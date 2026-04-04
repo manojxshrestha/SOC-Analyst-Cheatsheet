@@ -653,21 +653,21 @@ graph TD
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
-graph LR
-    Date(📅 Date) --> Time(⏰ Time)
-    Time --> Hostname(🖥️ Hostname)
-    Hostname --> Event(📝 Event Description)
-    Event --> Source(📂 Data Source)
+flowchart LR
+    A[Date] --> B[Time]
+    B --> C[Hostname]
+    C --> D[Event Description]
+    D --> E[Data Source]
     
-    Example1(2025-10-01) --> Ex1(03:12:02)
-    Ex1 --> Ex2(manage.insightnexus.com)
-    Ex2 --> Ex3(Login with default credentials)
-    Ex3 --> Ex4(Web Server Logs)
+    F[2025-10-01] --> G[03:12:02]
+    G --> H[manage.insightnexus.com]
+    H --> I[Login with default credentials]
+    I --> J[Web Server Logs]
     
-    classDef timeline fill:#e3f2fd,stroke:#999,stroke-width:3px,color:#333;
-    classDef example fill:#e8eaf6,stroke:#999,stroke-width:3px,color:#333;
-    class Date,Time,Hostname,Event,Source timeline;
-    class Example1,Ex1,Ex2,Ex3,Ex4 example;
+    classDef template fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
+    classDef sample fill:#e8eaf6,stroke:#999,stroke-width:2px,color:#333;
+    class A,B,C,D,E template;
+    class F,G,H,I,J sample;
 ```
 
 | Date | Time (UTC) | Hostname | Event Description | Data Source |
