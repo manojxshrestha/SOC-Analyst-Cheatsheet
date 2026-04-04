@@ -9,7 +9,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 | # | Module | Description | Key Topics |
 |---|--------|-------------|------------|
 | **1** | [Incident Handling Process](./1-Incident-Handling-Process/) ✅ | NIST-based incident response lifecycle | Cyber Kill Chain, MITRE ATT&CK, Pyramid of Pain, NIST IR Lifecycle (Preparation → Detection → Containment → Eradication → Recovery → Lessons Learned), IR Playbooks, Case Studies, Diamond Model, RACI Matrix |
-| **2** | Security Monitoring & SIEM Fundamentals | SIEM concepts and log management | Log sources, normalization, correlation, detection principles, SIEM architecture |
+| **2** | [Security Monitoring & SIEM Fundamentals](./2-Security-Monitoring-SIEM-Fundamentals/) ✅ | SIEM concepts and log management | Elastic Stack (Beats, Logstash, ES, Kibana), KQL queries, SOC tiers, MITRE ATT&CK mapping, Use Case Development lifecycle |
 | **3** | Windows Event Logs & Finding Evil | Windows security event analysis | Event IDs (4624, 4625, 4688, etc.), Sysmon, detecting malicious activity |
 | **4** | Introduction to Threat Hunting & Hunting With Elastic | Proactive threat detection | Hypothesis-based hunting, Elastic/KQL queries, MITRE ATT&CK mapping |
 | **5** | Understanding Log Sources & Investigating with Splunk | Splunk for SOC analysts | SPL queries, authentication monitoring, network logs, search optimization |
@@ -106,7 +106,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 SOC-Analyst-Cheatsheet/
 ├── README.md
 ├── 1-Incident-Handling-Process/      ✅ Complete
-├── 2-Security-Monitoring-SIEM-Fundamentals/   Coming Soon
+├── 2-Security-Monitoring-SIEM-Fundamentals/   ✅ Complete
 ├── 3-Windows-Event-Logs-Finding-Evil/        Coming Soon
 ├── 4-Introduction-to-Threat-Hunting/          Coming Soon
 ├── 5-Understanding-Log-Sources-Splunk/      Coming Soon
