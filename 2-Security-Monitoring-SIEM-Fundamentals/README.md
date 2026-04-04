@@ -5,53 +5,17 @@
 
 ## 0. Overview
 
-This module covers the **foundations of Security Information and Event Management (SIEM)** and Security Operations Centers (SOC). You'll learn how SIEM solutions work, the Elastic Stack architecture, SOC organizational structures, MITRE ATT&CK framework applications, and how to develop effective SIEM use cases.
-
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
-flowchart TB
-    subgraph "What You'll Learn"
-        A["SIEM Fundamentals<br/>Collection, Normalization, Correlation"] --> B["Elastic Stack<br/>Beats, Logstash, ES, Kibana"]
-        B --> C["SOC Structure<br/>Tiers, Roles, Responsibilities"]
-        C --> D["MITRE ATT&CK<br/>Detection & Mapping"]
-        D --> E["Use Case Development<br/>Lifecycle, Design, Tuning"]
-    end
-    
-    subgraph "Skills Gained"
-        F["KQL Query Writing"] --> G["SIEM Architecture Understanding"]
-        G --> H["Alert Triaging Basics"]
-        H --> I["Use Case Creation"]
-    end
-    
-    classDef learn fill:#e8f5e9,stroke:#999,stroke-width:2px,color:#333;
-    classDef skill fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C,D,E learn;
-    class F,G,H,I skill;
-```
+This module covers the **foundations of SIEM and SOC operations**. You'll learn how SIEM solutions work, the Elastic Stack architecture, SOC organizational structures, MITRE ATT&CK framework applications, and how to develop effective SIEM use cases.
 
 ### Key Takeaways
 
 | Concept | Description |
 |---------|-------------|
 | **SIEM** | Security Information and Event Management - centralizes log collection, normalization, and correlation |
-| **Elastic Stack** | Elasticsearch + Logstash + Kibana + Beats for data pipeline |
+| **Elastic Stack** | Elasticsearch + Logstash + Kibana + Beats |
 | **SOC** | Security Operations Center - continuous monitoring and incident response |
-| **Use Case** | Specific detection scenario that triggers alerts based on correlated events |
-| **KQL** | Kibana Query Language for searching Elasticsearch data |
-
-### Prerequisites
-
-- Basic understanding of networking concepts
-- Familiarity with operating systems (Windows, Linux)
-- Basic knowledge of security concepts
-
-### Module Sections
-
-1. SIEM Definition & Fundamentals
-2. Introduction To The Elastic Stack
-3. SOC Definition & Fundamentals
-4. MITRE ATT&CK & Security Operations
-5. SIEM Use Case Development
+| **Use Case** | Detection scenario that triggers alerts based on correlated events |
+| **KQL** | Kibana Query Language |
 
 ---
 
@@ -62,9 +26,7 @@ flowchart TB
 3. [SOC Definition & Fundamentals](#3-soc-definition--fundamentals)
 4. [MITRE ATT&CK & Security Operations](#4-mitre-attck--security-operations)
 5. [SIEM Use Case Development](#5-siem-use-case-development)
-6. [KQL Queries & Examples](#6-kql-queries--examples)
-7. [Interview Questions](#7-interview-questions)
-8. [Additional Resources](#8-additional-resources)
+6. [Additional Resources](#6-additional-resources)
 
 ---
 
@@ -73,8 +35,8 @@ flowchart TB
 ### What Is SIEM?
 
 SIEM (Security Information and Event Management) combines:
-- **Security Information Management (SIM)** - log storage, reporting, compliance
-- **Security Event Management (SEM)** - real-time monitoring, correlation, alerting
+- **SIM** (Security Information Management) - log storage, reporting, compliance
+- **SEM** (Security Event Management) - real-time monitoring, correlation, alerting
 
 **Core Capabilities:**
 
@@ -85,7 +47,6 @@ SIEM (Security Information and Event Management) combines:
 | **Correlation** | Link related events across sources |
 | **Alerting** | Notify on detected threats |
 | **Compliance** | Generate audit reports |
-| **Forensics** | Search and investigate incidents |
 
 ### How Does A SIEM Solution Work?
 
@@ -96,8 +57,6 @@ flowchart LR
         A[Firewalls] --> D[SIEM]
         B[Servers] --> D
         C[Endpoints] --> D
-        E[Applications] --> D
-        F[IDS/IPS] --> D
     end
     
     subgraph "SIEM Pipeline"
@@ -107,36 +66,30 @@ flowchart LR
         I --> J[Alerting]
     end
     
-    subgraph "Output"
-        J --> K[Dashboard]
-        J --> L[Incidents]
-        J --> M[Reports]
-    end
+    J --> K[Dashboard]
     
     classDef source fill:#fff3e0,stroke:#999,stroke-width:2px,color:#333;
     classDef process fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
-    classDef output fill:#e8f5e9,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C,E,F source;
+    class A,B,C source;
     class D,G,H,I,J process;
-    class K,L,M output;
+    class K process;
 ```
 
 ### Data Flows Within A SIEM
 
 | Stage | Description |
 |-------|-------------|
-| **1. Ingestion** | Collect logs from various sources (agents, syslog, APIs) |
-| **2. Normalization** | Convert raw data to common format (ECS) |
+| **1. Ingestion** | Collect logs from sources (agents, syslog, APIs) |
+| **2. Normalization** | Convert raw data to common format |
 | **3. Storage** | Index and store normalized data |
 | **4. Correlation** | Apply rules to detect patterns |
 | **5. Visualization** | Display via dashboards |
-| **6. Alerting** | Generate notifications |
 
-### SIEM Business Requirements & Use Cases
+### SIEM Business Requirements
 
 #### Log Aggregation & Normalization
 
-- Centralize terabytes of security data from firewalls, databases, applications
+- Centralize security data from firewalls, databases, applications
 - Correlate events across different sources
 - Improve threat visibility
 
@@ -150,7 +103,7 @@ flowchart LR
 
 - Reduce alert fatigue by filtering false positives
 - Provide context: who, what, when, where
-- Automate threat filtering
+- Determine actors involved, affected parts, timing
 
 #### Compliance
 
@@ -158,7 +111,8 @@ flowchart LR
 |------------|--------------|
 | **PCI DSS** | Real-time monitoring, log retention |
 | **HIPAA** | Audit trails, access monitoring |
-| **GDPR** | Data breach notification, logging |
+| **GDPR** | Data breach notification |
+| **ISO 27001** | Security logging and monitoring |
 
 ### Benefits of SIEM
 
@@ -166,9 +120,8 @@ flowchart LR
 |---------|-------------|
 | **Centralized View** | Single pane of glass for all logs |
 | **Proactive Detection** | Detect threats before damage |
-| **Faster Response** | Reduced MTTR (Mean Time To Respond) |
+| **Faster Response** | Reduced MTTR |
 | **Compliance** | Meet regulatory requirements |
-| **Forensics** | Historical investigation capability |
 
 ---
 
@@ -176,23 +129,21 @@ flowchart LR
 
 ### What Is The Elastic Stack?
 
-The Elastic Stack consists of four main components:
+The Elastic Stack is an open-source collection of applications:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart TB
-    subgraph "Elastic Stack Architecture"
-        subgraph "Ingest"
-            A[Beats<br/>Filebeat, Metricbeat] --> B[Logstash]
-        end
-        
-        subgraph "Store & Analyze"
-            B --> C[Elasticsearch]
-        end
-        
-        subgraph "Visualize"
-            C --> D[Kibana]
-        end
+    subgraph "Ingest"
+        A[Beats<br/>Filebeat, Metricbeat] --> B[Logstash]
+    end
+    
+    subgraph "Store & Analyze"
+        B --> C[Elasticsearch]
+    end
+    
+    subgraph "Visualize"
+        C --> D[Kibana]
     end
     
     classDef component fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
@@ -209,13 +160,12 @@ flowchart TB
 | **Metricbeat** | Metrics collection |
 | **Winlogbeat** | Windows Event Logs |
 | **Packetbeat** | Network traffic |
-| **Heartbeat** | Uptime monitoring |
 
 #### Logstash
 
 Three main functions:
 1. **Input** - Collect logs from files, syslog, network
-2. **Filter/Transform** - Parse, enrich, normalize
+2. **Filter** - Parse, enrich, normalize
 3. **Output** - Send to Elasticsearch
 
 #### Elasticsearch
@@ -233,22 +183,59 @@ Three main functions:
 ### Data Flow Options
 
 ```
-Option 1: Beats -> Logstash -> Elasticsearch -> Kibana
-          (With transformation and enrichment)
-
-Option 2: Beats -> Elasticsearch -> Kibana
-          (Direct ingestion, less processing)
+Beats -> Logstash -> Elasticsearch -> Kibana
+Beats -> Elasticsearch -> Kibana
 ```
 
 ### Elastic Stack As SIEM
-
-The Elastic Stack can function as a SIEM solution:
 
 1. **Ingest** security data from firewalls, IDS/IPS, endpoints
 2. **Store & Index** in Elasticsearch
 3. **Analyze** using search and correlations
 4. **Visualize** via Kibana dashboards
-5. **Detect** using Elastic Security rules
+
+### Kibana Query Language (KQL)
+
+#### Basic Structure
+
+```kql
+field:value
+```
+
+#### Free Text Search
+
+```kql
+"svc-sql1"
+```
+
+#### Logical Operators
+
+```kql
+event.code:4625 AND winlog.event_data.SubStatus:0xC0000072
+```
+
+#### Comparison Operators
+
+```kql
+@timestamp >= "2023-03-03T00:00:00.000Z"
+```
+
+#### Wildcards
+
+```kql
+user.name: admin*
+```
+
+### Elastic Common Schema (ECS)
+
+ECS provides **consistent field formats** across data sources:
+
+| Benefit | Description |
+|---------|-------------|
+| **Unified Data View** | Search across Windows, network, cloud |
+| **Improved Search Efficiency** | Standard field names |
+| **Enhanced Correlation** | Cross-source event correlation |
+| **Better Visualizations** | Consistent dashboard creation |
 
 ---
 
@@ -269,70 +256,40 @@ flowchart TB
         A[Monitor] --> B[Detect]
         B --> C[Analyze]
         C --> D[Respond]
-        D --> E[Report]
-    end
-    
-    subgraph "Tools Used"
-        F[SIEM] --> G[EDR]
-        G --> H[IDS/IPS]
-        H --> I[Threat Intel]
     end
     
     classDef function fill:#e8f5e9,stroke:#999,stroke-width:2px,color:#333;
-    classDef tool fill:#fff3e0,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C,D,E function;
-    class F,G,H,I tool;
+    class A,B,C,D function;
 ```
 
 ### SOC Team Roles
 
 | Role | Responsibilities |
 |------|------------------|
-| **SOC Director** | Strategic planning, budgeting, leadership |
-| **SOC Manager** | Day-to-day operations, team management |
-| **Tier 1 Analyst** | Alert triage, initial assessment, escalation |
-| **Tier 2 Analyst** | Deep investigation, incident handling |
+| **SOC Director** | Strategic planning, budgeting |
+| **SOC Manager** | Day-to-day operations |
+| **Tier 1 Analyst** | Alert triage, initial assessment |
+| **Tier 2 Analyst** | Deep investigation |
 | **Tier 3 Analyst** | Threat hunting, advanced forensics |
-| **Detection Engineer** | Create/update detection rules |
-| **Incident Responder** | Active incident management |
-| **Threat Intel Analyst** | Threat intelligence gathering |
+| **Detection Engineer** | Create detection rules |
+| **Incident Responder** | Active incident handling |
+| **Threat Intel Analyst** | Threat intelligence |
 
 ### SOC Tier Structure
-
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
-flowchart TB
-    subgraph "Tier 1 - First Responder"
-        A["Monitor alerts<br/>Triage & prioritize<br/>Escalate if needed"]
-    end
-    
-    subgraph "Tier 2 - Investigator"
-        B["Deep analysis<br/>Pattern identification<br/>Mitigation strategies"]
-    end
-    
-    subgraph "Tier 3 - Specialist"
-        C["Complex incidents<br/>Threat hunting<br/>Advanced forensics"]
-    end
-    
-    A --> B --> C
-    
-    classDef tier fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C tier;
-```
 
 | Tier | Focus | Skills Required |
 |------|-------|-----------------|
 | **Tier 1** | Triage | Basic log analysis, alert categorization |
-| **Tier 2** | Investigation | Deep packet analysis, malware triage |
-| **Tier 3** | Advanced | Forensics, threat hunting, APT analysis |
+| **Tier 2** | Investigation | Deep analysis, malware triage |
+| **Tier 3** | Advanced | Forensics, threat hunting |
 
 ### SOC Evolution Stages
 
 | Generation | Description |
 |------------|-------------|
-| **SOC 1.0** | Network-focused, perimeter security, separate tools |
-| **SOC 2.0** | Integrated threat intel, anomaly detection, behavioral analytics |
-| **Cognitive SOC** | AI/ML-assisted, automated decision making |
+| **SOC 1.0** | Network-focused, separate tools |
+| **SOC 2.0** | Integrated threat intel, anomaly detection |
+| **Cognitive SOC** | AI/ML-assisted decision making |
 
 ---
 
@@ -343,39 +300,32 @@ flowchart TB
 **ATT&CK** = Adversarial Tactics, Techniques, and Common Knowledge
 
 A framework documenting adversary attack methods:
-- **Tactics** - The goal/objective (why)
-- **Techniques** - How they achieve the goal (how)
-- **Procedures** - Specific implementations
+- **Tactics** - The goal/objective
+- **Techniques** - How they achieve the goal
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart LR
-    subgraph "Tactics"
-        A[Recon] --> B[Initial Access]
-        B --> C[Execution]
-        C --> D[Persistence]
-        D --> E[Priv Esc]
-        E --> F[Defense Evasion]
-        F --> G[Cred Access]
-        G --> H[Discovery]
-        H --> I[Lateral Movement]
-        I --> J[Collection]
-        J --> K[Exfiltration]
-        K --> L[Impact]
-    end
+    A[Recon] --> B[Initial Access]
+    B --> C[Execution]
+    C --> D[Persistence]
+    D --> E[Priv Esc]
+    E --> F[Defense Evasion]
+    F --> G[Cred Access]
+    G --> H[Discovery]
+    H --> I[Lateral Movement]
+    I --> J[Exfiltration]
     
-    style A fill:#ffcdd2
-    style B fill:#ffcdd2
-    style C fill:#ffcdd2
-    style D fill:#ffcdd2
-    style E fill:#ffcdd2
-    style F fill:#fff9c4
-    style G fill:#fff9c4
-    style H fill:#c8e6c9
-    style I fill:#c8e6c9
-    style J fill:#bbdefb
-    style K fill:#bbdefb
-    style L fill:#e1bee7
+    style A fill:#ffcdd2,stroke:#999
+    style B fill:#ffcdd2,stroke:#999
+    style C fill:#ffcdd2,stroke:#999
+    style D fill:#fff9c4,stroke:#999
+    style E fill:#fff9c4,stroke:#999
+    style F fill:#c8e6c9,stroke:#999
+    style G fill:#c8e6c9,stroke:#999
+    style H fill:#bbdefb,stroke:#999
+    style I fill:#bbdefb,stroke:#999
+    style J fill:#e1bee7,stroke:#999
 ```
 
 ### ATT&CK Use Cases in Security Operations
@@ -383,22 +333,11 @@ flowchart LR
 | Use Case | Description |
 |----------|-------------|
 | **Detection & Response** | Design detection rules based on TTPs |
-| **Gap Analysis** | Identify coverage gaps in security posture |
+| **Gap Analysis** | Identify coverage gaps |
 | **SOC Maturity** | Measure detection capability |
 | **Threat Intel** | Common language for adversary activities |
 | **Behavioral Analytics** | Map TTPs to detect anomalies |
 | **Red Teaming** | Plan attack simulations |
-| **Training** | Educate on adversary techniques |
-
-### Mapping Detection to ATT&CK
-
-Example: Detecting MSBuild being used for execution
-
-| Attribute | Value |
-|-----------|-------|
-| **Tactic** | Execution (TA0002) |
-| **Technique** | Trusted Developer Utilities (T1127) |
-| **Sub-technique** | MSBuild (T1127.001) |
 
 ---
 
@@ -407,10 +346,6 @@ Example: Detecting MSBuild being used for execution
 ### What Is A SIEM Use Case?
 
 A **use case** defines specific conditions that trigger an alert:
-- Brute force detection
-- Malware execution
-- Data exfiltration
-- Privilege escalation
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
@@ -418,13 +353,11 @@ flowchart LR
     A[10 Failed Logins] --> B[SIEM Correlation]
     B --> C[Single Alert]
     C --> D[SOC Notification]
-    D --> E[Investigation]
     
     style A fill:#fff3e0,stroke:#999
     style B fill:#e3f2fd,stroke:#999
     style C fill:#e3f2fd,stroke:#999
     style D fill:#e8f5e9,stroke:#999
-    style E fill:#e8f5e9,stroke:#999
 ```
 
 ### Use Case Development Lifecycle
@@ -440,7 +373,6 @@ flowchart TB
     F --> G[Onboarding]
     G --> H[Testing]
     H --> I[Fine Tuning]
-    I -.-> A
     
     style A fill:#e3f2fd,stroke:#999
     style B fill:#e3f2fd,stroke:#999
@@ -457,12 +389,12 @@ flowchart TB
 
 | Step | Description |
 |------|-------------|
-| **1. Requirements** | Define what to detect (e.g., 10 failed logins in 4 min) |
-| **2. Data Points** | Identify log sources (Windows, Linux, endpoints) |
+| **1. Requirements** | Define what to detect |
+| **2. Data Points** | Identify log sources |
 | **3. Log Validation** | Ensure logs contain required fields |
 | **4. Design** | Define condition, aggregation, priority |
-| **5. Implementation** | Create detection rule in SIEM |
-| **6. Documentation** | Write SOP for analysts |
+| **5. Implementation** | Create detection rule |
+| **6. Documentation** | Write SOP |
 | **7. Onboarding** | Move to production |
 | **8. Testing** | Validate with known scenarios |
 | **9. Fine Tuning** | Reduce false positives |
@@ -473,175 +405,31 @@ flowchart TB
 |-----------|-------------|
 | **Condition** | What triggers the alert |
 | **Aggregation** | Time window and grouping |
-| **Priority** | Severity level (High/Medium/Low) |
+| **Priority** | Severity (High/Medium/Low) |
 
 ### Example: MSBuild Detection
 
-**Scenario**: Detect MSBuild.exe started by Office applications
-
 | Attribute | Value |
 |-----------|-------|
-| **Risk** | Attacker may use MSBuild to execute malicious code |
+| **Risk** | Attacker uses MSBuild to execute code |
 | **Severity** | HIGH |
-| **MITRE Mapping** | T1127.001 - Trusted Developer Utilities: MSBuild |
+| **MITRE** | T1127.001 - MSBuild |
 | **Tactic** | Execution, Defense Evasion |
 
-**Detection Logic:**
-```
-process.name: "msbuild.exe" AND 
-process.parent.name: "excel.exe" OR "winword.exe"
-```
-
-### Example: Brute Force Detection
-
-| Attribute | Value |
-|-----------|-------|
-| **Condition** | 10 failed logins within 4 minutes |
-| **Aggregation** | Group by username |
-| **Priority** | HIGH (if admin account) |
-
 ---
 
-## 6. KQL Queries & Examples
-
-### Basic KQL Structure
-
-```kql
-field:value
-```
-
-### Free Text Search
-
-```kql
-"search term"
-```
-
-### Logical Operators
-
-```kql
-event.code:4625 AND winlog.event_data.SubStatus:0xC0000072
-```
-
-### Comparison Operators
-
-```kql
-@timestamp >= "2023-03-03T00:00:00.000Z"
-```
-
-### Wildcards
-
-```kql
-user.name: admin*
-```
-
-### Practical Queries
-
-#### Failed Login Attempts (Event ID 4625)
-
-```kql
-event.code:4625
-```
-
-#### Failed Logins to Disabled Accounts
-
-```kql
-event.code:4625 AND winlog.event_data.SubStatus:0xC0000072
-```
-
-#### Failed Logins Within Time Range
-
-```kql
-event.code:4625 AND winlog.event_data.SubStatus:0xC0000072 AND @timestamp >= "2023-03-03T00:00:00.000Z" AND @timestamp <= "2023-03-06T23:59:59.999Z"
-```
-
-#### Successful RDP Logons
-
-```kql
-event.code:4624 AND logon.type:10
-```
-
-#### Process Execution
-
-```kql
-event.category:process AND process.name:"cmd.exe"
-```
-
-#### Network Connections
-
-```kql
-event.category:network AND destination.ip:10.0.0.50
-```
-
-### ECS Fields Reference
-
-| Field | Description |
-|-------|-------------|
-| `@timestamp` | Event time |
-| `event.code` | Event identifier |
-| `event.category` | Event category |
-| `event.action` | Event action |
-| `user.name` | Username |
-| `source.ip` | Source IP |
-| `destination.ip` | Destination IP |
-| `process.name` | Process name |
-| `host.name` | Hostname |
-
----
-
-## 7. Interview Questions
-
-### General SIEM Questions
-
-1. **What is the difference between SIEM and SOC?**
-2. **Explain the SIEM data flow from source to alert.**
-3. **What is log normalization and why is it important?**
-4. **How do you reduce alert fatigue in a SOC?**
-5. **What is the difference between event correlation and aggregation?**
-
-### Elastic Stack Questions
-
-1. **Explain the components of the Elastic Stack.**
-2. **What is the difference between Beats and Logstash?**
-3. **What is ECS (Elastic Common Schema)?**
-4. **How do you write a basic KQL query?**
-
-### Use Case Development
-
-1. **Describe the use case development lifecycle.**
-2. **What factors determine alert severity?**
-3. **How do you tune a detection rule to reduce false positives?**
-4. **How do you map a detection rule to MITRE ATT&CK?**
-
-### Scenario-Based
-
-1. **You're seeing 500 failed logins from one IP. How would you investigate?**
-2. **A user reports suspicious email. What logs would you check?**
-3. **How would you detect lateral movement in your environment?**
-
----
-
-## 8. Additional Resources
+## 6. Additional Resources
 
 ### Official Documentation
 
 - [Elastic Documentation](https://www.elastic.co/guide/index.html)
-- [Elastic Common Schema](https://www.elastic.co/guide/en/ecs/current/index.html)
-- [Kibana Query Language](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)
+- [ECS Fields](https://www.elastic.co/guide/en/ecs/current/index.html)
+- [KQL Reference](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)
 
 ### MITRE ATT&CK
 
-- [MITRE ATT&CK Framework](https://attack.mitre.org)
+- [MITRE ATT&CK](https://attack.mitre.org)
 - [ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/)
-
-### SOC Best Practices
-
-- [NIST SP 800-61](https://csrc.nist.gov/publications/detail/sp/800-61/rev-2/final) - Computer Security Incident Handling Guide
-- [SANS SOC Research](https://www.sans.org/security-resources/)
-
-### Books
-
-- "The Practice of Network Security Monitoring" - Richard Bejtlich
-- "Security Operations Center: A Guide to SOC Operations"
 
 ---
 
