@@ -1,0 +1,6 @@
+# Ignore source files (HTB Academy materials)
+*.txt
+
+# OS files
+.DS_Store
+Thumbs.db
