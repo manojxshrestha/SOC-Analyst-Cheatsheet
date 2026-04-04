@@ -8,7 +8,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 
 | # | Module | Description | Key Topics |
 |---|--------|-------------|------------|
-| **1** | [Incident Handling Process](./1-Incident-Handling-Process/) ✅ | NIST-based incident response lifecycle | Cyber Kill Chain, MITRE ATT&CK, Pyramid of Pain, IR Playbooks, Case Studies |
+| **1** | [Incident Handling Process](./1-Incident-Handling-Process/) ✅ | NIST-based incident response lifecycle | Cyber Kill Chain, MITRE ATT&CK, Pyramid of Pain, NIST IR Lifecycle (Preparation → Detection → Containment → Eradication → Recovery → Lessons Learned), IR Playbooks, Case Studies, Diamond Model, RACI Matrix |
 | **2** | Security Monitoring & SIEM Fundamentals | SIEM concepts and log management | Log sources, normalization, correlation, detection principles, SIEM architecture |
 | **3** | Windows Event Logs & Finding Evil | Windows security event analysis | Event IDs (4624, 4625, 4688, etc.), Sysmon, detecting malicious activity |
 | **4** | Introduction to Threat Hunting & Hunting With Elastic | Proactive threat detection | Hypothesis-based hunting, Elastic/KQL queries, MITRE ATT&CK mapping |

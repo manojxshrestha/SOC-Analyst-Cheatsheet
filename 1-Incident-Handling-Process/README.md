@@ -3,7 +3,57 @@
 
 ---
 
+## 0. Overview
+
+This module covers the **foundational concepts of incident handling** - the structured approach SOC analysts use to respond to security events and incidents. You'll learn how to distinguish between events and incidents, understand various attack frameworks, and master the NIST incident response lifecycle.
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
+flowchart TB
+    subgraph "🎯 What You'll Learn"
+        A["📡 Events vs Incidents<br/>What's the difference?"] --> B["🔗 Cyber Kill Chain<br/>Attack progression stages"]
+        B --> C["🎯 MITRE ATT&CK<br/>Tactics & techniques"]
+        C --> D["📊 Pyramid of Pain<br/>IOC hierarchy"]
+        D --> E["🔄 NIST IR Lifecycle<br/>Preparation → Recovery"]
+    end
+    
+    subgraph "💼 Real-World Skills"
+        F["✅ Triage & assess incidents"] --> G["📝 Document incidents"]
+        G --> H["🔍 Apply detection frameworks"]
+        H --> I["📋 Follow IR playbooks"]
+    end
+    
+    classDef learn fill:#e8f5e9,stroke:#999,stroke-width:2px,color:#333;
+    classDef skill fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
+    class A,B,C,D,E learn;
+    class F,G,H,I skill;
+```
+
+### Key Takeaways
+
+| Concept | Description |
+|---------|-------------|
+| **Event** | Any observable occurrence in a system/network |
+| **Incident** | Event with negative consequence requiring response |
+| **IR Lifecycle** | Preparation → Detection → Containment → Eradication → Recovery → Lessons Learned |
+| **Frameworks** | Cyber Kill Chain, MITRE ATT&CK, Diamond Model |
+
+### Prerequisites
+
+- Basic understanding of networking (TCP/IP, ports, protocols)
+- Familiarity with operating systems (Windows, Linux)
+- Understanding of common attack vectors
+
+### Module Duration
+
+- **Theory**: 2-3 hours
+- **Hands-on Practice**: 3-4 hours
+- **Total**: ~6-7 hours
+
+---
+
 ## Table of Contents
+0. [Overview](#0-overview)
 1. [Fundamentals](#1-fundamentals)
 2. [Real-World Incident Types](#2-real-world-incident-types)
 3. [Cyber Kill Chain](#3-cyber-kill-chain)
