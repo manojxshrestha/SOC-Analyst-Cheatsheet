@@ -1076,6 +1076,10 @@ PS C:\Tools\psgetsystem> Import-Module .\psgetsys.ps1
 PS C:\Tools\psgetsystem> [MyProcess]::CreateProcessFromParent([Process ID of spoolsv.exe],"C:\Windows\System32\cmd.exe","")
 ```
 
+<img width="2566" height="1574" alt="image" src="https://github.com/user-attachments/assets/42fac4a8-0e5c-4f7a-8ffe-7b3742014c91" />
+
+Desktop showing Process Hacker with running processes, Event Viewer with Sysmon logs, and PowerShell executing a command.
+
 > 🔴 **DETECTION BYPASS**: Due to the parent PID spoofing technique we employed, **Sysmon Event 1 incorrectly displays spoolsv.exe as the parent of cmd.exe**. However, it was actually powershell.exe that created cmd.exe!
 
 ### ETW Detection: Microsoft-Windows-Kernel-Process
@@ -1087,7 +1091,15 @@ PS C:\Tools\psgetsystem> [MyProcess]::CreateProcessFromParent([Process ID of spo
 SilkETW.exe -t user -pn Microsoft-Windows-Kernel-Process -ot file -p C:\windows\temp\etw.json
 ```
 
+<img width="2581" height="1425" alt="image" src="https://github.com/user-attachments/assets/f402bd86-49fd-4167-a071-8cead33acae8" />
+
+Desktop showing Process Hacker with running processes, PowerShell executing commands, and Command Prompt running SilkETW for event tracing.
+
 The ETW data correctly shows **powershell.exe** as the real parent - not spoofed like Sysmon!
+
+<img width="3835" height="1757" alt="image" src="https://github.com/user-attachments/assets/a44eed41-0a92-440d-9fbc-d74f88cf467c" />
+
+Desktop showing Process Hacker with running processes, PowerShell executing commands, and Notepad displaying process details with a search for PID 2508.
 
 > 🔑 **KEY TAKEAWAY**: ETW's kernel-level visibility cannot be easily spoofed by user-mode techniques like PPID spoofing!
 
@@ -1117,6 +1129,7 @@ PS C:\Tools\GhostPack Compiled Binaries>.\Seatbelt.exe TokenPrivileges
 This triggers Sysmon Event ID 7 (Image Load):
 
 <img width="1064" height="813" alt="image" src="https://github.com/user-attachments/assets/319077d3-e2b9-4ece-a97d-5bb8857bcf92" />
+<img width="1064" height="782" alt="image" src="https://github.com/user-attachments/assets/3b27a48c-6102-41e4-b3d1-d54fcaee5f28" />
 
 > 📌 **LIMITATION**: Sysmon shows DLL loading but NOT the actual assembly content/behavior!
 
@@ -1128,6 +1141,8 @@ This triggers Sysmon Event ID 7 (Image Load):
 # Collect .NET Runtime events (keywords: JitKeyword, InteropKeyword, LoaderKeyword, NGenKeyword)
 SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x2038 -ot file -p C:\windows\temp\etw.json
 ```
+
+<img width="3065" height="1729" alt="image" src="https://github.com/user-attachments/assets/b17264e2-014b-4f60-8bc5-7109a71c5ce6" />
 
 > 📌 **KEYWORDS TO MONITOR**:
 | Keyword | Purpose |
@@ -1143,6 +1158,13 @@ The ETW data reveals:
 - Internal behavior that Sysmon cannot see
 
 > 💡 **TAKEAWAY**: ETW provides **execution-level visibility** beyond just DLL loading!
+
+In our current SilkETW configuration, we're selectively targeting a specific subset (indicated by 0x2038), which includes: **JitKeyword**, **InteropKeyword**, **LoaderKeyword**, and **NGenKeyword**.
+
+- **JitKeyword**: Just-In-Time (JIT) compilation events - reveals methods being compiled at runtime. Useful for understanding the execution flow of the .NET assembly.
+- **InteropKeyword**: Interoperability events when managed code interacts with unmanaged code. Provides insights into potential interactions with native APIs.
+- **LoaderKeyword**: Assembly loading process details within the .NET runtime. Vital for understanding what .NET assemblies are being loaded and executed.
+- **NGenKeyword**: Native Image Generator events - concerned with precompiled .NET assemblies. Helps detect scenarios where attackers use precompiled assemblies to evade JIT-related detections.
 
 ### Summary: Sysmon vs ETW
 
