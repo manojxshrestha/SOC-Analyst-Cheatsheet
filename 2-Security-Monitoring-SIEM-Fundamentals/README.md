@@ -785,123 +785,104 @@ When this alert triggers:
 
 
 
- Section 8 / 11
-Go to Questions
-SIEM Visualization Example 3: Successful RDP Logon Related To Service Accounts
+---
 
-In this SIEM visualization example, we aim to create a visualization to monitor successful RDP logons specifically related to service accounts. Service account credentials are never used for RDP logons in corporate/real-world environments. We have been informed by the IT Operations department that all service accounts on the environment start with svc-.
+### Successful RDP Logon (Service Accounts) - Visualization Example 3
 
-The motivation for this visualization stems from the fact that service accounts often possess exceptionally high privileges. We need to keep a close eye on how service accounts are used.
+This visualization monitors **successful RDP logons to service accounts** - a critical security indicator. Service accounts should never require remote interactive (RDP) access.
 
-Our visualization will be based on the following Windows event log.
+> **Security Note**: Service accounts typically have elevated privileges. Any RDP login to a service account is anomalous and could indicate:
+> - Compromised service account credentials
+> - Privilege escalation from a regular user account
+> - Misconfiguration allowing unintended access
+> - Attackers moving laterally using service account credentials
 
-    4624: An account was successfully logged on
+#### Understanding the Windows Event
 
-Navigate to the bottom of this section and click on Click here to spawn the target system!.
+| Event ID | Description | Logon Type |
+|----------|-------------|------------|
+| **4624** | An account was successfully logged on | **RemoteInteractive** (Type 10) |
 
-Navigate to http://[Target IP]:5601, click on the side navigation toggle, and click on "Dashboard".
+#### Step-by-Step Configuration
 
-A prebaked dashboard should be visible. Let's click on the "pencil"/edit icon.
+##### Step 1: Create New Visualization
 
-<img width="1888" height="652" alt="image" src="https://github.com/user-attachments/assets/7e462d56-2fc9-4ab8-b523-793a595c61cb" />
+Navigate to your dashboard in Kibana and create a new visualization using the index pattern `windows*`.
 
+##### Step 2: Add Filters
 
-Elastic Dashboards page with a 'Create dashboard' button, search bar, and a listed dashboard titled 'SOC-Alerts' with an edit option.
+Add the following filters:
 
-Now, to initiate the creation of our first visualization, we simply have to click on the "Create visualization" button.
+| Field | Operator | Value |
+|-------|----------|-------|
+| `event.code` | is | `4624` |
+| `winlog.logon.type` | is | `RemoteInteractive` |
 
-Upon initiating the creation of our first visualization, the following new window will appear with various options and settings.
+##### Step 3: Filter for Service Accounts
 
-<img width="1030" height="638" alt="image" src="https://github.com/user-attachments/assets/9723cb21-0d38-4b51-bb5b-809f8274fec8" />
+Add a KQL query to filter for service accounts (typically prefixed with `svc-`):
 
-
-Elastic dashboard interface with options to add a filter, select 'windows*' index, search field names, and choose 'Bar vertical stacked' visualization.
-
-There are five things for us to notice on this window:
-
-    A filter option that allows us to filter the data before creating a graph. In this case our goal is to display successful RDP logons specifically related to service accounts. We can use a filter to only consider event IDs that match 4624 – An account was successfully logged on. In this case though, we should also take into account the logon type which should be RemoteInteractive (winlog.logon.type field). The following images demonstrates how we can specify such filters.
-
-	<img width="1427" height="802" alt="image" src="https://github.com/user-attachments/assets/b9fcf859-edc1-4d86-bf1a-1f537e943e29" />
-
-
-    Elastic filter editor with 'event.code' set to 'is 4624' and options to save or cancel.
-	
-	<img width="1426" height="809" alt="image" src="https://github.com/user-attachments/assets/80aae116-584b-4ef4-bd84-f2952d6c033e" />
-
-    Elastic filter editor with 'winlog.logon.type' set to 'is RemoteInteractive' and options to save or cancel.
-	
-    This field indicates the data set (index) that we are going to use. It is common for data from various infrastructure sources to be separated into different indices, such as network, Windows, Linux, etc. In this particular example, we will specify windows* in the "Index pattern".
-   
-	This search bar provides us with the ability to double-check the existence of a specific field within our data set, serving as another way to ensure that we are looking at the correct data. We are interested in the user.name.keyword field. We can use the search bar to quickly perform a search and verify if this field is present and discovered within our selected data set. This allows us to confirm that we are accessing the desired field and working with accurate data.
-
-
-  <img width="460" height="1043" alt="image" src="https://github.com/user-attachments/assets/ee640b2c-32c2-40d8-aadd-d6d079353f8e" />
-
-	Elastic search interface with query 'user.' and available fields like related.user.keyword and user.name.keyword.
-
-	
-    Lastly, this drop-down menu enables us to select the type of visualization we want to create. The default option displayed in the earlier image is "Bar vertical stacked". If we click on that button, it will reveal additional available options (image redacted as not all options fit on the screen). From this expanded list, we can choose the desired visualization type that best suits our requirements and data presentation needs.
-
-	<img width="1030" height="793" alt="image" src="https://github.com/user-attachments/assets/c5d5bb97-1c78-4bd7-9172-2dc74abae62e" />
-
-    Elastic visualization type menu with options like Metric, Table, Bar horizontal, and Bar vertical stacked.
-
-For this visualization, let's select the "Table" option. After selecting the "Table", we can proceed to click on the "Rows" option. This will allow us to choose the specific data elements that we want to include in the table view.
-
-<img width="711" height="712" alt="image" src="https://github.com/user-attachments/assets/251d8f36-c653-4c4b-a058-c6a23c3ac2c5" />
-
-
-Table configuration interface with options to add or drag-and-drop fields into Rows, Columns, and Metrics sections.
-
-Let's configure the "Rows" settings as follows.
-
-<img width="728" height="935" alt="image" src="https://github.com/user-attachments/assets/0b99ccda-6b67-49a8-9f87-14a6ff6d666e" />
-
-
-Rows configuration interface: Select user.name.keyword field, top 1000 values, ranked by count of records in descending order.
-
-Moving forward, let's close the "Rows" window and proceed to enter the "Metrics" configuration.
-
-<img width="703" height="839" alt="image" src="https://github.com/user-attachments/assets/2c2cf5b0-88d0-45e5-b334-2645738a4dbe" />
-
-
-Table configuration: Rows set to top values of user.name.keyword, add fields to Columns and Metrics.
-
-In the "Metrics" window, let's select "count" as the desired metric.
-
-<img width="606" height="554" alt="image" src="https://github.com/user-attachments/assets/b3f22ae1-0ae6-4ff8-9773-8fe791a069d5" />
-
-
-Metrics selection interface: Choose 'Count' function for field.
-
-One final addition to the table is to include two more "Rows" settings to show the machine where the successful RDP logon attempt occurred and the machine that initiated the successful RDP logon attempt. To do this, we will select the host.hostname.keyword field that represents the computer reporting the successful RDP logon attempt and the related.ip.keyword field that represents the IP of the computer initiating the succsessful RDP logon attempt. This will allow us to display the involved machines alongside the count of successful logon attempts, as shown in the image.
-
-<img width="458" height="875" alt="image" src="https://github.com/user-attachments/assets/ed137fa9-9abd-4dbc-b6e6-c0ef6fe123e8" />
-
-Rows configuration: Select host.hostname.keyword, top 1000 values, ranked by number of logins in descending order.
-
-<img width="458" height="821" alt="image" src="https://github.com/user-attachments/assets/1e364b7d-0254-4478-a858-fb44da0f7998" />
-
-
-Rows configuration: Select related.ip.keyword, top 1000 values, ranked by number of logins in descending order.
-
-As discussed, we want to monitor successful RDP logons specifically related to service accounts, knowing for a fact that all service accounts of the environment start with svc-. So, to conclude our visualization we need to specify the following KQL query.
-
-        shellsession
+```kql
 user.name: svc-*
+```
 
-Note: As you can see we don't use the .keyword field in KQL queries.
-<img width="1800" height="1218" alt="image" src="https://github.com/user-attachments/assets/c7d6b3a6-d0c4-4666-8d2d-30e49a3ab0ce" />
+> **Note**: In KQL queries, you typically don't need to use the `.keyword` field.
 
+##### Step 4: Configure Table Visualization
 
-Elastic dashboard showing user logins: svc-sql1 connected to PKI, 2 logins.
+Select **Table** visualization and configure the following **Rows**:
 
-Now we can see four columns in the table, which contain the following information:
+| Field | Display Name | Settings |
+|-------|--------------|----------|
+| `user.name.keyword` | Service Account | Top 1000 values, Rank by Count |
+| `host.hostname.keyword` | Target Machine | Top 1000 values, Rank by Count |
+| `related.ip.keyword` | Source IP | Top 1000 values, Rank by Count |
 
-    The service account whose credentials generated the successful RDP logon attempt event.
-    The machine on which the logon attempt occurred.
-    The IP of the machine that initiated the logon attempt.
-    The number of times the event has occurred (based on the specified time frame or the entire data set, depending on the settings).
+##### Step 5: Configure Metrics
 
-Finally, click on "Save and return", and you will observe that the new visualization is added to the dashboard.
+In the **Metrics** section:
+- Select **Count** as the metric
+- Display Name: `# of RDP Sessions`
+
+##### Step 6: Save the Visualization
+
+Save the visualization with title "Successful RDP - Service Accounts".
+
+#### Sample Query
+
+```kql
+event.code:4624 AND winlog.logon.type:RemoteInteractive AND user.name:svc-*
+```
+
+#### Resulting Table Columns
+
+| Column | Description |
+|--------|-------------|
+| **Service Account** | The account used for RDP |
+| **Target Machine** | Computer where RDP connection was made |
+| **Source IP** | IP address initiating the RDP connection |
+| **# of RDP Sessions** | Count of RDP sessions |
+
+#### Why This Matters
+
+| Aspect | Importance |
+|--------|------------|
+| **Lateral Movement** | Detects attackers using compromised service accounts |
+| **Privilege Escalation** | Identifies unauthorized access to high-privilege accounts |
+| **Compliance** | Service accounts should never have RDP access |
+| **Forensics** | Provides audit trail of service account usage |
+
+#### Investigation Workflow
+
+When this alert triggers:
+
+1. **Verify legitimacy** - Is this expected RDP usage for the service account?
+2. **Check source machine** - Is the source IP from a legitimate workstation?
+3. **Review timing** - Is this during business hours or unusual times?
+4. **Check recent changes** - Any recent changes to this service account?
+5. **Escalate** - If suspicious, escalate to Tier 2/3 for further investigation
+
+---
+
+*Module 2 Complete - Security Monitoring & SIEM Fundamentals*
 
