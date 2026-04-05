@@ -52,39 +52,23 @@ SIEM (Security Information and Event Management) combines:
 ### How Does A SIEM Solution Work?
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart LR
-    subgraph "Data Sources"
-        A[Firewalls] --> D[SIEM]
-        B[Servers] --> D
-        C[Endpoints] --> D
-    end
-    
-    subgraph "SIEM Pipeline"
-        D --> G[Collection]
-        G --> H[Normalization]
-        H --> I[Correlation]
-        I --> J[Alerting]
-    end
-    
-    J --> K[Dashboard]
-    
-    classDef source fill:#fff3e0,stroke:#999,stroke-width:2px,color:#333;
-    classDef process fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C source;
-    class D,G,H,I,J process;
-    class K process;
+    Firewalls --> SIEM
+    Servers --> SIEM
+    Endpoints --> SIEM
+    SIEM --> Collection
+    Collection --> Normalization
+    Normalization --> Correlation
+    Correlation --> Alerting
+    Alerting --> Dashboard
 ```
 
-### Data Flows Within A SIEM
-
-| Stage | Description |
-|-------|-------------|
-| **1. Ingestion** | Collect logs from sources (agents, syslog, APIs) |
-| **2. Normalization** | Convert raw data to common format |
-| **3. Storage** | Index and store normalized data |
-| **4. Correlation** | Apply rules to detect patterns |
-| **5. Visualization** | Display via dashboards |
+**Data Flow:**
+1. **Ingestion** - Collect logs from sources (agents, syslog, APIs)
+2. **Normalization** - Convert raw data to common format
+3. **Storage** - Index and store normalized data
+4. **Correlation** - Apply rules to detect patterns
+5. **Visualization** - Display via dashboards
 
 ### SIEM Business Requirements
 
@@ -133,22 +117,8 @@ flowchart LR
 The Elastic Stack is an open-source collection of applications:
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart TB
-    subgraph "Ingest"
-        A[Beats<br/>Filebeat, Metricbeat] --> B[Logstash]
-    end
-    
-    subgraph "Store & Analyze"
-        B --> C[Elasticsearch]
-    end
-    
-    subgraph "Visualize"
-        C --> D[Kibana]
-    end
-    
-    classDef component fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C,D component;
+    Beats --> Logstash --> Elasticsearch --> Kibana
 ```
 
 ### Components
@@ -251,16 +221,8 @@ A **Security Operations Center (SOC)** is a facility with a team responsible for
 - Security event management
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart TB
-    subgraph "SOC Functions"
-        A[Monitor] --> B[Detect]
-        B --> C[Analyze]
-        C --> D[Respond]
-    end
-    
-    classDef function fill:#e8f5e9,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C,D function;
+    Monitor --> Detect --> Analyze --> Respond
 ```
 
 ### SOC Team Roles
@@ -305,28 +267,8 @@ A framework documenting adversary attack methods:
 - **Techniques** - How they achieve the goal
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart LR
-    A[Recon] --> B[Initial Access]
-    B --> C[Execution]
-    C --> D[Persistence]
-    D --> E[Priv Esc]
-    E --> F[Defense Evasion]
-    F --> G[Cred Access]
-    G --> H[Discovery]
-    H --> I[Lateral Movement]
-    I --> J[Exfiltration]
-    
-    style A fill:#ffcdd2,stroke:#999
-    style B fill:#ffcdd2,stroke:#999
-    style C fill:#ffcdd2,stroke:#999
-    style D fill:#fff9c4,stroke:#999
-    style E fill:#fff9c4,stroke:#999
-    style F fill:#c8e6c9,stroke:#999
-    style G fill:#c8e6c9,stroke:#999
-    style H fill:#bbdefb,stroke:#999
-    style I fill:#bbdefb,stroke:#999
-    style J fill:#e1bee7,stroke:#999
+    Recon --> Initial_Access --> Execution --> Persistence --> Priv_Esc --> Defense_Evasion --> Cred_Access --> Discovery --> Lateral_Movement --> Exfiltration
 ```
 
 ### ATT&CK Use Cases in Security Operations
@@ -364,16 +306,9 @@ flowchart LR
 ### Use Case Development Lifecycle
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart TB
-    A[Requirements] --> B[Data Points]
-    B --> C[Log Validation]
-    C --> D[Design]
-    D --> E[Implementation]
-    E --> F[Documentation]
-    F --> G[Onboarding]
-    G --> H[Testing]
-    H --> I[Fine Tuning]
+    Requirements --> Data_Points --> Log_Validation --> Design --> Implementation --> Documentation --> Onboarding --> Testing --> Fine_Tuning
+```
     
     style A fill:#e3f2fd,stroke:#999
     style B fill:#e3f2fd,stroke:#999
