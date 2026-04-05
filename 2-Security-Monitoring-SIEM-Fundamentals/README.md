@@ -1004,4 +1004,29 @@ Escalate when:
 
 ---
 
+### Interview Questions
+
+1. **What is the difference between SIEM and SOC?**
+2. **Explain the SIEM data flow from source to alert.**
+3. **What is log normalization and why is it important?**
+4. **How do you reduce alert fatigue in a SOC?**
+5. **Explain the Elastic Stack components.**
+6. **What is ECS (Elastic Common Schema)?**
+7. **Write a basic KQL query to find failed logins.**
+8. **Describe the use case development lifecycle.**
+9. **What factors determine alert severity?**
+10. **How do you map a detection rule to MITRE ATT&CK?**
+
+---
+
+### Additional Resources
+
+- [Elastic Documentation](https://www.elastic.co/guide/index.html)
+- [ECS Fields](https://www.elastic.co/guide/en/ecs/current/index.html)
+- [KQL Reference](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)
+- [MITRE ATT&CK](https://attack.mitre.org)
+- [ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/)
+
+---
+
 *Module 2 Complete - Security Monitoring & SIEM Fundamentals*
