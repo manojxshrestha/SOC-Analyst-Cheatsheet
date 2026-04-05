@@ -1212,37 +1212,6 @@ The `-ets` parameter tells Logman to query Event Tracing Sessions directly. With
 
 ---
 
-### Q10: How do you detect lateral movement via RDP in event logs?
-
-**Answer:**
-
-Look for:
-- Event 4624 with LogonType=10 (RemoteInteractive)
-- Source Network Address from external IP
-- Service accounts doing RDP (should never happen)
-
----
-
-### Q11: What is ETW and how does it differ from traditional Windows Event Logs?
-
-**Answer:**
-
-ETW (Event Tracing for Windows) is a high-performance, real-time tracing facility built into Windows. Unlike traditional event logs, ETW provides:
-- 1,000+ built-in providers
-- Kernel-level visibility
-- Real-time event capture
-- Highly customizable filtering
-
----
-
-### Q12: What is the purpose of the "-ets" parameter in logman?
-
-**Answer:**
-
-The `-ets` parameter tells Logman to query Event Tracing Sessions directly. Without it, Logman will not identify the ETW sessions running on the system.
-
----
-
 ## 6. Additional Resources
 
 ### Tools
@@ -1262,6 +1231,13 @@ The `-ets` parameter tells Logman to query Event Tracing Sessions directly. With
 - [Sysmon Event IDs](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 - [MITRE ATT&CK - T1059.001 PowerShell](https://attack.mitre.org/techniques/T1059/001/)
 - [DLL Hijacking Techniques](https://blog.checkpoint.com/)
+
+### Communities
+
+- r/dfir (Reddit)
+- r/sysadmin (Reddit)
+- SANS Digital Forensics
+- Blue Team Tools Discord
 
 ---
 
