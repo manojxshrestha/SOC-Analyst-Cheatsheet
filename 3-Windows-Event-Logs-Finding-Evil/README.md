@@ -1205,12 +1205,31 @@ The ETW data reveals:
 
 > 💡 **TAKEAWAY**: ETW provides **execution-level visibility** beyond just DLL loading!
 
-In our current SilkETW configuration, we're selectively targeting a specific subset (indicated by 0x2038), which includes: **JitKeyword**, **InteropKeyword**, **LoaderKeyword**, and **NGenKeyword**.
+### How to Use Each Keyword
 
-- **JitKeyword**: Just-In-Time (JIT) compilation events - reveals methods being compiled at runtime. Useful for understanding the execution flow of the .NET assembly.
-- **InteropKeyword**: Interoperability events when managed code interacts with unmanaged code. Provides insights into potential interactions with native APIs.
-- **LoaderKeyword**: Assembly loading process details within the .NET runtime. Vital for understanding what .NET assemblies are being loaded and executed.
-- **NGenKeyword**: Native Image Generator events - concerned with precompiled .NET assemblies. Helps detect scenarios where attackers use precompiled assemblies to evade JIT-related detections.
+You can combine keywords or use them individually:
+
+```cmd
+# Collect ALL .NET events (0x2038 = all four combined)
+SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x2038 -ot file -p C:\windows\temp\etw.json
+
+# Just JitKeyword (0x8) - see what methods are running
+SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x8 -ot file -p C:\windows\temp\jit.json
+
+# Just LoaderKeyword (0x20) - see what assemblies load
+SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x20 -ot file -p C:\windows\temp\loader.json
+
+# Combine Jit + Interop (0x10 + 0x8 = 0x18)
+SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x18 -ot file -p C:\windows\temp\combined.json
+```
+
+| Keyword | Hex Value | Use When |
+|---------|-----------|----------|
+| JitKeyword | 0x8 | You want to see actual code execution |
+| InteropKeyword | 0x10 | You want to see Windows API calls |
+| LoaderKeyword | 0x20 | You want to see loaded assemblies |
+| NGenKeyword | 0x2000 | You suspect precompiled tools |
+| All combined | 0x2038 | Full visibility |
 
 ### Summary: Sysmon vs ETW
 
