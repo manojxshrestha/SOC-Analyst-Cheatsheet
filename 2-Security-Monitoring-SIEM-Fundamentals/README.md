@@ -886,3 +886,293 @@ When this alert triggers:
 
 *Module 2 Complete - Security Monitoring & SIEM Fundamentals*
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Security Monitoring & SIEM Fundamentals
+Security Monitoring & SIEM Fundamentals 100%
+
+Section 9 / 11
+Go to Questions
+SIEM Visualization Example 4: Users Added Or Removed From A Local Group (Within A Specific Timeframe)
+
+In this SIEM visualization example, we aim to create a visualization to monitor user additions or removals from the local "Administrators" group from March 5th 2023 to date.
+
+Our visualization will be based on the following Windows event logs.
+
+    4732: A member was added to a security-enabled local group
+    4733: A member was removed from a security-enabled local group
+
+Navigate to the bottom of this section and click on Click here to spawn the target system!.
+
+Navigate to http://[Target IP]:5601, click on the side navigation toggle, and click on "Dashboard".
+
+A prebaked dashboard should be visible. Let's click on the "pencil"/edit icon.
+
+<img width="1888" height="652" alt="image" src="https://github.com/user-attachments/assets/3ce288bd-06bb-4ab0-be2f-03f19c81e2d5" />
+
+
+Elastic dashboard with SOC-Alerts listed, option to create or edit dashboards.
+
+Now, to initiate the creation of our first visualization, we simply have to click on the "Create visualization" button.
+
+Upon initiating the creation of our first visualization, the following new window will appear with various options and settings.
+<img width="1030" height="638" alt="image" src="https://github.com/user-attachments/assets/15b262f1-ce57-4f92-aa4e-b0182803ec3d" />
+
+Elastic dashboard: Add filter, select windows index, bar vertical stacked chart.
+
+There are four things for us to notice on this window:
+
+    A filter option that allows us to filter the data before creating a graph. In this case our goal is to display user additions or removals from the local "Administrators" group. We can use a filter to only consider event IDs that match 4732 – A member was added to a security-enabled local group and 4733 – A member was removed from a security-enabled local group. We can also use a filter to only consider 4732 and 4733 events where the local group is the "Administrators" one.
+
+	<img width="1030" height="473" alt="image" src="https://github.com/user-attachments/assets/742ad714-9b9e-4af5-8b26-98d7446107ee" />
+
+    Elastic dashboard filter: event.code is 4732 or 4733, group.name is administrators.
+
+	
+    This field indicates the data set (index) that we are going to use. It is common for data from various infrastructure sources to be separated into different indices, such as network, Windows, Linux, etc. In this particular example, we will specify windows* in the "Index pattern".
+    This search bar provides us with the ability to double-check the existence of a specific field within our data set, serving as another way to ensure that we are looking at the correct data. We are interested in the user.name.keyword field. We can use the search bar to quickly perform a search and verify if this field is present and discovered within our selected data set. This allows us to confirm that we are accessing the desired field and working with accurate data.
+
+	<img width="460" height="1043" alt="image" src="https://github.com/user-attachments/assets/30e53837-cc79-4272-ad78-fe0c1546bd7f" />
+
+    Elastic dashboard: Filter event.code 4625, search user fields.
+	
+    Lastly, this drop-down menu enables us to select the type of visualization we want to create. The default option displayed in the earlier image is "Bar vertical stacked". If we click on that button, it will reveal additional available options (image redacted as not all options fit on the screen). From this expanded list, we can choose the desired visualization type that best suits our requirements and data presentation needs.
+
+	<img width="1030" height="793" alt="image" src="https://github.com/user-attachments/assets/d2571940-3893-4c15-b615-90fc4e59bfca" />
+
+    Visualization type menu: Bar vertical stacked selected.
+
+For this visualization, let's select the "Table" option. After selecting the "Table", we can proceed to click on the "Rows" option. This will allow us to choose the specific data elements that we want to include in the table view.
+
+<img width="711" height="712" alt="image" src="https://github.com/user-attachments/assets/f4eafe27-9e20-4e57-af3e-9c3efe0aec40" />
+
+Table configuration: Add fields to Rows, Columns, and Metrics.
+
+Let's configure the "Rows" settings as follows.
+<img width="728" height="935" alt="image" src="https://github.com/user-attachments/assets/4093fecb-4d76-4985-93be-6859b7e09a84" />
+
+
+Rows configuration: Select user.name.keyword, top 1000 values, ranked by count of records in descending order.
+
+Moving forward, let's close the "Rows" window and proceed to enter the "Metrics" configuration.
+
+<img width="703" height="839" alt="image" src="https://github.com/user-attachments/assets/05ed4b13-e9d0-4b77-af79-171375a2997f" />
+
+
+Table configuration: Rows set to top values of user.name.keyword, add fields to Columns and Metrics.
+
+In the "Metrics" window, let's select "count" as the desired metric.
+<img width="606" height="554" alt="image" src="https://github.com/user-attachments/assets/cff3f641-c998-446f-a7b8-985921d94701" />
+
+
+Metrics selection: Choose 'Count' function.
+
+One final addition to the table is to include some more "Rows" settings to enhance our understanding.
+
+    Which user was added to or removed from the group? (winlog.event_data.MemberSid.keyword field)
+    To which group was the addition or the removal performed? (double-checking that it is the "Administrators" one) (group.name.keyword field)
+	
+    Was the user added to or removed from the group? (event.action.keyword field)
+    On which machine did the action occur? (host.name.keyword field)
+	<img width="1169" height="332" alt="image" src="https://github.com/user-attachments/assets/c5f57ee9-67ff-4fa2-8135-2ceee639b49c" />
+
+    Table showing top values of user.name, winlog.event_data.MemberSid, group.name, event.action, host.name, with record counts.
+
+Click on "Save and return", and you will observe that the new visualization is added to the dashboard.
+
+As discussed, we want to monitor user additions or removals from the local "Administrators" group within a specific timeframe (March 5th 2023 to date).
+
+We can narrow the scope of our visualization as follows.
+
+<img width="1917" height="1413" alt="image" src="https://github.com/user-attachments/assets/4c34fc42-91f9-4383-98c6-28df2c378270" />
+
+
+Dashboard showing failed logon attempts and RDP logon for service account, with options to edit lens and create drilldown.
+<img width="1921" height="1409" alt="image" src="https://github.com/user-attachments/assets/82b72380-4396-461b-91f9-f320518c6fec" />
+
+
+Dashboard showing failed logon attempts and RDP logon for service account, with options to customize time range.
+<img width="1923" height="1403" alt="image" src="https://github.com/user-attachments/assets/7f45c2a0-49ac-4e17-ae74-f7bad5cd1612" />
+
+
+Dashboard with failed logon attempts and RDP logon, showing panel time range customization to March 5, 2023.
+
+Finally, let's click on the "Save" button so that all our edits persist.
+
+Please allow 3-5 minutes for Kibana to become available after spawning the target of the questions below.
+
+
+
+
+
+ Section 10 / 11
+The Triaging Process
+What Is Alert Triaging?
+
+Alert triaging, performed by a Security Operations Center (SOC) analyst, is the process of evaluating and prioritizing security alerts generated by various monitoring and detection systems to determine their level of threat and potential impact on an organization's systems and data. It involves systematically reviewing and categorizing alerts to effectively allocate resources and respond to security incidents.
+
+Escalation is an important aspect of alert triaging in a SOC environment. The escalation process typically involves notifying supervisors, incident response teams, or designated individuals within the organization who have the authority to make decisions and coordinate the response effort. The SOC analyst provides detailed information about the alert, including its severity, potential impact, and any relevant findings from the initial investigation. This allows the decision-makers to assess the situation and determine the appropriate course of action, such as involving specialized teams, initiating broader incident response procedures, or engaging external resources if necessary.
+
+Escalation ensures that critical alerts receive prompt attention and facilitates effective coordination among different stakeholders, enabling a timely and efficient response to potential security incidents. It helps to leverage the expertise and decision-making capabilities of individuals who are responsible for managing and mitigating higher-level threats or incidents within the organization.
+What Is The Ideal Triaging Process?
+
+    Initial Alert Review:
+
+    Thoroughly review the initial alert, including metadata, timestamp, source IP, destination IP, affected systems, and triggering rule/signature.
+    Analyze associated logs (network traffic, system, application) to understand the alert's context.
+
+    Alert Classification:
+
+    Classify the alert based on severity, impact, and urgency using the organization's predefined classification system.
+
+    Alert Correlation:
+
+    Cross-reference the alert with related alerts, events, or incidents to identify patterns, similarities, or potential indicators of compromise (IOCs).
+    Query the SIEM or log management system to gather relevant log data.
+    Leverage threat intelligence feeds to check for known attack patterns or malware signatures.
+
+    Enrichment of Alert Data:
+
+    Gather additional information to enrich the alert data and gain context:
+        Collect network packet captures, memory dumps, or file samples associated with the alert.
+        Utilize external threat intelligence sources, open-source tools, or sandboxes to analyze suspicious files, URLs, or IP addresses.
+        Conduct reconnaissance of affected systems for anomalies (network connections, processes, file modifications).
+
+    Risk Assessment:
+
+    Evaluate the potential risk and impact to critical assets, data, or infrastructure:
+        Consider the value of affected systems, sensitivity of data, compliance requirements, and regulatory implications.
+        Determine likelihood of a successful attack or potential lateral movement.
+
+    Contextual Analysis:
+
+    The analyst considers the context surrounding the alert, including the affected assets, their criticality, and the sensitivity of the data they handle.
+    They evaluate the security controls in place, such as firewalls, intrusion detection/prevention systems, and endpoint protection solutions, to determine if the alert indicates a potential control failure or evasion technique.
+    The analyst assesses the relevant compliance requirements, industry regulations, and contractual obligations to understand the implications of the alert on the organization's legal and regulatory compliance posture.
+
+    Incident Response Planning:
+
+    Initiate an incident response plan if the alert is significant:
+        Document alert details, affected systems, observed behaviors, potential IOCs, and enrichment data.
+        Assign incident response team members with defined roles and responsibilities.
+        Coordinate with other teams (network operations, system administrators, vendors) as necessary.
+
+    Consultation with IT Operations:
+
+    Assess the need for additional context or missing information by consulting with IT operations or relevant departments:
+        Engage in discussions or meetings to gather insights on the affected systems, recent changes, or ongoing maintenance activities.
+        Collaborate to understand any known issues, misconfigurations, or network changes that could potentially generate false-positive alerts.
+        Gain a holistic understanding of the environment and any non-malicious activities that might have triggered the alert.
+        Document the insights and information obtained during the consultation.
+
+    Response Execution:
+
+    Based on the alert review, risk assessment, and consultation, determine the appropriate response actions.
+    If the additional context resolves the alert or identifies it as a non-malicious event, take necessary actions without escalation.
+    If the alert still indicates potential security concerns or requires further investigation, proceed with the incident response actions.
+
+    Escalation:
+
+    Identify triggers for escalation based on organization's policies and alert severity:
+        Triggers may include compromise of critical systems/assets, ongoing attacks, unfamiliar/sophisticated techniques, widespread impact, or insider threats.
+    Assess the alert against escalation triggers, considering potential consequences if not escalated.
+    Follow internal escalation process, notifying higher-level teams/management responsible for incident response.
+    Provide comprehensive alert summary, severity, potential impact, enrichment data, and risk assessment.
+    Document all communication related to escalation.
+    In some cases, escalate to external entities (law enforcement, incident response providers, CERTs) based on legal/regulatory requirements.
+
+    Continuous Monitoring:
+
+    Continuously monitor the situation and incident response progress.
+    Maintain open communication with escalated teams, providing updates on developments, findings, or changes in severity/impact.
+    Collaborate closely with escalated teams for a coordinated response.
+
+    De-escalation:
+
+    Evaluate the need for de-escalation as the incident response progresses and the situation is under control.
+    De-escalate when the risk is mitigated, incident is contained, and further escalation is unnecessary.
+    Notify relevant parties, providing a summary of actions taken, outcomes, and lessons learned.
+
+Regularly review and update the process, aligning it with organizational policies, procedures, and guidelines. Adapt the process to address emerging threats and evolving needs.
+
+
+
+
+
+
+
+
+
+
+
+ Section 11 / 11
+Go to Questions
+Skills Assessment
+Dashboard Review & Critical Thinking Exercise
+
+Congratulations,
+
+You have been hired in Eagle as a SOC Tier 1 analyst. Yesterday was your on-boarding day with the company, and today you will be familiarized with the SOC. Your day will begin by meeting up with a senior analyst, who will provide insights into the environment, and afterwards, you are expected to begin monitoring alerts and security events in our home-cooked SOC dashboards.
+
+The following are your notes after meeting the senior analyst, who provided insights into the environment:
+
+    The organization has moved all hosting to the cloud; the old DMZ network is closed down, so no more servers exist there.
+    The IT operation team (the core IT admins) consists of four people. They are the only ones with high privileges in the environment.
+    The IT operation team often tends to use the default administrator account(s) even if they are told otherwise.
+    All endpoint devices are hardened according to CIS hardening baselines. Whitelisting exists to a limited extent.
+    IT security has created a privileged admin workstation (PAW) and requires that all admin activities be performed on this machine.
+    The Linux environment is primarily 'left over' servers from back in the day, which have very little, if any, activity on a regular day. The root user account is not used; due to audit findings, the account was blocked from connecting remotely, and users who require those rights will need to escalate via the sudo command.
+    Naming conventions exist and are strictly followed; for example, service accounts contain '-svc' as part of their name. Service accounts are created with long, complex passwords, and they perform a very specific task (most likely running services locally on machines).
+
+If you had a running instance of the target please reset it by clicking on the "Reset Target" icon. This will ensure that you regain access to the preconfigured dashboard, that you may have deleted during the SIEM visualization-related sections.
+
+Now you are free to take your seat and start monitoring. Navigate to http://[Target IP]:5601, click on the side navigation toggle, and click on "Dashboard". Review the SOC-Alerts dashboard.
+
+    Visualization 1: Failed logon attempts (All users)
+    Such a visualization might reveal potential brute force attacks. It's important to identify any single user with numerous failed attempts or perhaps, various users connecting to (or from) the same endpoint device. However, the current data does not point towards any such scenario. One anomaly is noticeable though. Hint: It is related to the "sql-svc1" account.
+    Visualization 2: Failed logon attempts (Disabled user)
+    It seems that there is one incident where the user "Anni" has tried to authenticate, despite the account being disabled.
+    Visualization 3: Failed logon attempts (Admin users only)
+    Hint: Check if all events took place on either Privileged Access Workstations (PAWs) or Domain Controllers.
+    Visualization 4: RDP logon for service account
+    Service accounts in this environment serve a very specialized function. Do you notice anything that warrants suspicion?
+    Visualization 5: User added or removed from a local group
+    An administrator has incorporated an individual (who is only represented by the SID value) into the "Administrators" group. Should you escalate to a Tier 2/3 analyst or consult with the IT Operations department first?
+    Visualization 6: Admin logon not from PAW
+    Administrators should exclusively utilize PAWs for server remote connections. Should you escalate to a Tier 2/3 analyst or consult with the IT Operations department first?
+    Visualization 7: SSH Logins
+    Be reminded that the root user account is not typically in use.
+
+Go through the questions below and enter your answers.
