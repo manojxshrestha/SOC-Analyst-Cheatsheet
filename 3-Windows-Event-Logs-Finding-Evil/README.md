@@ -722,70 +722,46 @@ logman.exe query providers Microsoft-Windows-Winlogon
 
 > 💡 **TAKEAWAY**: ETW provides **1,000+ built-in providers** in Windows 10!
 
-        cmd-session
-C:\Tools> logman.exe query "EventLog-System" -ets
+### Querying ETW Sessions
 
+```cmd
+# Query specific session details
+logman.exe query "EventLog-System" -ets
+```
 
+This shows session info including providers:
+
+```
 Name:                 EventLog-System
 Status:               Running
-Root Path:            %systemdrive%\PerfLogs\Admin
-Segment:              Off
-Schedules:            On
-Segment Max Size:     100 MB
-
-Name:                 EventLog-System\EventLog-System
-Type:                 Trace
-Append:               Off
-Circular:             Off
-Overwrite:            Off
 Buffer Size:          64
-Buffers Lost:         0
-Buffers Written:      47
-Buffer Flush Timer:   1
-Clock Type:           System
 File Mode:            Real-time
 
 Provider:
 Name:                 Microsoft-Windows-FunctionDiscoveryHost
 Provider Guid:        {538CBBAD-4877-4EB2-B26E-7CAEE8F0F8CB}
-Level:                255
-KeywordsAll:          0x0
 KeywordsAny:          0x8000000000000000 (System)
-Properties:           65
-Filter Type:          0
+```
 
-Provider:
-Name:                 Microsoft-Windows-Subsys-SMSS
-Provider Guid:        {43E63DA5-41D1-4FBF-ADED-1BBED98FDD1D}
-Level:                255
-KeywordsAll:          0x0
-KeywordsAny:          0x4000000000000000 (System)
-Properties:           65
-Filter Type:          0
+### Key Provider Types
 
-Provider:
-Name:                 Microsoft-Windows-Kernel-General
-Provider Guid:        {A68CA8B7-004F-D7B6-A698-07E2DE0F1F5D}
-Level:                255
-KeywordsAll:          0x0
-KeywordsAny:          0x8000000000000000 (System)
-Properties:           65
-Filter Type:          0
+| Type | Description |
+|------|-------------|
+| **MOF Providers** | Based on Managed Object Format schemas |
+| **WPP Providers** | Windows Software Trace Preprocessor |
+| **Manifest-based** | Modern XML manifest-based |
+| **TraceLogging** | Simplified event generation API |
 
-Provider:
-Name:                 Microsoft-Windows-FilterManager
-Provider Guid:        {F3C5E28E-63F6-49C7-A204-E48A1BC4B09D}
-Level:                255
-KeywordsAll:          0x0
-KeywordsAny:          0x8000000000000000 (System)
-Properties:           65
-Filter Type:          0
+### ETW vs Traditional Logs
 
---- SNIP ---
+| Feature | Traditional Event Logs | ETW |
+|---------|------------------------|-----|
+| **Providers** | ~5 main logs | 1,000+ providers |
+| **Performance** | Low overhead | Minimal impact |
+| **Real-time** | Limited | Native real-time |
+| **Customization** | Limited | Highly customizable |
 
-The command completed successfully.
-
-By using the logman query providers command, we can generate a list of all available providers on the system, including their respective GUIDs.
+> 🔑 **TAKEAWAY**: Use ETW for deep forensics, traditional logs for baseline monitoring!
 
         cmd-session
 C:\Tools> logman.exe query providers
@@ -894,52 +870,39 @@ Microsoft-Windows Networking VPN Plugin Platform {E5FC4A0F-7198-492F-9B0F-88FDCB
 Microsoft-Windows-AAD                    {4DE9BC9C-B27A-43C9-8994-0915F1A5E24F}
 Microsoft-Windows-ACL-UI                 {EA4CC8B8-A150-47A3-AFB9-C8D194B19452}
 
-The command completed successfully.
+> 🔴 **FACT**: Windows 10 includes **more than 1,000 built-in providers**! Third-party software also adds ETW providers.
 
-Windows 10 includes more than 1,000 built-in providers. Moreover, Third-Party Software often incorporates its own ETW providers, especially those operating in Kernel mode.
+> 📌 **TIP**: Filter providers using `findstr`:
 
-Due to the high number of providers, it's usually advantageous to filter them using findstr. For instance, you will see multiple results for "Winlogon" in the given example.
-
-        cmd-session
+```cmd
 C:\Tools> logman.exe query providers | findstr "Winlogon"
+```
+
+Output:
+```
 Microsoft-Windows-Winlogon               {DBE9B383-7CF3-4331-91CC-A3CB16A3B538}
 Windows Winlogon Trace                   {D451642C-63A6-11D7-9720-00B0D03E0347}
+```
 
-By specifying a provider with Logman, we gain a deeper understanding of the provider's function. This will inform us about the Keywords we can filter on, the available event levels, and which processes are currently utilizing the provider.
+### Querying Provider Details
 
-        cmd-session
+```cmd
 C:\Tools> logman.exe query providers Microsoft-Windows-Winlogon
+```
 
-Provider                                 GUID
--------------------------------------------------------------------------------
-Microsoft-Windows-Winlogon               {DBE9B383-7CF3-4331-91CC-A3CB16A3B538}
+This shows keywords, levels, and PIDs:
 
-Value               Keyword              Description
--------------------------------------------------------------------------------
-0x0000000000010000  PerfInstrumentation
-0x0000000000020000  PerfDiagnostics
-0x0000000000040000  NotificationEvents
-0x0000000000080000  PerfTrackContext
-0x0000100000000000  ms:ReservedKeyword44
-0x0000200000000000  ms:Telemetry
-0x0000400000000000  ms:Measures
-0x0000800000000000  ms:CriticalData
-0x0001000000000000  win:ResponseTime     Response Time
-0x0080000000000000  win:EventlogClassic  Classic
-0x8000000000000000  Microsoft-Windows-Winlogon/Diagnostic
-0x4000000000000000  Microsoft-Windows-Winlogon/Operational
-0x2000000000000000  System               System
+| Keyword | Description |
+|---------|-------------|
+| 0x4000000000000000 | Microsoft-Windows-Winlogon/Operational |
+| 0x8000000000000000 | Microsoft-Windows-Winlogon/Diagnostic |
+| 0x2000000000000000 | System |
 
-Value               Level                Description
--------------------------------------------------------------------------------
-0x02                win:Error            Error
-0x03                win:Warning          Warning
-0x04                win:Informational    Information
-
-PID                 Image
--------------------------------------------------------------------------------
-0x00001710
-0x0000025c
+| Level | Description |
+|-------|-------------|
+| 0x02 | Error |
+| 0x03 | Warning |
+| 0x04 | Informational |
 
 
 The command completed successfully.
@@ -967,32 +930,26 @@ GUI-based alternatives also exist. These are:
 
     ETW Explorer window showing search results for 'PowerShell' with two providers listed, including GUIDs.
 
-Useful Providers
+> 🔧 **TOOL**: Use **ETW Explorer** or **PerfMon** to explore providers visually!
 
-    Microsoft-Windows-Kernel-Process: This ETW provider is instrumental in monitoring process-related activity within the Windows kernel. It can aid in detecting unusual process behaviors such as process injection, process hollowing, and other tactics commonly used by malware and advanced persistent threats (APTs).
-    Microsoft-Windows-Kernel-File: As the name suggests, this provider focuses on file-related operations. It can be employed for detection scenarios involving unauthorized file access, changes to critical system files, or suspicious file operations indicative of exfiltration or ransomware activity.
-    Microsoft-Windows-Kernel-Network: This ETW provider offers visibility into network-related activity at the kernel level. It's especially useful in detecting network-based attacks such as data exfiltration, unauthorized network connections, and potential signs of command and control (C2) communication.
-    Microsoft-Windows-SMBClient/SMBServer: These providers monitor Server Message Block (SMB) client and server activity, providing insights into file sharing and network communication. They can be used to detect unusual SMB traffic patterns, potentially indicating lateral movement or data exfiltration.
-    Microsoft-Windows-DotNETRuntime: This provider focuses on .NET runtime events, making it ideal for identifying anomalies in .NET application execution, potential exploitation of .NET vulnerabilities, or malicious .NET assembly loading.
-    OpenSSH: Monitoring the OpenSSH ETW provider can provide important insights into Secure Shell (SSH) connection attempts, successful and failed authentications, and potential brute force attacks.
-    Microsoft-Windows-VPN-Client: This provider enables tracking of Virtual Private Network (VPN) client events. It can be useful for identifying unauthorized or suspicious VPN connections.
-    Microsoft-Windows-PowerShell: This ETW provider tracks PowerShell execution and command activity, making it invaluable for detecting suspicious PowerShell usage, script block logging, and potential misuse or exploitation.
-    Microsoft-Windows-Kernel-Registry: This provider monitors registry operations, making it useful for detection scenarios related to changes in registry keys, often associated with persistence mechanisms, malware installation, or system configuration changes.
-    Microsoft-Windows-CodeIntegrity: This provider monitors code and driver integrity checks, which can be key in identifying attempts to load unsigned or malicious drivers or code.
-    Microsoft-Antimalware-Service: This ETW provider can be employed to detect potential issues with the antimalware service, including disabled services, configuration changes, or potential evasion techniques employed by malware.
-    WinRM: Monitoring the Windows Remote Management (WinRM) provider can reveal unauthorized or suspicious remote management activity, often indicative of lateral movement or remote command execution.
-    Microsoft-Windows-TerminalServices-LocalSessionManager: This provider tracks local Terminal Services sessions, making it useful for detecting unauthorized or suspicious remote desktop activity.
-    Microsoft-Windows-Security-Mitigations: This provider keeps tabs on the effectiveness and operations of security mitigations in place. It's essential for identifying potential bypass attempts of these security controls.
-    Microsoft-Windows-DNS-Client: This ETW provider gives visibility into DNS client activity, which is crucial for detecting DNS-based attacks, including DNS tunneling or unusual DNS requests that may indicate C2 communication.
-    Microsoft-Antimalware-Protection: This provider monitors the operations of antimalware protection mechanisms. It can be used to detect any issues with these mechanisms, such as disabled protection features, configuration changes, or signs of evasion techniques employed by malicious actors.
+### Useful ETW Providers for Security
 
-Restricted Providers
+> 📌 **MUST-KNOW PROVIDERS** for SOC Analysts:
 
-In the realm of Windows operating system security, certain ETW providers are considered "restricted." These providers offer valuable telemetry but are only accessible to processes that carry the requisite permissions. This exclusivity is designed to ensure that sensitive system data remains shielded from potential threats.
+| Provider | Purpose |
+|----------|---------|
+| **Microsoft-Windows-Kernel-Process** | Process injection, hollowing detection |
+| **Microsoft-Windows-Kernel-File** | File access, ransomware activity |
+| **Microsoft-Windows-Kernel-Network** | Network C2, exfiltration detection |
+| **Microsoft-Windows-Kernel-Registry** | Persistence via registry keys |
+| **Microsoft-Windows-SMBClient/SMBServer** | Lateral movement detection |
+| **Microsoft-Windows-DotNETRuntime** | .NET exploitation detection |
+| **Microsoft-Windows-PowerShell** | PowerShell script execution |
+| **Microsoft-Antimalware-Service** | AV detection/evasion monitoring |
+| **Microsoft-Windows-DNS-Client** | DNS tunneling, C2 detection |
+| **Microsoft-Windows-Security-Mitigations** | Security control bypass detection |
 
-One of these high-value, restricted providers is Microsoft-Windows-Threat-Intelligence. This provider offers crucial insights into potential security threats and is often leveraged in Digital Forensics and Incident Response (DFIR) operations. However, to access this provider, processes must be privileged with a specific right, known as Protected Process Light (PPL).
-
-According to Elastic:To be able to run as a PPL, an anti-malware vendor must apply to Microsoft, prove their identity, sign binding legal documents, implement an Early Launch Anti-Malware (ELAM) driver, run it through a test suite, and submit it to Microsoft for a special Authenticode signature. It is not a trivial process. Once this process is complete, the vendor can use this ELAM driver to have Windows protect their anti-malware service by running it as a PPL. With that said, workarounds to access the Microsoft-Windows-Threat-Intelligence provider exist.
+> 🔐 **RESTRICTED PROVIDERS**: Some providers like **Microsoft-Windows-Threat-Intelligence** require **Protected Process Light (PPL)** status - only available to privileged security tools!
 
 In the context of Microsoft-Windows-Threat-Intelligence, the benefits of this privileged access are manifold. This provider can record highly granular data about potential threats, enabling security professionals to detect and analyze sophisticated attacks that may have eluded other defenses. Its telemetry can serve as vital evidence in forensic investigations, revealing details about the origin of a threat, the systems and data it interacted with, and the alterations it made. Moreover, by monitoring this provider in real-time, security teams can potentially identify ongoing threats and intervene to mitigate damage.
 
