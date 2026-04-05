@@ -7,22 +7,6 @@
 
 This module covers the **foundations of SIEM and SOC operations**. You'll learn how SIEM solutions work, the Elastic Stack architecture, SOC organizational structures, MITRE ATT&CK framework applications, and how to develop effective SIEM use cases.
 
-```mermaid
-flowchart TB
-    subgraph "What You'll Learn"
-        A["SIEM Fundamentals"] --> B["Elastic Stack"]
-        B --> C["SOC Structure"]
-        C --> D["MITRE ATT&CK"]
-        D --> E["Use Case Development"]
-    end
-    
-    subgraph "Skills Gained"
-        F["KQL Query Writing"] --> G["SIEM Architecture"]
-        G --> H["Alert Triaging"]
-        H --> I["Use Case Creation"]
-    end
-```
-
 ### Key Takeaways
 
 | Concept | Description |
