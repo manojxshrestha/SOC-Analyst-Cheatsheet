@@ -237,19 +237,21 @@ Sysmon log entry: Image loaded, ProcessID 8060, Image mmc.exe, ImageLoaded psapi
 
 The event log contains the DLL's signing status (in this case, it is Microsoft-signed), the process or image responsible for loading the DLL, and the specific DLL that was loaded. In our example, we observe that "MMC.exe" loaded "psapi.dll", which is also Microsoft-signed. Both files are located in the System32 directory.
 
-Now, let's proceed with building a detection mechanism. To gain more insights into DLL hijacks, conducting research is paramount. We can focus on a specific hijack involving the vulnerable executable calc.exe and a list of DLLs that can be hijacked.
+Now, let's proceed with building a detection mechanism. To gain more insights into DLL hijacks, conducting research is paramount. We can focus on a specific hijack involving the vulnerable executable **`calc.exe`** and a list of DLLs that can be hijacked.
 
 <img width="1000" height="550" alt="image" src="https://github.com/user-attachments/assets/f3448679-5d7d-47be-8b57-2e46591b1615" />
 
-Table showing calc.exe with associated DLLs: CRYPTBASE.DLL, edputil.dll, MLANG.dll, PROPSYS.dll, Secur32.dll, SSPICLI.DLL, WININET.dll, and their functions.
+Table showing **calc.exe** with associated DLLs: CRYPTBASE.DLL, **edputil.dll**, **MLANG.dll**, **PROPSYS.dll**, **Secur32.dll**, **SSPICLI.DLL**, **WININET.dll**, and their functions.
 
-Let's attempt the hijack using "calc.exe" and "WININET.dll" as an example. To simplify the process, we can utilize Stephen Fewer's "hello world" reflective DLL.
+Let's attempt the hijack using **`calc.exe`** and **`WININET.dll`** as an example. To simplify the process, we can utilize Stephen Fewer's "hello world" reflective DLL.
 
-By following the required steps, which involve renaming reflective_dll.x64.dll to WININET.dll, moving calc.exe from C:\Windows\System32 along with WININET.dll to a writable directory (such as the Desktop folder), and executing calc.exe, we achieve success. Instead of the Calculator application, a MessageBox is displayed.
+> ⚠️ **ATTACK VECTOR**: By placing a malicious **`WININET.dll`** in the same folder as **`calc.exe`**, the Calculator will load our DLL instead of the legitimate System32 DLL!
+
+By following the required steps, which involve renaming reflective_dll.x64.dll to **WININET.dll**, moving **calc.exe** from C:\Windows\System32 along with **WININET.dll** to a writable directory (such as the Desktop folder), and executing **calc.exe**, we achieve success. Instead of the Calculator application, a MessageBox is displayed.
 
 <img width="1008" height="592" alt="image" src="https://github.com/user-attachments/assets/dd56f9ae-f50f-41e5-bbde-226bbbf9c54d" />
 
-Command prompt running calc.exe, desktop showing WININET.dll and calc icons, with a popup message 'Hello from DllMain!' indicating Reflective DLL Injection.
+Command prompt running **calc.exe**, desktop showing **WININET.dll** and calc icons, with a popup message 'Hello from DllMain!' indicating Reflective DLL Injection.
 
 Next, we analyze the impact of the hijack. First, we filter the event logs to focus on Event ID 7, which represents module load events.
 
@@ -257,20 +259,29 @@ Next, we analyze the impact of the hijack. First, we filter the event logs to fo
 
 Filter Current Log window with options for event level, event logs set to Microsoft-Windows-Sysmon/Operational, and Event ID 7.
 
-Subsequently, we search for instances of "calc.exe", by clicking "Find...", to identify the DLL load associated with our hijack.
+Subsequently, we search for instances of **calc.exe**, by clicking "Find...", to identify the DLL load associated with our hijack.
 
 <img width="2136" height="836" alt="image" src="https://github.com/user-attachments/assets/7407070a-3eff-44d2-bf68-9d252351767a" />
 
-Sysmon log entry: Image loaded, ProcessID 6212, Image calc.exe, ImageLoaded WININET.dll, Signed false, User DESKTOP-N33HELB\Waldo. Find dialog open for 'calc.exe'.
+Sysmon log entry: Image loaded, ProcessID 6212, Image **calc.exe**, ImageLoaded **WININET.dll**, **Signed false**, User DESKTOP-N33HELB\Waldo. Find dialog open for 'calc.exe'.
 
 The output from Sysmon provides valuable insights. Now, we can observe several indicators of compromise (IOCs) to create effective detection rules.
 
 Let's explore these IOCs:
-- **"calc.exe"** originally located in System32, should not be found in a writable directory. Therefore, a copy of "calc.exe" in a writable directory serves as an IOC.
-- **"WININET.dll"** originally located in System32, should not be loaded outside of System32 by calc.exe. If instances of "WININET.dll" loading occur outside of System32 with "calc.exe" as the parent process, it indicates a DLL hijack.
-- The original **"WININET.dll"** is Microsoft-signed, while our injected DLL remains unsigned.
 
-These three powerful IOCs provide an effective means of detecting a DLL hijack involving calc.exe.
+> 🔴 **KEY IOCs for DLL Hijack Detection:**
+
+| IOC | Description | Why It's Suspicious |
+|-----|-------------|---------------------|
+| **`calc.exe`** in writable directory | Should only be in System32 | Legitimate calc.exe never runs from Desktop/Downloads |
+| **`WININET.dll`** loaded outside System32 | Should load from C:\Windows\System32 | Indicates hijacked DLL loading |
+| **Unsigned DLL** | Signed=false | Malicious DLLs typically unsigned |
+
+- **`calc.exe`** originally located in System32, should not be found in a writable directory. Therefore, a copy of **`calc.exe`** in a writable directory serves as an IOC.
+- **`WININET.dll`** originally located in System32, should not be loaded outside of System32 by calc.exe. If instances of **`WININET.dll`** loading occur outside of System32 with **`calc.exe`** as the parent process, it indicates a DLL hijack.
+- The original **`WININET.dll`** is Microsoft-signed, while our injected DLL remains **unsigned**.
+
+> 📌 **DETECTION TIP**: These three powerful IOCs provide an effective means of detecting a DLL hijack involving **`calc.exe`**!
 
 ### Detection Example 2: Detecting Unmanaged PowerShell/C-Sharp Injection
 
