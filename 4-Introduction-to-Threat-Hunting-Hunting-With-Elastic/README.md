@@ -317,9 +317,69 @@ graph LR
 
 | Level | Audience | Focus | Questions |
 |-------|----------|-------|------------|
-| **Strategic** | C-Suite, VPs | Overview of adversary operations | Who? Why? |
-| **Operational** | Mid-level Management | Campaigns, TTPs | How? Where? |
-| **Tactical** | Network Defenders | Immediate actionable IoCs | What? When? |
+| **Strategic** | C-Suite, VPs | Overview of adversary operations, TTPs, MO | Who? Why? |
+| **Operational** | Mid-level Management | Campaigns, TTPs, how adversary operates | How? Where? |
+| **Tactical** | Network Defenders | Immediate actionable IoCs, specific indicators | What? When? |
+
+### Strategic Intelligence Details
+
+- **Audience**: C-suite executives, VPs, company leaders
+- **Purpose**: Align intelligence with company risks to inform decisions
+- **Content**: Overview of adversary's operations over time, mapping TTPs and Modus Operandi (MO)
+- **Questions**: Who? Why?
+- **Example**: Report on APT28 (Fancy Bear) - past campaigns, motivations, targets, long-term strategies
+
+### Operational Intelligence Details
+
+- **Audience**: Mid-level management
+- **Purpose**: Detailed campaign analysis
+- **Content**: TTPs, adversary campaigns, operational details
+- **Questions**: How? Where?
+- **Example**: Detailed analysis of a ransomware campaign - initial access methods, lateral movement tactics, execution methods
+
+### Tactical Intelligence Details
+
+- **Audience**: Network Defenders, SOC analysts
+- **Purpose**: Immediate actionable information
+- **Content**: Specific IP addresses, URLs, domains, file hashes, registry keys
+- **Questions**: What? When?
+- **Example**: Specific C2 server IPs, malware hashes, phishing email indicators
+
+---
+
+## Difference Between Threat Intelligence & Threat Hunting
+
+> 🔑 **Two distinct but interconnected specialties**:
+
+### Threat Intelligence (Predictive)
+
+**Purpose**: Anticipate the adversary's moves, ascertain their targets, and discern their methods of information acquisition.
+
+**Mission**: Predict:
+- 📍 **Location** of the intended attack
+- ⏰ **Timing** of the attack
+- 🎯 **Operational strategies** the adversary will employ
+- 🎯 **Ultimate objectives** of the adversary
+
+### Threat Hunting (Reactive & Proactive)
+
+**Purpose**: Determine whether an adversary is present in the network (or was present and evaded detection).
+
+**Triggered by**: An initiating event or incident - within our network or in a industry network
+
+### How They Bolster Each Other
+
+```mermaid
+graph LR
+    TI[Threat Intelligence<br/>Predictive] -->|Informs| TH[Threat Hunting<br/>Reactive/Proactive]
+    TH -->|Findings enrich| TI
+    
+    style TI fill:#54a0ff,stroke:#333,color:#fff
+    style TH fill:#ff6b6b,stroke:#333,color:#fff
+```
+
+- CTI team analyzes adversary activities → shares with threat hunters
+- Threat hunting findings → refine CTI predictions
 
 ---
 
