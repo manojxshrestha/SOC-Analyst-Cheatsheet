@@ -1172,6 +1172,12 @@ Use **-FilterXPath** parameter for XPath queries:
 Get-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -FilterXPath "*[EventData[Data[@Name='Image']='C:\Windows\System32\reg.exe']] and *[EventData[Data[@Name='CommandLine']='`"C:\Windows\system32\reg.exe`" ADD HKCU\Software\Sysinternals /v EulaAccepted /t REG_DWORD /d 1 /f']]" | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
 ```
 
+> 💡 **TIP**: Image and CommandLine can be identified by browsing the XML representation of any Sysmon event with ID 1 through Event Viewer.
+
+<img width="1543" height="693" alt="image" src="https://github.com/user-attachments/assets/bb33af48-36d5-4f07-aa14-1faa8858b12d" />
+
+Sysmon Event 1 showing process creation details for SecurityHealthHost.exe, including process ID, file path, and command line.
+
 **Find suspicious IP connections:**
 
 ```powershell
