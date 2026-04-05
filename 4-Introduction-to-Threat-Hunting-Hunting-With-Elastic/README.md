@@ -2,54 +2,61 @@
 
 
 
+# Introduction to Threat Hunting & Hunting With Elastic
+## SOC Analyst Cheatsheet - Module 4/15
 
+---
 
+## Table of Contents
 
-HTB Academy Logo
-Introduction to Threat Hunting & Hunting With Elastic
-Introduction to Threat Hunting & Hunting With Elastic 100%
+0. [Overview](#0-overview)
+1. [Threat Hunting Fundamentals](#1-threat-hunting-fundamentals)
+2. [Threat Hunting Process](#2-threat-hunting-process)
+3. [Threat Hunting Glossary](#3-threat-hunting-glossary)
+4. [Threat Intelligence Fundamentals](#4-threat-intelligence-fundamentals)
+5. [Hunting With Elastic](#5-hunting-with-elastic)
+6. [Interview Questions](#6-interview-questions)
+7. [Additional Resources](#7-additional-resources)
 
-Section 1 / 6
-Go to Questions
-Threat Hunting Fundamentals
-Threat Hunting Definition
+---
 
-The median duration between an actual security breach and its detection, otherwise termed "dwell time", is usually several weeks, if not months. This implies a potential adversarial presence within a network for a span approaching three weeks, a duration that can be significantly impactful.
+## 0. Overview
 
-This alarming fact underscores the growing inefficacy of traditional, defense-oriented cybersecurity tactics. In response, we advocate for a paradigm shift towards a proactive, offensive strategy – the initiation of threat hunting.
+> 📌 **WHY IT MATTERS**: The median "dwell time" (time between breach and detection) is **several weeks to months**. This means attackers could be in your network for ~3 weeks before you detect them!
 
-Threat hunting is an active, human-led, and often hypothesis-driven practice that systematically combs through network data to identify stealthy, advanced threats that evade existing security solutions. This strategic evolution from a conventionally reactive posture allows us to uncover insidious threats that automated detection systems or external entities such as law enforcement might not discern.
+**Threat hunting** is an active, human-led, and often hypothesis-driven practice that systematically combs through network data to identify stealthy, advanced threats that evade existing security solutions.
 
-The principal objective of threat hunting is to substantially reduce dwell time by recognizing malicious entities at the earliest stage of the cyber kill chain. This proactive stance has the potential to prevent threat actors from entrenching themselves deeply within our infrastructure and to swiftly neutralize them.
+### Key Objectives
 
-The threat hunting process commences with the identification of assets – systems or data – that could be high-value targets for threat actors. Next, we analyze the TTPs (Tactics, Techniques, and Procedures) these adversaries are likely to employ, based on current threat intelligence. We subsequently strive to proactively detect, isolate, and validate any artifacts related to the abovementioned TTPs and any anomalous activity that deviates from established baseline norms.
+- 🚨 **Reduce dwell time** - Detect threats early in the cyber kill chain
+- 🔍 **Find stealthy threats** - Uncover threats that automated systems miss
+- ⚡ **Proactive defense** - Shift from reactive to anticipatory security
 
-During the hunting endeavor, we regularly employ Threat Intelligence, a vital component that aids in formulating effective hunting hypotheses, developing counter-tactics, and executing protective measures to prevent system compromise.
+### Key Facets of Threat Hunting
 
-Key facets of threat hunting include:
+> 🔑 **KEY FACETS**:
+- 📊 **Offensive, proactive strategy** - Prioritize threat anticipation over reaction based on hypotheses, attacker TTPs, and intelligence
+- 🔴 **Offensive, reactive response** - Searches for artifacts related to verified incidents based on evidence
+- 🧠 **Adversarial mindset** - Cognitive empathy with the attacker
+- 📈 **Deep environment knowledge** - Understanding IT environment, network topology, digital assets, and normal activity
+- 🛠️ **High-fidelity data** - Utilizing quality telemetry and advanced threat hunting tools/platforms
 
-    An offensive, proactive strategy that prioritizes threat anticipation over reaction, based on hypotheses, attacker TTPs, and intelligence.
-    An offensive, reactive response that searches across the network for artifacts related to a verified incident, based on evidence and intelligence.
-    A solid, practical comprehension of threat landscape, cyber threats, adversarial TTPs, and the cyber kill chain.
-    Cognitive empathy with the attacker, fostering an understanding of the adversarial mindset.
-    A profound knowledge of the organization's IT environment, network topology, digital assets, and normal activity.
-    Utilization of high-fidelity data and tactical analytics, and leveraging advanced threat hunting tools and platforms.
+---
 
-The Relationship Between Incident Handling & Threat Hunting
+## The Relationship Between Incident Handling & Threat Hunting
 
-So, how does threat hunting intersect with the various phases of Incident Handling?
+> 📌 **INTEGRATION**: Threat hunting intersects with Incident Handling across all phases:
 
-    In the Preparation phase of incident handling, a threat hunting team must set up robust, clear rules of engagement. Operational protocols must be established, outlining when and how to intervene, the course of action in specific scenarios, and so forth. Organizations may choose to weave threat hunting into their existing incident handling policies and procedures, obviating the need for separate threat hunting policies and procedures.
-    During the Detection & Analysis phase of incident handling, a threat hunter’s acumen is indispensable. They can augment investigations, ascertain whether the observed indicators of compromise (IoCs) truly signify an incident, and further, their adversarial mindset can help uncover additional artifacts or IoCs that might have been missed initially.
-    In the Containment, Eradication, and Recovery phase of incident handling, the role of a hunter can be diverse. Some organizations might expect hunters to perform tasks within the Containment, Eradication, and Recovery stages. However, this is not a universally accepted practice. The specific roles and responsibilities of the hunting team will be stipulated in the procedural documents and security policies.
-    Regarding the Post-Incident Activity phase of incident handling, hunters, with their extensive expertise spanning various IT domains and IT Security, can contribute significantly. They can proffer recommendations to fortify the organization's overall security posture.
+| IR Phase | Hunter's Role |
+|---------|---------------|
+| **Preparation** | Set up rules of engagement, establish operational protocols |
+| **Detection & Analysis** | Augment investigations, validate IoCs, uncover hidden artifacts |
+| **Containment/Eradication/Recovery** | Execute remediation (varies by organization) |
+| **Post-Incident** | Provide recommendations to fortify security posture |
 
-We tried to shed light on the symbiotic relationship between incident handling and threat hunting. Whether these processes should be integrated or function independently is a strategic decision, contingent upon each organization's unique threat landscape, risk, etc.
-A Threat Hunting Team's Structure
+---
 
-The construction of a threat hunting team is a strategic and meticulously planned process that requires a diverse range of skills, expertise, and perspectives. It is crucial that each member of the team offers a unique set of competencies that, when combined, provide a holistic and comprehensive approach to identifying, mitigating, and eliminating threats.
-
-The ideal threat hunting team composition typically includes the following roles:
+## A Threat Hunting Team's Structure
 
     Threat Hunter: The core role within the team, threat hunters are cybersecurity professionals with a deep understanding of the threat landscape, cyber adversaries' Tactics, Techniques, and Procedures (TTPs), and sophisticated threat detection methodologies. They proactively search for Indicators of Compromise (IoCs) and are proficient in using a variety of threat hunting tools and platforms.
     Threat Intelligence Analyst: These individuals are responsible for gathering and analyzing data from a variety of sources, including open-source intelligence, dark web intelligence, industry reports, and threat feeds. Their job is to understand the current threat landscape and predict future trends, providing valuable insights to threat hunters.
@@ -118,15 +125,9 @@ adblock modal image
 
 
 
-HTB Academy Logo
-Introduction to Threat Hunting & Hunting With Elastic
-Introduction to Threat Hunting & Hunting With Elastic 100%
+---
 
-Section 2 / 6
-Go to Questions
-The Threat Hunting Process
-
-Below is a brief description of the threat hunting process:
+## 1. Threat Hunting Fundamentals
 
     Setting the Stage: The initial phase is all about planning and preparation. It includes laying out clear targets based on a deep understanding of the threat landscape, our business's critical requirements, and our threat intelligence insights. The preparation phase also encompasses making certain our environment is ready for effective threat hunting, which might involve enabling extensive logging across our systems and ensuring threat hunting tools, such as SIEM, EDR, IDS, are correctly set up. Additionally, we stay informed about the most recent cyber threats and familiarize ourselves with threat actor profiles.
         Example: During the planning and preparation phase, a threat hunting team might conduct in-depth research on the latest threat intelligence reports, analyze industry-specific vulnerabilities, and study the tactics, techniques, and procedures (TTPs) employed by threat actors. They may also identify critical assets and systems within the organization that are most likely to be targeted. As part of the preparation, extensive logging mechanisms can be implemented across servers, network devices, and endpoints to capture relevant data for analysis. Threat hunting tools like SIEM, EDR, and IDS are configured to collect and correlate logs, generate alerts, and provide visibility into potential security incidents. Additionally, the team stays updated on emerging cyber threats by monitoring threat feeds, subscribing to relevant security mailing lists, and participating in information sharing communities.
@@ -183,14 +184,11 @@ adblock modal image
 
 
 
-HTB Academy Logo
-Introduction to Threat Hunting & Hunting With Elastic
-Introduction to Threat Hunting & Hunting With Elastic 100%
+---
 
-Section 3 / 6
-Threat Hunting Glossary
+## 2. The Threat Hunting Process
 
-Within the domain of cybersecurity and threat hunting, several crucial terms and concepts play a pivotal role. Here's an enriched understanding of these:
+Below is a brief description of the threat hunting process:
 
     Adversary: An adversary, within the realm of Cyber Threat Intelligence (CTI), refers to an entity driven by shared objectives as your organization, albeit unauthorized, seeking to infiltrate your business and satisfy their collection requirements, which may include financial gains, insider information, or valuable intellectual property. These adversaries possess varying levels of technical expertise and are motivated to circumvent your security measures.
     Adversaries can be classified into distinct categories, including cyber criminals, insider threats, hacktivists, or state-sponsored operators. Each category exhibits unique characteristics and motivations in their pursuit of unauthorized access and exploitation.
@@ -260,18 +258,13 @@ adblock modal image
 
 
 
-HTB Academy Logo
-Introduction to Threat Hunting & Hunting With Elastic
-Introduction to Threat Hunting & Hunting With Elastic 100%
+---
 
-Section 4 / 6
-Go to Questions
-Threat Intelligence Fundamentals
-Cyber Threat Intelligence Definition
+## 3. Threat Hunting Glossary
 
-Cyber Threat Intelligence (CTI) represents a vital asset in our arsenal, providing essential insights to fortify our defenses against cyberattacks. The primary objective of our CTI team is to transition our defense strategies from merely reactive measures to a more proactive, anticipatory stance. They contribute crucial insights to our Security Operations Center (SOC).
+> 📌 **KEY TERMS**: Understanding these terms is essential for effective threat hunting!
 
-Four fundamental principles make CTI an integral part of our cybersecurity strategy: 
+**Adversary**: An entity driven by shared objectives, unauthorized, seeking to infiltrate your business. Can be cyber criminals, insider threats, hacktivists, or state-sponsored operators. 
 
 
 
@@ -401,19 +394,19 @@ adblock modal image
 
 
 
-HTB Academy Logo
-Introduction to Threat Hunting & Hunting With Elastic
-Introduction to Threat Hunting & Hunting With Elastic 100%
+---
 
-Section 5 / 6
-Go to Questions
-Hunting For Stuxbot
-Threat Intelligence Report: Stuxbot
+## 4. Threat Intelligence Fundamentals
 
-The present Threat Intelligence report underlines the immediate menace posed by the organized cybercrime collective known as "Stuxbot". The group initiated its phishing campaigns earlier this year and operates with a broad scope, seizing upon opportunities as they arise, without any specific targeting strategy – their motto seems to be anyone, anytime. The primary motivation behind their actions appears to be espionage, as there have been no indications of them exfiltrating sensitive blueprints, proprietary business information, or seeking financial gain through methods such as ransomware or blackmail.
+### Cyber Threat Intelligence Definition
 
-    Platforms in the Crosshairs: Microsoft Windows
-    Threatened Entities: Windows Users
+> 📌 **WHY CTI MATTERS**: Cyber Threat Intelligence (CTI) provides essential insights to **fortify our defenses** against cyberattacks. The primary objective is to transition from reactive to **proactive, anticipatory** stance!
+
+**Four fundamental principles** make CTI essential:
+- 🎯 **Time** - Intelligence must be timely
+- 📊 **Actionable** - Must enable concrete actions
+- 🎯 **Accurate** - Must be reliable
+- 📈 **Relevant** - Must apply to your organization
     Potential Impact: Complete takeover of the victim's computer / Domain escalation
     Risk Level: Critical
 
