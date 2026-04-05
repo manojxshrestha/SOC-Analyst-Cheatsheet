@@ -44,9 +44,48 @@ This module covers **Windows Event Logs & Sysmon** - the primary data sources fo
 
 ---
 
-## 1. Windows Event Logging Basics
+## 0. Overview
 
-Windows Event Logs are an intrinsic part of the Windows Operating System, storing logs from different components of the system including the system itself, applications running on it, ETW providers, services, and others.
+This module covers **Windows Event Logs & Sysmon** - the primary data sources for detecting malicious activity on Windows endpoints. You'll learn how to analyze security logs, use Sysmon for enhanced detection, identify suspicious behavior, and find evil using Windows event log analysis.
+
+### Key Takeaways
+
+| Concept | Description |
+|---------|-------------|
+| **Windows Event Logs** | Records of system, security, and application events |
+| **Security Event IDs** | Windows security log event identifiers |
+| **Sysmon** | System Monitor - enhanced logging for security |
+| **DLL Hijacking** | Loading malicious DLLs via legitimate processes |
+| **Process Injection** | Injecting code into legitimate processes |
+| **Credential Dumping** | Extracting credentials from LSASS |
+
+### Prerequisites
+
+- Basic understanding of Windows OS
+- Familiarity with Windows administration
+- Understanding of Windows Event Viewer
+
+### Module Duration
+
+- **Theory**: 3-4 hours
+- **Hands-on Practice**: 4-5 hours
+- **Total**: ~8-9 hours
+
+---
+
+## Table of Contents
+
+0. [Overview](#0-overview)
+1. [Windows Event Logging Basics](#1-windows-event-logging-basics)
+2. [Analyzing Evil With Sysmon & Event Logs](#2-analyzing-evil-with-sysmon--event-logs)
+3. [Event Tracing for Windows (ETW)](#3-event-tracing-for-windows-etw)
+4. [Tapping Into ETW](#4-tapping-into-etw)
+5. [Interview Questions](#5-interview-questions)
+6. [Additional Resources](#6-additional-resources)
+
+---
+
+## 1. Windows Event Logging Basics
 
 Windows event logging offers comprehensive logging capabilities for application errors, security events, and diagnostic information. As cybersecurity professionals, we leverage these logs extensively for analysis and intrusion detection.
 
@@ -428,192 +467,6 @@ Filter for:
 - Source processes from unexpected locations
 - Unusual SourceUser accessing SYSTEM processes
 - Processes that don't normally need LSASS access
-
----
-
-## 5. Interview Questions
-
-### Q1: What is Sysmon and why is it important for security monitoring?
-
-**Answer:** Sysmon (System Monitor) is a Windows system service and device driver that remains resident across system reboots to monitor and log system activity to the Windows event log. It provides detailed information about process creation, network connections, changes to file creation time, and more that typically doesn't appear in Security Event logs.
-
----
-
-### Q2: What is the difference between Windows Event ID 4688 and Sysmon Event ID 1?
-
-**Answer:**
-
-| Feature | Windows 4688 | Sysmon Event 1 |
-|---------|-------------|----------------|
-| Command Line | May be empty | Always captured |
-| Parent Command Line | Not captured | Captured |
-| Hash | Not captured | SHA256, MD5, IMPHASH |
-| Configurable | Limited | Extensive |
-
----
-
-### Q3: How do you detect DLL hijacking using Sysmon?
-
-**Answer:**
-
-1. Enable Sysmon Event ID 7 (Image Load)
-2. Look for DLLs loaded from unexpected locations
-3. Check for unsigned DLLs loading into legitimate processes
-4. Monitor for processes loading DLLs from user-writable directories
-
-**IOCs to watch:**
-- calc.exe running from Desktop instead of System32
-- WININET.dll loaded from user directory
-- Unsigned DLLs loading into signed processes
-
----
-
-### Q4: How can you detect unmanaged PowerShell injection?
-
-**Answer:**
-
-Monitor for:
-- **clr.dll** loading in processes that shouldn't run .NET (like spoolsv.exe)
-- **clrjit.dll** in unusual processes
-- Any non-PowerShell processes becoming "managed" (.NET processes)
-
-These DLLs indicate .NET runtime loading in processes that don't typically use it.
-
----
-
-### Q5: What Sysmon event ID is used to detect credential dumping?
-
-**Answer:** Sysmon Event ID 10 - ProcessAccess
-
-This event logs when one process accesses another, particularly important for detecting attempts to access lsass.exe (where credentials are stored).
-
----
-
-### Q6: What are the indicators of credential dumping via LSASS access?
-
-**Answer:**
-- Sysmon Event 10 showing access to lsass.exe
-- Source process from unusual location (e.g., Downloads folder)
-- SourceUser different from TargetUser (e.g., user accessing SYSTEM process)
-- Request for SeDebugPrivilege
-
----
-
-### Q7: What is the difference between managed and unmanaged code?
-
-**Answer:**
-
-- **Managed Code**: Requires .NET Runtime (CLR) to execute - compiled to bytecode (C#, VB.NET, F#)
-- **Unmanaged Code**: Runs directly as native assembly (C, C++, Delphi)
-
-**Detection**: Look for clr.dll and clrjit.dll loading in processes that shouldn't have .NET.
-
----
-
-### Q8: How do you configure Sysmon?
-
-**Answer:**
-
-```cmd
-# Install Sysmon
-sysmon.exe -i -accepteula -h md5,sha256,imphash -l -n
-
-# Apply configuration
-sysmon.exe -c config.xml
-```
-
-Configuration files are XML-based and can be obtained from:
-- SwiftOnSecurity/sysmon-config (comprehensive)
-- olafhartong/sysmon-modular (modular)
-
----
-
-### Q9: What Windows Event ID shows when the security log is cleared?
-
-**Answer:** Event ID 1102 - The audit log was cleared
-
-This is a critical indicator - attackers often clear logs to hide their tracks.
-
----
-
-### Q10: How do you detect lateral movement via RDP in event logs?
-
-**Answer:**
-
-Look for:
-- Event 4624 with LogonType=10 (RemoteInteractive)
-- Source Network Address from external IP
-- Service accounts doing RDP (should never happen)
-
----
-
-## 6. Additional Resources
-
-### Tools
-
-- [Sysinternals Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon)
-- [Swift On Security Sysmon Config](https://github.com/SwiftOnSecurity/sysmon-config)
-- [Olaf Hartong Sysmon Modular](https://github.com/olafhartong/sysmon-modular)
-- [Process Hacker](https://processhacker.sourceforge.io/)
-- [Event Log Explorer](https://eventlogxp.com/)
-
-### References
-
-- [Microsoft Security Event ID Reference](https://learn.microsoft.com/en-us/windows/security/threat-protection/audit/security-auditing)
-- [Sysmon Event IDs](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
-- [MITRE ATT&CK - T1059.001 PowerShell](https://attack.mitre.org/techniques/T1059/001/)
-- [DLL Hijacking Techniques](https://blog.checkpoint.com/)
-
-### Communities
-
-- r/dfir (Reddit)
-- r/sysadmin (Reddit)
-- SANS Digital Forensics
-
----
-
-*Module 3/15 - Windows Event Logs & Finding Evil*
-*Built with research + HTB Academy materials*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ---
 
@@ -1245,6 +1098,8 @@ SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x18 -ot file -p C:\
 
 ## 5. Interview Questions
 
+### Q1: What is the difference between Windows Event ID 4688 and Sysmon Event ID 1?
+
 **Answer:**
 
 | Feature | Windows 4688 | Sysmon Event 1 |
@@ -1256,7 +1111,7 @@ SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x18 -ot file -p C:\
 
 ---
 
-### Q3: How do you detect DLL hijacking using Sysmon?
+### Q2: How do you detect DLL hijacking using Sysmon?
 
 **Answer:**
 
@@ -1267,7 +1122,7 @@ SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x18 -ot file -p C:\
 
 ---
 
-### Q4: How can you detect unmanaged PowerShell injection?
+### Q3: How can you detect unmanaged PowerShell injection?
 
 **Answer:**
 
@@ -1278,7 +1133,7 @@ Monitor for:
 
 ---
 
-### Q5: What Sysmon event ID is used to detect credential dumping?
+### Q4: What Sysmon event ID is used to detect credential dumping?
 
 **Answer:** Sysmon Event ID 10 - ProcessAccess
 
@@ -1286,7 +1141,7 @@ This event logs when one process accesses another, particularly important for de
 
 ---
 
-### Q6: What are the indicators of credential dumping via LSASS access?
+### Q5: What are the indicators of credential dumping via LSASS access?
 
 **Answer:**
 - Sysmon Event 10 showing access to lsass.exe
@@ -1295,7 +1150,7 @@ This event logs when one process accesses another, particularly important for de
 
 ---
 
-### Q7: What is the difference between managed and unmanaged code?
+### Q6: What is the difference between managed and unmanaged code?
 
 **Answer:**
 
@@ -1304,7 +1159,7 @@ This event logs when one process accesses another, particularly important for de
 
 ---
 
-### Q8: How do you configure Sysmon?
+### Q7: How do you configure Sysmon?
 
 **Answer:**
 
@@ -1318,11 +1173,42 @@ sysmon.exe -c config.xml
 
 ---
 
-### Q9: What Windows Event ID shows when the security log is cleared?
+### Q8: What Windows Event ID shows when the security log is cleared?
 
 **Answer:** Event ID 1102 - The audit log was cleared
 
 This is a critical indicator - attackers often clear logs to hide their tracks.
+
+---
+
+### Q9: How do you detect lateral movement via RDP in event logs?
+
+**Answer:**
+
+Look for:
+- Event 4624 with LogonType=10 (RemoteInteractive)
+- Source Network Address from external IP
+- Service accounts doing RDP (should never happen)
+
+---
+
+### Q10: What is ETW and how does it differ from traditional Windows Event Logs?
+
+**Answer:**
+
+ETW (Event Tracing for Windows) is a high-performance, real-time tracing facility built into Windows. Unlike traditional event logs, ETW provides:
+- 1,000+ built-in providers
+- Kernel-level visibility
+- Real-time event capture
+- Highly customizable filtering
+
+---
+
+### Q11: What is the purpose of the "-ets" parameter in logman?
+
+**Answer:**
+
+The `-ets` parameter tells Logman to query Event Tracing Sessions directly. Without it, Logman will not identify the ETW sessions running on the system.
 
 ---
 
