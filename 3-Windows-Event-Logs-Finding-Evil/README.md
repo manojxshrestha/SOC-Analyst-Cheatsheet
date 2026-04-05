@@ -38,8 +38,9 @@ This module covers **Windows Event Logs & Sysmon** - the primary data sources fo
 1. [Windows Event Logging Basics](#1-windows-event-logging-basics)
 2. [Analyzing Evil With Sysmon & Event Logs](#2-analyzing-evil-with-sysmon--event-logs)
 3. [Event Tracing for Windows (ETW)](#3-event-tracing-for-windows-etw)
-4. [Interview Questions](#4-interview-questions)
-5. [Additional Resources](#5-additional-resources)
+4. [Tapping Into ETW](#4-tapping-into-etw)
+5. [Interview Questions](#5-interview-questions)
+6. [Additional Resources](#6-additional-resources)
 
 ---
 
@@ -430,7 +431,7 @@ Filter for:
 
 ---
 
-## 4. Interview Questions
+## 5. Interview Questions
 
 ### Q1: What is Sysmon and why is it important for security monitoring?
 
@@ -1033,16 +1034,25 @@ ETW Explorer window showing search results for 'PowerShell' with two providers l
 
 
 
-Windows Event Logs & Finding Evil
+---
 
-Section 4 / 6
-Go to Questions
-Tapping Into ETW
-Detection Example 1: Detecting Strange Parent-Child Relationships
+## 4. Tapping Into ETW
 
-Abnormal parent-child relationships among processes can be indicative of malicious activities. In standard Windows environments, certain processes never call or spawn others. For example, it is highly unlikely to see "calc.exe" spawning "cmd.exe" in a normal Windows environment. Understanding these typical parent-child relationships can assist in detecting anomalies. Samir Bousseaden has shared an insightful mind map introducing common parent-child relationships, which can be referenced here.
+> 📌 **WHY THIS MATTERS**: Sysmon can be bypassed! ETW provides deeper visibility that can't be spoofed easily.
 
-By utilizing Process Hacker, we can explore parent-child relationships within Windows. Sorting the processes by dropdowns in the Processes view reveals a hierarchical representation of the relationships.
+In this section, we'll explore how ETW can detect attacks that evade Sysmon.
+
+### Detection Example 1: Detecting Strange Parent-Child Relationships
+
+> 🔴 **KEY CONCEPT**: Abnormal parent-child process relationships are strong indicators of malicious activity!
+
+**Normal behavior**: Certain processes NEVER spawn others. For example:
+- `calc.exe` should never spawn `cmd.exe`
+- `spoolsv.exe` should only spawn `conhost.exe`, not `whoami.exe`
+
+> 📌 **REFERENCE**: Check [Samir Bousseaden's mind map](https://twitter.com/sbousseaden) for common parent-child relationships!
+
+By utilizing **Process Hacker**, we can explore parent-child relationships within Windows.
 
 <img width="1000" height="936" alt="image" src="https://github.com/user-attachments/assets/163ae53d-45e0-46cc-b184-47a44585244d" />
 
@@ -1052,155 +1062,99 @@ Analyzing these relationships in standard and custom environments enables us to 
 
 <img width="622" height="86" alt="image" src="https://github.com/user-attachments/assets/71c36933-9c2b-42c0-9d09-38d37f4a87b4" />
 
-
 Process list showing spoolsv.exe with PID 2792 and conhost.exe with PID 648.
 
-To showcase a strange parent-child relationship, where "cmd.exe" appears to be created by "spoolsv.exe" with no accompanying arguments, we will utilize an attacking technique called Parent PID Spoofing. Parent PID Spoofing can be executed through the psgetsystem project in the following manner.
+### Parent PID Spoofing Attack
 
-        powershell-session
+> ⚠️ **ATTACK TECHNIQUE**: Attackers use **Parent PID (PPID) Spoofing** to hide malicious processes!
+
+To showcase a strange parent-child relationship, where "cmd.exe" appears to be created by "spoolsv.exe" with no accompanying arguments, we will utilize an attacking technique called **Parent PID Spoofing**.
+
+```powershell
 PS C:\Tools\psgetsystem> powershell -ep bypass
 PS C:\Tools\psgetsystem> Import-Module .\psgetsys.ps1 
 PS C:\Tools\psgetsystem> [MyProcess]::CreateProcessFromParent([Process ID of spoolsv.exe],"C:\Windows\System32\cmd.exe","")
+```
 
+> 🔴 **DETECTION BYPASS**: Due to the parent PID spoofing technique we employed, **Sysmon Event 1 incorrectly displays spoolsv.exe as the parent of cmd.exe**. However, it was actually powershell.exe that created cmd.exe!
 
-<img width="2566" height="1574" alt="image" src="https://github.com/user-attachments/assets/42fac4a8-0e5c-4f7a-8ffe-7b3742014c91" />
+### ETW Detection: Microsoft-Windows-Kernel-Process
 
-Desktop showing Process Hacker with running processes, Event Viewer with Sysmon logs, and PowerShell executing a command.
+> 📌 **SOLUTION**: Use ETW to get accurate parent process info!
 
-Due to the parent PID spoofing technique we employed, Sysmon Event 1 incorrectly displays spoolsv.exe as the parent of cmd.exe. However, it was actually powershell.exe that created cmd.exe.
+```cmd
+# Collect from Kernel-Process provider
+SilkETW.exe -t user -pn Microsoft-Windows-Kernel-Process -ot file -p C:\windows\temp\etw.json
+```
 
-As we have previously discussed, although Sysmon and event logs provide valuable telemetry for hunting and creating alert rules, they are not the only sources of information. Let's begin by collecting data from the Microsoft-Windows-Kernel-Process provider using SilkETW (the provider can be identified using logman as we described previously, logman.exe query providers | findstr "Process"). After that, we can proceed to simulate the attack again to assess whether ETW can provide us with more accurate information regarding the execution of cmd.exe.
+The ETW data correctly shows **powershell.exe** as the real parent - not spoofed like Sysmon!
 
-        cmd-session
-c:\Tools\SilkETW_SilkService_v8\v8\SilkETW>SilkETW.exe -t user -pn Microsoft-Windows-Kernel-Process -ot file -p C:\windows\temp\etw.json
+> 🔑 **KEY TAKEAWAY**: ETW's kernel-level visibility cannot be easily spoofed by user-mode techniques like PPID spoofing!
 
-<img width="2581" height="1425" alt="image" src="https://github.com/user-attachments/assets/f402bd86-49fd-4167-a071-8cead33acae8" />
+---
 
-Desktop showing Process Hacker with running processes, PowerShell executing commands, and Command Prompt running SilkETW for event tracing.
+### Detection Example 2: Detecting Malicious .NET Assembly Loading
 
-The etw.json file (that includes data from the Microsoft-Windows-Kernel-Process provider) seems to contain information about powershell.exe being the one who created cmd.exe.
+> 📌 **CONCEPT**: "Bring Your Own Land" (BYOL) - attackers now use custom .NET assemblies instead of native tools!
 
-<img width="3835" height="1757" alt="image" src="https://github.com/user-attachments/assets/a44eed41-0a92-440d-9fbc-d74f88cf467c" />
+**Why BYOL is effective:**
+1. Every Windows system has .NET pre-installed
+2. .NET assemblies can be loaded directly into memory (no disk artifacts)
+3. Rich libraries for HTTP, crypto, IPC make attack tools powerful
+4. Bypasses file-based detection
 
-Desktop showing Process Hacker with running processes, PowerShell executing commands, and Notepad displaying process details with a search for PID 2508.
+**Example**: Cobalt Strike's `execute-assembly` command executes .NET assemblies in memory!
 
-It should be noted that SilkETW event logs can be ingested and viewed by Windows Event Viewer through SilkService to provide us with deeper and more extensive visibility into the actions performed on a system.
-Detection Example 2: Detecting Malicious .NET Assembly Loading
+### Detecting .NET Assembly Loading
 
-Traditionally, adversaries employed a strategy known as "Living off the Land" (LotL), exploiting legitimate system tools, such as PowerShell, to carry out their malicious operations. This approach reduces the risk of detection since it involves the use of tools that are native to the system, and therefore less likely to raise suspicion.
+> 🔴 **KEY IOCs**: Look for loading of **clr.dll** and **mscoree.dll** in unusual processes!
 
-However, the cybersecurity community has adapted and developed countermeasures against this strategy.
-
-Responding to these defensive advancements, attackers have developed a new approach that Mandiant labels as "Bring Your Own Land" (BYOL). Instead of relying on the tools already present on a victim's system, threat actors and penetration testers emulating these tactics now employ .NET assemblies executed entirely in memory. This involves creating custom-built tools using languages like C#, rendering them independent of the pre-existing tools on the target system. The "Bring Your Own Land" lands is quite effective for the following reasons:
-
-    Each Windows system comes equipped with a certain version of .NET pre-installed by default.
-    A salient feature of .NET is its managed nature, alleviating the need for programmers to manually handle memory management. This attribute is part of the framework's managed code execution process, where the Common Language Runtime (CLR) takes responsibility for key system-level operations such as garbage collection, eliminating memory leaks and ensuring more efficient resource utilization.
-    One of the intriguing advantages of using .NET assemblies is their ability to be loaded directly into memory. This means that an executable or DLL does not need to be written physically to the disk - instead, it is executed directly in memory. This behavior minimizes the artifacts left behind on the system and can help bypass some forms of detection that rely on inspecting files written to disk.
-    Microsoft has integrated a wide range of libraries into the .NET framework to address numerous common programming challenges. These libraries include functionalities for establishing HTTP connections, implementing cryptographic operations, and enabling inter-process communication (IPC), such as named pipes. These pre-built tools streamline the development process, reduce the likelihood of errors, and make it easier to build robust and efficient applications. Furthermore, for a threat actor, these rich features provide a toolkit for creating more sophisticated and covert attack methods.
-
-A powerful illustration of this BYOL strategy is the "execute-assembly" command implemented in CobaltStrike, a widely-used software platform for Adversary Simulations and Red Team Operations. CobaltStrike's 'execute-assembly' command allows the user to execute .NET assemblies directly from memory, making it an ideal tool for implementing a BYOL strategy.
-
-In a manner akin to how we detected the execution of unmanaged PowerShell scripts through the observation of anomalous clr.dll and clrjit.dll loading activity in processes that ordinarily wouldn't require them, we can employ a similar approach to identify malicious .NET assembly loading. This is achieved by scrutinizing the activity related to the loading of .NET-associated DLLs, specifically clr.dll and mscoree.dll.
-
-Monitoring the loading of such libraries can help reveal attempts to execute .NET assemblies in unusual or unexpected contexts, which can be a sign of malicious activity. This type of DLL loading behavior can often be detected by leveraging Sysmon's Event ID 7, which corresponds to "Image Loaded" events.
-
-For demonstrative purposes, let's emulate a malicious .NET assembly load by executing a precompiled version of Seatbelt that resides on disk. Seatbelt is a well-known .NET assembly, often employed by adversaries who load and execute it in memory to gain situational awareness on a compromised system.
-
-        powershell-session
+```powershell
+# Execute Seatbelt (legitimate but used by attackers)
 PS C:\Tools\GhostPack Compiled Binaries>.\Seatbelt.exe TokenPrivileges
+```
 
-                        %&&@@@&&
-                        &&&&&&&%%%,                       #&&@@@@@@%%%%%%###############%
-                        &%&   %&%%                        &////(((&%%%%%#%################//((((###%%%%%%%%%%%%%%%
-%%%%%%%%%%%######%%%#%%####%  &%%**#                      @////(((&%%%%%%######################(((((((((((((((((((
-#%#%%%%%%%#######%#%%#######  %&%,,,,,,,,,,,,,,,,         @////(((&%%%%%#%#####################(((((((((((((((((((
-#%#%%%%%%#####%%#%#%%#######  %%%,,,,,,  ,,.   ,,         @////(((&%%%%%%%######################(#(((#(#((((((((((
-#####%%%####################  &%%......  ...   ..         @////(((&%%%%%%%###############%######((#(#(####((((((((
-#######%##########%#########  %%%......  ...   ..         @////(((&%%%%%#########################(#(#######((#####
-###%##%%####################  &%%...............          @////(((&%%%%%%%%##############%#######(#########((#####
-#####%######################  %%%..                       @////(((&%%%%%%%################
-                        &%&   %%%%%      Seatbelt         %////(((&%%%%%%%%#############*
-                        &%%&&&%%%%%        v1.2.1         ,(((&%%%%%%%%%%%%%%%%%,
-                         #%%%%##,
-
-
-====== TokenPrivileges ======
-
-Current Token's Privileges
-
-                     SeIncreaseQuotaPrivilege:  DISABLED
-                          SeSecurityPrivilege:  DISABLED
-                     SeTakeOwnershipPrivilege:  DISABLED
-                        SeLoadDriverPrivilege:  DISABLED
-                     SeSystemProfilePrivilege:  DISABLED
-                        SeSystemtimePrivilege:  DISABLED
-              SeProfileSingleProcessPrivilege:  DISABLED
-              SeIncreaseBasePriorityPrivilege:  DISABLED
-                    SeCreatePagefilePrivilege:  DISABLED
-                            SeBackupPrivilege:  DISABLED
-                           SeRestorePrivilege:  DISABLED
-                          SeShutdownPrivilege:  DISABLED
-                             SeDebugPrivilege:  SE_PRIVILEGE_ENABLED
-                 SeSystemEnvironmentPrivilege:  DISABLED
-                      SeChangeNotifyPrivilege:  SE_PRIVILEGE_ENABLED_BY_DEFAULT, SE_PRIVILEGE_ENABLED
-                    SeRemoteShutdownPrivilege:  DISABLED
-                            SeUndockPrivilege:  DISABLED
-                      SeManageVolumePrivilege:  DISABLED
-                       SeImpersonatePrivilege:  SE_PRIVILEGE_ENABLED_BY_DEFAULT, SE_PRIVILEGE_ENABLED
-                      SeCreateGlobalPrivilege:  SE_PRIVILEGE_ENABLED_BY_DEFAULT, SE_PRIVILEGE_ENABLED
-                SeIncreaseWorkingSetPrivilege:  DISABLED
-                          SeTimeZonePrivilege:  DISABLED
-                SeCreateSymbolicLinkPrivilege:  DISABLED
-    SeDelegateSessionUserImpersonatePrivilege:  DISABLED
-
-Assuming we have Sysmon configured appropriately to log image loading events (Event ID 7), executing 'Seatbelt.exe' would trigger the loading of key .NET-related DLLs such as 'clr.dll' and 'mscoree.dll'. Sysmon, keenly observing system activities, will log these DLL load operations as Event ID 7 records.
+This triggers Sysmon Event ID 7 (Image Load):
 
 <img width="1064" height="813" alt="image" src="https://github.com/user-attachments/assets/319077d3-e2b9-4ece-a97d-5bb8857bcf92" />
-<img width="1064" height="782" alt="image" src="https://github.com/user-attachments/assets/3b27a48c-6102-41e4-b3d1-d54fcaee5f28" />
 
-Sysmon Event 7 details showing image load information for Seatbelt.exe, including process ID, file path, and signature status.Sysmon Event 7 showing image load details for Seatbelt.exe, including process ID, file path, and signature status as valid.
+> 📌 **LIMITATION**: Sysmon shows DLL loading but NOT the actual assembly content/behavior!
 
-As already mentioned, relying solely on Sysmon Event ID 7 for detecting attacks can be challenging due to the large volume of events it generates (especially if not configured properly). Additionally, while it informs us about the DLLs being loaded, it doesn't provide granular details about the actual content of the loaded .NET assembly.
+### ETW Detection: Microsoft-Windows-DotNETRuntime
 
-To augment our visibility and gain deeper insights into the actual assembly being loaded, we can again leverage Event Tracing for Windows (ETW) and specifically the Microsoft-Windows-DotNETRuntime provider.
+> 🔑 **DEEPER VISIBILITY**: ETW can reveal what's actually happening inside the .NET assembly!
 
-Let's use SilkETW to collect data from the Microsoft-Windows-DotNETRuntime provider. After that, we can proceed to simulate the attack again to evaluate whether ETW can furnish us with more detailed and actionable intelligence regarding the loading and execution of the 'Seatbelt' .NET assembly.
+```cmd
+# Collect .NET Runtime events (keywords: JitKeyword, InteropKeyword, LoaderKeyword, NGenKeyword)
+SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x2038 -ot file -p C:\windows\temp\etw.json
+```
 
-        cmd-session
-c:\Tools\SilkETW_SilkService_v8\v8\SilkETW>SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x2038 -ot file -p C:\windows\temp\etw.json
+> 📌 **KEYWORDS TO MONITOR**:
+| Keyword | Purpose |
+|---------|---------|
+| **JitKeyword** | JIT compilation - reveals methods being compiled at runtime |
+| **InteropKeyword** | Managed/Unmanaged code interactions |
+| **LoaderKeyword** | Assembly loading process details |
+| **NGenKeyword** | Native Image Generator events - detects precompiled assemblies |
 
-<img width="3065" height="1729" alt="image" src="https://github.com/user-attachments/assets/b17264e2-014b-4f60-8bc5-7109a71c5ce6" />
+The ETW data reveals:
+- Assembly name being loaded
+- Method names being executed
+- Internal behavior that Sysmon cannot see
 
-The etw.json file (that includes data from the Microsoft-Windows-DotNETRuntime provider) seems to contain a wealth of information about the loaded assembly, including method names.
+> 💡 **TAKEAWAY**: ETW provides **execution-level visibility** beyond just DLL loading!
 
-Desktop showing Windows Explorer with Temp folder, Command Prompt running SilkETW, PowerShell executing Seatbelt.exe, and Notepad displaying JSON data.
+### Summary: Sysmon vs ETW
 
-It's worth noting that in our current SilkETW configuration, we're not capturing the entirety of events from the "Microsoft-Windows-DotNETRuntime" provider. Instead, we're selectively targeting a specific subset (indicated by 0x2038), which includes: JitKeyword, InteropKeyword, LoaderKeyword, and NGenKeyword.
+| Aspect | Sysmon | ETW |
+|--------|--------|-----|
+| **Parent Process** | Can be spoofed (PPID) | Accurate (kernel-level) |
+| **.NET Assembly** | Shows DLL loading only | Shows assembly behavior |
+| **Configuration** | XML-based config | Provider/keyword filtering |
+| **Performance** | Moderate | Lightweight |
+| **Visibility** | User-mode | Kernel-level |
 
-    The JitKeyword relates to the Just-In-Time (JIT) compilation events, providing information on the methods being compiled at runtime. This could be particularly useful for understanding the execution flow of the .NET assembly.
-    The InteropKeyword refers to Interoperability events, which come into play when managed code interacts with unmanaged code. These events could provide insights into potential interactions with native APIs or other unmanaged components.
-    LoaderKeyword events provide details on the assembly loading process within the .NET runtime, which can be vital for understanding what .NET assemblies are being loaded and potentially executed.
-    Lastly, the NGenKeyword corresponds to Native Image Generator (NGen) events, which are concerned with the creation and usage of precompiled .NET assemblies. Monitoring these could help detect scenarios where attackers use precompiled .NET assemblies to evade JIT-related detections.
-
-This blog post provides valuable perspectives on SilkETW as well as the identification of malware based on .NET.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+---
 
 ## 5. Interview Questions
 
@@ -1316,7 +1270,7 @@ The `-ets` parameter tells Logman to query Event Tracing Sessions directly. With
 
 ---
 
-## 5. Additional Resources
+## 6. Additional Resources
 
 ### Tools
 
