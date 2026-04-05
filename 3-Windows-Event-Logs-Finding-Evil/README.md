@@ -430,7 +430,7 @@ Filter for:
 
 ---
 
-## 3. Interview Questions
+## 4. Interview Questions
 
 ### Q1: What is Sysmon and why is it important for security monitoring?
 
@@ -546,7 +546,7 @@ Look for:
 
 ---
 
-## 4. Additional Resources
+## 6. Additional Resources
 
 ### Tools
 
@@ -614,12 +614,9 @@ Look for:
 
 
 
-HTB Academy Logo
-Windows Event Logs & Finding Evil
-Windows Event Logs & Finding Evil 100%
+---
 
-Section 3 / 6
-Event Tracing for Windows (ETW)
+## 3. Event Tracing for Windows (ETW)
 
 > 📌 **WHY ETW MATTERS**: ETW provides **high-performance, real-time telemetry** that goes far beyond traditional Windows Event Logs. Essential for modern blue team operations!
 
@@ -1009,10 +1006,146 @@ ETW Explorer window showing search results for 'PowerShell' with two providers l
 
 > 💡 **NEXT STEP**: In the next section, we will utilize ETW to investigate attacks that may evade detection if we rely solely on Sysmon!
 
+---
+
+## 5. Interview Questions
+
+**Answer:**
+
+| Feature | Windows 4688 | Sysmon Event 1 |
+|---------|-------------|----------------|
+| Command Line | May be empty | Always captured |
+| Parent Command Line | Not captured | Captured |
+| Hash | Not captured | SHA256, MD5, IMPHASH |
+| Configurable | Limited | Extensive |
+
+---
+
+### Q3: How do you detect DLL hijacking using Sysmon?
+
+**Answer:**
+
+1. Enable Sysmon Event ID 7 (Image Load)
+2. Look for DLLs loaded from unexpected locations
+3. Check for unsigned DLLs loading into legitimate processes
+4. Monitor for processes loading DLLs from user-writable directories
+
+---
+
+### Q4: How can you detect unmanaged PowerShell injection?
+
+**Answer:**
+
+Monitor for:
+- **clr.dll** loading in processes that shouldn't run .NET
+- **clrjit.dll** in unusual processes
+- Any non-PowerShell processes becoming "managed" (.NET processes)
+
+---
+
+### Q5: What Sysmon event ID is used to detect credential dumping?
+
+**Answer:** Sysmon Event ID 10 - ProcessAccess
+
+This event logs when one process accesses another, particularly important for detecting attempts to access lsass.exe (where credentials are stored).
+
+---
+
+### Q6: What are the indicators of credential dumping via LSASS access?
+
+**Answer:**
+- Sysmon Event 10 showing access to lsass.exe
+- Source process from unusual location (e.g., Downloads folder)
+- SourceUser different from TargetUser
+
+---
+
+### Q7: What is the difference between managed and unmanaged code?
+
+**Answer:**
+
+- **Managed Code**: Requires .NET Runtime (CLR) to execute - compiled to bytecode (C#, VB.NET)
+- **Unmanaged Code**: Runs directly as native assembly (C, C++)
+
+---
+
+### Q8: How do you configure Sysmon?
+
+**Answer:**
+
+```cmd
+# Install Sysmon
+sysmon.exe -i -accepteula -h md5,sha256,imphash -l -n
+
+# Apply configuration
+sysmon.exe -c config.xml
+```
+
+---
+
+### Q9: What Windows Event ID shows when the security log is cleared?
+
+**Answer:** Event ID 1102 - The audit log was cleared
+
+This is a critical indicator - attackers often clear logs to hide their tracks.
+
+---
+
+### Q10: How do you detect lateral movement via RDP in event logs?
+
+**Answer:**
+
+Look for:
+- Event 4624 with LogonType=10 (RemoteInteractive)
+- Source Network Address from external IP
+- Service accounts doing RDP (should never happen)
+
+---
+
+### Q11: What is ETW and how does it differ from traditional Windows Event Logs?
+
+**Answer:**
+
+ETW (Event Tracing for Windows) is a high-performance, real-time tracing facility built into Windows. Unlike traditional event logs, ETW provides:
+- 1,000+ built-in providers
+- Kernel-level visibility
+- Real-time event capture
+- Highly customizable filtering
+
+---
+
+### Q12: What is the purpose of the "-ets" parameter in logman?
+
+**Answer:**
+
+The `-ets` parameter tells Logman to query Event Tracing Sessions directly. Without it, Logman will not identify the ETW sessions running on the system.
+
+---
+
+## 5. Additional Resources
+
+### Tools
+
+- [Sysinternals Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon)
+- [Swift On Security Sysmon Config](https://github.com/SwiftOnSecurity/sysmon-config)
+- [Olaf Hartong Sysmon Modular](https://github.com/olafhartong/sysmon-modular)
+- [Process Hacker](https://processhacker.sourceforge.io/)
+- [Event Log Explorer](https://eventlogxp.com/)
+- [ETW Explorer](https://github.com/zscore/ETWExplorer)
+
 ### References
 
 - [A Primer on Event Tracing for Windows (ETW)](https://nasbench.medium.com/a-primer-on-event-tracing-for-windows-etw-997725c082bf)
 - [A Beginner's Guide to ETW](https://bmcder.com/blog/a-begginers-all-inclusive-guide-to-etw)
+- [Microsoft Security Event ID Reference](https://learn.microsoft.com/en-us/windows/security/threat-protection/audit/security-auditing)
+- [Sysmon Event IDs](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
+- [MITRE ATT&CK - T1059.001 PowerShell](https://attack.mitre.org/techniques/T1059/001/)
+- [DLL Hijacking Techniques](https://blog.checkpoint.com/)
+
+---
+
+*Module 3/15 - Windows Event Logs & Finding Evil*
+*Built with research + HTB Academy materials*
 
 
 
