@@ -1200,6 +1200,10 @@ Get-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -FilterXPath "*[Eve
 
 > 💡 **TIP**: Image and CommandLine can be identified by browsing the XML representation of any Sysmon event with ID 1 through Event Viewer.
 
+<img width="1543" height="693" alt="image" src="https://github.com/user-attachments/assets/bb33af48-36d5-4f07-aa14-1faa8858b12d" />
+
+Sysmon Event 1 showing process creation details for SecurityHealthHost.exe, including process ID, file path, and command line.
+
 **Find suspicious IP connections:**
 
 ```powershell
@@ -1221,6 +1225,10 @@ Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; 
 ```
 
 > 💡 **TIP**: `Properties[21]` corresponds to the ParentCommandLine field in Sysmon Event ID 1.
+
+<img width="1242" height="907" alt="image" src="https://github.com/user-attachments/assets/5010ed3b-c2f9-4de6-914d-d8819a67906e" />
+
+Sysmon Event 1 showing process creation details for mmc.exe, including process ID, file path, and command line, with high integrity level.
 
 ---
 
