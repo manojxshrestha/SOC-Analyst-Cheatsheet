@@ -7,6 +7,22 @@
 
 This module covers the **foundations of SIEM and SOC operations**. You'll learn how SIEM solutions work, the Elastic Stack architecture, SOC organizational structures, MITRE ATT&CK framework applications, and how to develop effective SIEM use cases.
 
+```mermaid
+flowchart TB
+    subgraph "What You'll Learn"
+        A["SIEM Fundamentals"] --> B["Elastic Stack"]
+        B --> C["SOC Structure"]
+        C --> D["MITRE ATT&CK"]
+        D --> E["Use Case Development"]
+    end
+    
+    subgraph "Skills Gained"
+        F["KQL Query Writing"] --> G["SIEM Architecture"]
+        G --> H["Alert Triaging"]
+        H --> I["Use Case Creation"]
+    end
+```
+
 ### Key Takeaways
 
 | Concept | Description |
@@ -17,10 +33,23 @@ This module covers the **foundations of SIEM and SOC operations**. You'll learn 
 | **Use Case** | Detection scenario that triggers alerts based on correlated events |
 | **KQL** | Kibana Query Language |
 
+### Prerequisites
+
+- Basic understanding of networking (TCP/IP, ports, protocols)
+- Familiarity with operating systems (Windows, Linux)
+- Basic knowledge of security concepts
+
+### Module Duration
+
+- **Theory**: 2-3 hours
+- **Hands-on Practice**: 3-4 hours
+- **Total**: ~6-7 hours
+
 ---
 
 ## Table of Contents
 
+0. [Overview](#0-overview)
 1. [SIEM Definition & Fundamentals](#1-siem-definition--fundamentals)
 2. [Introduction To The Elastic Stack](#2-introduction-to-the-elastic-stack)
 3. [SOC Definition & Fundamentals](#3-soc-definition--fundamentals)
@@ -308,17 +337,6 @@ flowchart LR
 ```mermaid
 flowchart TB
     Requirements --> Data_Points --> Log_Validation --> Design --> Implementation --> Documentation --> Onboarding --> Testing --> Fine_Tuning
-```
-    
-    style A fill:#e3f2fd,stroke:#999
-    style B fill:#e3f2fd,stroke:#999
-    style C fill:#e3f2fd,stroke:#999
-    style D fill:#fff3e0,stroke:#999
-    style E fill:#fff3e0,stroke:#999
-    style F fill:#e8f5e9,stroke:#999
-    style G fill:#e8f5e9,stroke:#999
-    style H fill:#e8f5e9,stroke:#999
-    style I fill:#fce4ec,stroke:#999
 ```
 
 ### Steps to Build SIEM Use Cases
