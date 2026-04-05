@@ -8,25 +8,15 @@
 This module covers the **foundational concepts of incident handling** - the structured approach SOC analysts use to respond to security events and incidents. You'll learn how to distinguish between events and incidents, understand various attack frameworks, and master the NIST incident response lifecycle.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart TB
-    subgraph "🎯 What You'll Learn"
-        A["📡 Events vs Incidents<br/>What's the difference?"] --> B["🔗 Cyber Kill Chain<br/>Attack progression stages"]
-        B --> C["🎯 MITRE ATT&CK<br/>Tactics & techniques"]
-        C --> D["📊 Pyramid of Pain<br/>IOC hierarchy"]
-        D --> E["🔄 NIST IR Lifecycle<br/>Preparation → Recovery"]
-    end
+    Events_vs_Incidents --> Cyber_Kill_Chain
+    Cyber_Kill_Chain --> MITRE_ATTCK
+    MITRE_ATTCK --> Pyramid_of_Pain
+    Pyramid_of_Pain --> NIST_IR_Lifecycle
     
-    subgraph "💼 Real-World Skills"
-        F["✅ Triage & assess incidents"] --> G["📝 Document incidents"]
-        G --> H["🔍 Apply detection frameworks"]
-        H --> I["📋 Follow IR playbooks"]
-    end
-    
-    classDef learn fill:#e8f5e9,stroke:#999,stroke-width:2px,color:#333;
-    classDef skill fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C,D,E learn;
-    class F,G,H,I skill;
+    Triage_Assess --> Document_Incidents
+    Document_Incidents --> Apply_Frameworks
+    Apply_Frameworks --> IR_Playbooks
 ```
 
 ### Key Takeaways
@@ -77,21 +67,9 @@ flowchart TB
 ### Event vs Incident
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999', 'edgeLabelBackground':'#eee', 'clusterBkg': '#eee'}}}%%
-graph LR
-    subgraph "📌 EVENT (Neutral)"
-        A1(User sends email) --> A2(Mouse click)
-        A2 --> A3(Firewall allows connection)
-    end
-    subgraph "⚠️ INCIDENT (Negative)"
-        B1(Data theft) --> B2(System crash)
-        B2 --> B3(Unauthorized access)
-        B3 --> B4(Malware infection)
-    end
-    classDef neutral fill:#e3f2fd,stroke:#999,stroke-width:3px,color:#333;
-    classDef incident fill:#ffebee,stroke:#999,stroke-width:3px,color:#333;
-    class A1,A2,A3 neutral;
-    class B1,B2,B3,B4 incident;
+flowchart LR
+    User_sends_email --> Mouse_click --> Firewall_allows_connection
+    Data_theft --> System_crash --> Unauthorized_access --> Malware_infection
 ```
 
 | Term | Definition | Example |
@@ -127,16 +105,11 @@ An event with **clear intent to cause harm** performed against a computer system
 ### Incident Manager Role
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    A(🎯 Incident Manager) --> B[SOC Manager / CISO / CIO]
-    A --> C[Authority to direct business units]
-    A --> D[Single point of communication]
-    A --> E[Track activities & status]
-    classDef manager fill:#fff3e0,stroke:#fff,stroke-width:3px,color:#333;
-    classDef role fill:#ffe0b2,stroke:#fff,stroke-width:2px,rx:5,ry:5,color:#333;
-    class A manager;
-    class B,C,D,E role;
+flowchart TD
+    Incident_Manager --> SOC_Manager
+    Incident_Manager --> Authority
+    Incident_Manager --> Communication_Point
+    Incident_Manager --> Track_Activities
 ```
 
 ---
@@ -193,17 +166,8 @@ graph TD
 ### 7 Stages Overview
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph LR
-    1(🔍 Recon) --> 2(⚔️ Weaponize)
-    2 --> 3(📦 Delivery)
-    3 --> 4(💥 Exploitation)
-    4 --> 5(🔧 Installation)
-    5 --> 6(🎛️ C2)
-    6 --> 7(🎯 Actions)
-    
-    classDef stage fill:#fff,stroke:#fff,stroke-width:2px,rx:8,ry:8,color:#333;
-    class 1,2,3,4,5,6,7 stage;
+flowchart LR
+    Recon --> Weaponize --> Delivery --> Exploitation --> Installation --> C2 --> Actions
 ```
 
 ### Stage Details
@@ -477,17 +441,13 @@ graph TD
 ### The 4 Stages
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    P(📋 Preparation<br/>~40%) --> D(🔍 Detection & Analysis<br/>~40%)
-    D --> C(🛡️ Containment, Eradication<br/>& Recovery<br/>~15%)
-    C --> PI(📊 Post-Incident<br/>~5%)
+flowchart TD
+    P[Preparation ~40%] --> D[Detection & Analysis ~40%]
+    D --> C[Containment, Eradication & Recovery ~15%]
+    C --> PI[Post-Incident ~5%]
     
-    PI -.->|🔄 Feedback| P
-    PI -.->|📈 Improvement| D
-    
-    classDef nist fill:#fff,stroke:#fff,stroke-width:2px,rx:8,ry:8,color:#333;
-    class P,D,C,PI nist;
+    PI -.->|Feedback| P
+    PI -.->|Improvement| D
 ```
 
 ### Key Concept
@@ -561,29 +521,19 @@ graph TD
 ### Jump Bag Essentials
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    subgraph "💻 Hardware"
-        H1(Forensic Laptop)
-        H2(Write Blockers)
-        H3(Hard Drives)
-        H4(Network Cables)
-        H5(USB Drives)
-    end
+flowchart TD
+    H1[Forensic Laptop] --> Hardware[Hardware]
+    H2[Write Blockers] --> Hardware
+    H3[Hard Drives] --> Hardware
+    H4[Network Cables] --> Hardware
+    H5[USB Drives] --> Hardware
     
-    subgraph "🛠️ Software"
-        S1(FTK Imager - Disk Imaging)
-        S2(WinPmem - Memory Capture)
-        S3(Wireshark - Network Analysis)
-        S4(Autopsy - File Analysis)
-        S5(Volatility - Memory Forensics)
-        S6(TheHive - Case Management)
-    end
-    
-    classDef hardware fill:#e3f2fd,stroke:#fff,stroke-width:2px,color:#333,rx:5;
-    classDef software fill:#e8eaf6,stroke:#fff,stroke-width:2px,color:#333,rx:5;
-    class H1,H2,H3,H4,H5 hardware;
-    class S1,S2,S3,S4,S5,S6 software;
+    S1[FTK Imager] --> Software[Software]
+    S2[WinPmem] --> Software
+    S3[Wireshark] --> Software
+    S4[Autopsy] --> Software
+    S5[Volatility] --> Software
+    S6[TheHive] --> Software
 ```
 
 ### Protective Measures
@@ -607,35 +557,23 @@ graph TD
 ### Detection Sources
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    S1(👤 Employee Reports) --> Detection(🔔 Detection)
-    S2(🛠️ Tool Alerts<br/>EDR/IDS/Firewall/SIEM) --> Detection
-    S3(🏴‍☠️ Threat Hunting) --> Detection
-    S4(📢 Third-Party) --> Detection
+flowchart TD
+    S1[Employee Reports] --> Detection[Detection]
+    S2[Tool Alerts EDR/IDS/Firewall/SIEM] --> Detection
+    S3[Threat Hunting] --> Detection
+    S4[Third-Party] --> Detection
     
-    Detection --> A(📊 Analyze & Triage)
-    
-    classDef source fill:#e3f2fd,stroke:#fff,stroke-width:2px,rx:5,color:#333;
-    classDef detect fill:#fff3e0,stroke:#fff,stroke-width:3px,rx:8,color:#333;
-    classDef analyze fill:#e0f2f1,stroke:#fff,stroke-width:2px,rx:5,color:#333;
-    class S1,S2,S3,S4 source;
-    class Detection detect;
-    class A analyze;
+    Detection --> A[Analyze & Triage]
 ```
 
 ### Detection Layers (Defense in Depth)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    Internet(🌐 Internet) --> Perimeter(🔥 Perimeter<br/>Firewall<br/>IDS/IPS<br/>WAF<br/>DMZ)
-    Perimeter --> Internal(🏢 Internal Network<br/>HIDS<br/>Local Firewall<br/>Segmentation)
-    Internal --> Endpoint(💻 Endpoint<br/>EDR<br/>Antivirus<br/>Sysmon<br/>Host Firewall)
-    Endpoint --> Application(📱 Application<br/>App Logs<br/>Service Logs<br/>DB Logs)
-    
-    classDef layer fill:#fff,stroke:#fff,stroke-width:2px,rx:8,ry:8,color:#333;
-    class Internet,Perimeter,Internal,Endpoint,Application layer;
+flowchart TD
+    Internet[Internet] --> Perimeter[Perimeter]
+    Perimeter --> Internal[Internal Network]
+    Internal --> Endpoint[Endpoint]
+    Endpoint --> Application[Application]
 ```
 
 ### Initial Investigation Questions
@@ -652,7 +590,6 @@ graph TD
 ### Building Incident Timeline
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart LR
     A[Date] --> B[Time]
     B --> C[Hostname]
@@ -663,11 +600,6 @@ flowchart LR
     G --> H[manage.insightnexus.com]
     H --> I[Login with default credentials]
     I --> J[Web Server Logs]
-    
-    classDef template fill:#e3f2fd,stroke:#999,stroke-width:2px,color:#333;
-    classDef sample fill:#e8eaf6,stroke:#999,stroke-width:2px,color:#333;
-    class A,B,C,D,E template;
-    class F,G,H,I,J sample;
 ```
 
 | Date | Time (UTC) | Hostname | Event Description | Data Source |
@@ -688,50 +620,25 @@ flowchart LR
 ### IOC Creation & Usage
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    subgraph "🔍 IOC Types"
-        IP(🌐 IP Addresses<br/>C2 servers)
-        Hash(🔢 File Hashes<br/>MD5, SHA256)
-        File(📄 Filenames)
-        Domain(🌍 Domain Names)
-        Reg(🔧 Registry Keys)
-        User(👤 User Accounts)
-    end
-    
-    subgraph "📋 IOC Standards"
-        OpenIOC(📝 OpenIOC<br/>Mandiant XML)
-        YARA(🎯 YARA<br/>Pattern Matching)
-        STIX(📦 STIX<br/>JSON Sharing)
-    end
-    
-    IP --> OpenIOC
-    Hash --> YARA
-    File --> STIX
-    Domain --> OpenIOC
-    Reg --> YARA
-    User --> STIX
-    
-    classDef ioc fill:#e3f2fd,stroke:#fff,stroke-width:2px,rx:5,color:#333;
-    classDef std fill:#e0f2f1,stroke:#fff,stroke-width:2px,rx:5,color:#333;
-    class IP,Hash,File,Domain,Reg,User ioc;
-    class OpenIOC,YARA,STIX std;
+flowchart TD
+    IP[IP Addresses C2 servers] --> OpenIOC
+    Hash[File Hashes MD5 SHA256] --> YARA
+    File[Filenames] --> STIX
+    Domain[Domain Names] --> OpenIOC
+    Reg[Registry Keys] --> YARA
+    User[User Accounts] --> STIX
 ```
 
 ### Investigation Cycle
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    A(📥 Initial Data) --> B(🔍 Create IOCs)
-    B --> C(🔎 Search IOCs)
-    C --> D(🎯 Identify New Leads)
-    D --> E(📊 Collect & Analyze)
-    E --> F(📝 Update Timeline)
-    F -.->|🔄 Repeat| B
-    
-    classDef step fill:#fff,stroke:#fff,stroke-width:2px,rx:8,ry:8,color:#333;
-    class A,B,C,D,E,F step;
+flowchart TD
+    A[Initial Data] --> B[Create IOCs]
+    B --> C[Search IOCs]
+    C --> D[Identify New Leads]
+    D --> E[Collect & Analyze]
+    E --> F[Update Timeline]
+    F -.->|Repeat| B
 ```
 
 ### AI in Threat Detection
@@ -751,30 +658,18 @@ graph TD
 ### Containment Strategy
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#fff'}}}%%
-graph TD
-    subgraph "⚡ Short-Term (Minimal Footprint)"
-        ST1(🔀 Isolate VLAN) --> SP(💾 Preserve Evidence)
-        ST2(🔌 Pull Network Cable) --> SP
-        ST3(🎯 Sinkhole C2 DNS) --> SP
-    end
+flowchart TD
+    ST1[Isolate VLAN] --> SP[Preserve Evidence]
+    ST2[Pull Network Cable] --> SP
+    ST3[Sinkhole C2 DNS] --> SP
     
-    subgraph "🔒 Long-Term (Persistent Changes)"
-        LT1(🔑 Change Passwords) --> LP(✅ Persistent Changes)
-        LT2(🛡️ Apply Firewall Rules) --> LP
-        LT3(📡 Deploy HIDS) --> LP
-        LT4(🔧 Apply Patches) --> LP
-    end
+    LT1[Change Passwords] --> LP[Persistent Changes]
+    LT2[Apply Firewall Rules] --> LP
+    LT3[Deploy HIDS] --> LP
+    LT4[Apply Patches] --> LP
     
-    SP --> Containment(🎉 Containment Complete)
+    SP --> Containment[Containment Complete]
     LP --> Containment
-    
-    classDef short fill:#fff3e0,stroke:#fff,stroke-width:2px,color:#333;
-    classDef long fill:#e3f2fd,stroke:#fff,stroke-width:2px,color:#333;
-    classDef complete fill:#e8f5e9,stroke:#fff,stroke-width:3px,rx:10,color:#333;
-    class ST1,ST2,ST3,SP short;
-    class LT1,LT2,LT3,LT4,LP long;
-    class Containment complete;
 ```
 
 ### ⚠️ CRITICAL RULE
@@ -883,17 +778,13 @@ graph LR
 ### Attack Chain
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#fff', 'nodeBorder': '#fff'}}}%%
-graph TD
-    A(🔓 Default Credentials<br/>admin/admin) --> B(🚪 ManageEngine Access)
-    B --> C(🎛️ C2 to 103.112.60.117<br/>HTTPS)
-    C --> D(👑 Domain Admin Created)
-    D --> E(🖥️ RDP to DEV-021<br/>Exposed RDP)
-    E --> F(📦 GPO Deploys MSI<br/>java-update.msi)
-    F --> G(📤 Data Exfiltration<br/>diagnostics_data.zip)
-    
-    classDef attack fill:#fff,stroke:#fff,stroke-width:2px,rx:8,ry:8,color:#333;
-    class A,B,C,D,E,F,G attack;
+flowchart TD
+    A[Default Credentials admin/admin] --> B[ManageEngine Access]
+    B --> C[C2 to 103.112.60.117 HTTPS]
+    C --> D[Domain Admin Created]
+    D --> E[RDP to DEV-021 Exposed RDP]
+    E --> F[GPO Deploys MSI java-update.msi]
+    F --> G[Data Exfiltration diagnostics_data.zip]
 ```
 
 ### Timeline
@@ -1156,18 +1047,11 @@ level: medium
 ### 16.1 Incident Classification & Severity Levels
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
-graph TD
-    P1(🚨 P1 - Critical<br/>Active APT/Ransomware<br/>Data Exfiltration) --> Immediate(⚡ Immediate Response)
-    P2(🔴 P2 - High<br/>Malware/Unauthorized Access) --> OneHour(⏰ < 1 Hour Response)
-    P3(🟡 P3 - Medium<br/>Policy Violation/Suspicious) --> FourHours(⏱️ < 4 Hours Response)
-    P4(🟢 P4 - Low<br/>Failed Logins/Minor Anomalies) --> TwentyFour(📅 < 24 Hours Response)
-    
-    classDef critical fill:#ffebee,stroke:#999,stroke-width:3px,rx:8,color:#333;
-    classDef high fill:#fff3e0,stroke:#999,stroke-width:2px,rx:5,color:#333;
-    classDef medium fill:#fffde7,stroke:#999,stroke-width:2px,rx:5,color:#333;
-    classDef low fill:#e8f5e9,stroke:#999,stroke-width:2px,rx:5,color:#333;
-    class P1,P2,P3,P4 critical,high,medium,low;
+flowchart TD
+    P1[P1 - Critical Active APT/Ransomware Data Exfiltration] --> Immediate[Immediate Response]
+    P2[P2 - High Malware/Unauthorized Access] --> OneHour[< 1 Hour Response]
+    P3[P3 - Medium Policy Violation/Suspicious] --> FourHours[< 4 Hours Response]
+    P4[P4 - Low Failed Logins/Minor Anomalies] --> TwentyFour[< 24 Hours Response]
 ```
 
 | Severity | Response Time | Examples | Resources |
