@@ -803,8 +803,21 @@ This shows keywords, levels, and PIDs:
 
 > 🔧 **TOOL**: Use **ETW Explorer** or **PerfMon** to explore providers visually!
 
-- **Performance Monitor**: Visualize running trace sessions
-- **ETW Explorer**: Browse provider metadata and events
+Using the graphical interface of the Performance Monitor tool, we can visualize various running trace sessions. A detailed overview of a specific trace can be accessed simply by double-clicking on it.
+
+<img width="1473" height="1745" alt="image" src="https://github.com/user-attachments/assets/3eff7a78-b522-4092-a118-4de89edf4a0f" />
+
+Windows desktop showing Command Prompt with performance tracking context details and Performance Monitor app search result.
+
+<img width="1599" height="1121" alt="image" src="https://github.com/user-attachments/assets/b102b1fb-5373-43c6-a32a-ab487683ccc8" />
+
+Performance Monitor window displaying a list of running Event Trace Sessions.
+
+> 📌 **ALTERNATIVE**: ETW Provider metadata can also be viewed through the **EtwExplorer** project.
+
+<img width="1000" height="585" alt="image" src="https://github.com/user-attachments/assets/f9f73d23-52fe-409b-9057-46f59c8a852d" />
+
+ETW Explorer window showing search results for 'PowerShell' with two providers listed, including GUIDs.
 
 ### Useful ETW Providers for Security
 
