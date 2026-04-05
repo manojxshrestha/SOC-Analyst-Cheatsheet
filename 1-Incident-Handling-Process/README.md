@@ -5,7 +5,19 @@
 
 ## 0. Overview
 
-This module covers the **foundational concepts of incident handling** - the structured approach SOC analysts use to respond to security events and incidents.
+This module covers the **foundational concepts of incident handling** - the structured approach SOC analysts use to respond to security events and incidents. You'll learn how to distinguish between events and incidents, understand various attack frameworks, and master the NIST incident response lifecycle.
+
+```mermaid
+flowchart TB
+    Events_vs_Incidents --> Cyber_Kill_Chain
+    Cyber_Kill_Chain --> MITRE_ATTCK
+    MITRE_ATTCK --> Pyramid_of_Pain
+    Pyramid_of_Pain --> NIST_IR_Lifecycle
+    
+    Triage_Assess --> Document_Incidents
+    Document_Incidents --> Apply_Frameworks
+    Apply_Frameworks --> IR_Playbooks
+```
 
 ### Key Takeaways
 
@@ -54,14 +66,10 @@ This module covers the **foundational concepts of incident handling** - the stru
 
 ### Event vs Incident
 
-**Event Flow:**
-```
-User Action → System Response (neutral)
-```
-
-**Incident Flow:**
-```
-Data Theft → System Crash → Unauthorized Access → Malware
+```mermaid
+flowchart LR
+    User_sends_email --> Mouse_click --> Firewall_allows_connection
+    Data_theft --> System_crash --> Unauthorized_access --> Malware_infection
 ```
 
 | Term | Definition | Example |
@@ -96,11 +104,13 @@ An event with **clear intent to cause harm** performed against a computer system
 
 ### Incident Manager Role
 
-**Incident Manager connects to:**
-- SOC Manager / CISO / CIO
-- Authority to direct business units
-- Single point of communication
-- Track activities & status
+```mermaid
+flowchart TD
+    Incident_Manager --> SOC_Manager
+    Incident_Manager --> Authority
+    Incident_Manager --> Communication_Point
+    Incident_Manager --> Track_Activities
+```
 
 ---
 
@@ -155,27 +165,24 @@ An event with **clear intent to cause harm** performed against a computer system
 
 ### 7 Stages Overview
 
-```
-Recon → Weaponize → Delivery → Exploitation → Installation → C2 → Actions
+```mermaid
+flowchart LR
+    Recon --> Weaponize --> Delivery --> Exploitation --> Installation --> C2 --> Actions
 ```
 
 ### Stage Details
 
 #### 1️⃣ Reconnaissance
 
-**Passive Reconnaissance:**
-- LinkedIn, Social Media
-- Job Postings
-- Company Documentation
-- WHOIS, Shodan
-
-**Active Reconnaissance:**
-- Port Scanning
-- Service Enumeration
-- Vulnerability Scanning
-- Network Mapping
-
-All → Target Organization
+```mermaid
+flowchart TD
+    Passive_Recon --> Target
+    Active_Recon --> Target
+    
+    Passive_Recon[LinkedIn, Job Postings, Documentation, WHOIS]
+    Active_Recon[Port Scanning, Service Enum, Vuln Scanning]
+    Target[Target Organization]
+```
 
 **SOC Detection Focus:**
 - Monitor firewall logs for unusual port scans
@@ -192,14 +199,15 @@ All → Target Organization
 
 #### 3️⃣ Delivery
 
-**Delivery Methods:**
-- Phishing Emails → Target
-- Malicious Website → Target
-- USB/Dropped Devices → Target
-- Watering Hole → Target
-- Social Engineering → Target
-
-**Payload Types:** .exe, .dll, .bat, .vbs, .js, .hta, .ps1, .docm
+```mermaid
+flowchart TD
+    Phishing --> Target
+    Malicious_Website --> Target
+    USB_Devices --> Target
+    Watering_Hole --> Target
+    Social_Engineering --> Target
+    Target[Victim]
+```
 
 **SOC Detection Focus:**
 - Email gateway alerts
@@ -219,25 +227,43 @@ All → Target Organization
 
 #### 5️⃣ Installation
 
-**Persistence Methods:**
-- Droppers → Persistence
-- Backdoors → Persistence
-- Rootkits → Persistence
-- Scheduled Tasks → Persistence
-- Registry Keys → Persistence
-- Services → Persistence
-
-**Goals:**
-- Survive Reboot
-- Deploy Additional Tools
+```mermaid
+flowchart LR
+    Droppers --> Persistence
+    Backdoors --> Persistence
+    Rootkits --> Persistence
+    Scheduled_Tasks --> Persistence
+    Registry_Keys --> Persistence
+    Services --> Persistence
+    
+    Persistence --> Survive_Reboot
+    Persistence --> Deploy_Additional_Tools
+```
 
 **SOC Detection Focus:**
-- Unusual outbound connections
-- DNS queries to suspicious domains
-- Large data transfers
-- Beaconing patterns (regular intervals)
+- New scheduled tasks
+- New services installed
+- Registry changes
+- New startup entries
 
-#### 7️⃣ Actions on Objectives
+#### 6️⃣ Command & Control (C2)
+
+```mermaid
+flowchart LR
+    Victim --> C2
+    C2 --> Victim
+    
+    C2_Server[C2 Server]
+    Beacon[1. Beacon]
+    Instructions[2. Instructions]
+    Additional_Tools[3. Additional Tools]
+    
+    Victim --> Beacon
+    C2 --> Instructions
+    C2 --> Additional_Tools
+```
+
+**SOC Detection Focus:**
 - Unusual outbound connections
 - DNS queries to suspicious domains
 - Large data transfers
@@ -266,9 +292,13 @@ All → Target Organization
 
 ### Concept Overview
 
-```
-Tactic → Technique → SubTech
-Example: Initial Access → T1190 (Exploit Public-Facing) → T1190.004 (SQL Injection)
+```mermaid
+flowchart TD
+    Tactic --> Technique
+    Technique --> SubTech
+    
+    Example1[Initial Access] --> Example2[T1190 - Exploit Public-Facing]
+    Example2 --> Example3[T1190.004 - SQL Injection]
 ```
 
 ### Enterprise Tactics (14 Tactics)
@@ -292,10 +322,18 @@ Example: Initial Access → T1190 (Exploit Public-Facing) → T1190.004 (SQL Inj
 
 ### Common Techniques for SOC Analysts
 
-```
-Initial Access: Phishing, Exploit App, Valid Accounts
-Execution: PowerShell, User Execution
-Persistence: Registry Run Keys, Scheduled Task, Windows Service
+```mermaid
+flowchart TD
+    Phishing --> Initial_Access
+    Exploit_App --> Initial_Access
+    Valid_Accounts --> Initial_Access
+    
+    PowerShell --> Execution
+    User_Execution --> Execution
+    
+    Registry_Run_Keys --> Persistence
+    Scheduled_Task --> Persistence
+    Windows_Service --> Persistence
 ```
 
 | Tactic | Technique | ID | Detection Focus |
@@ -318,8 +356,20 @@ Persistence: Registry Run Keys, Scheduled Task, Windows Service
 
 ## 5. Pyramid of Pain
 
-```
-TTPs (Hardest to change) → Tools → Network Artifacts → Domain Names → IP Addresses → Hash Values (Easiest to change)
+```mermaid
+flowchart TD
+    TTP --> Tools
+    Tools --> Network_Artifacts
+    Network_Artifacts --> Domain_Names
+    Domain_Names --> IP_Addresses
+    IP_Addresses --> Hash_Values
+    
+    TTP[TTPs - Hardest to change]
+    Tools[Malware, Exploits]
+    Network_Artifacts[Registry, Mutex, Filenames]
+    Domain_Names[C2 domains]
+    IP_Addresses[C2 servers]
+    Hash_Values[File hashes]
 ```
 
 ### Understanding Each Level
@@ -347,10 +397,14 @@ TTPs (Hardest to change) → Tools → Network Artifacts → Domain Names → IP
 
 ### The 4 Stages
 
-```
-Preparation (~40%) → Detection & Analysis (~40%) → Containment, Eradication & Recovery (~15%) → Post-Incident (~5%)
-                          ↑                                                            ↓
-                          ←←←←←←← Feedback & Improvement ←←←←←←←←←←
+```mermaid
+flowchart TD
+    P[Preparation ~40%] --> D[Detection & Analysis ~40%]
+    D --> C[Containment, Eradication & Recovery ~15%]
+    C --> PI[Post-Incident ~5%]
+    
+    PI -.->|Feedback| P
+    PI -.->|Improvement| D
 ```
 
 ### Key Concept
@@ -379,10 +433,16 @@ Preparation (~40%) → Detection & Analysis (~40%) → Containment, Eradication 
 
 ### Prerequisites Checklist
 
-```
-People (Skilled IR Team, Trained Workforce) → Capability
-Policies (Clear Policies, Documentation) → Capability
-Tools (Software, Hardware) → Capability
+```mermaid
+flowchart TD
+    People --> Capability
+    Policies --> Capability
+    Tools --> Capability
+    
+    People[Skilled IR Team, Trained Workforce]
+    Policies[Clear Policies, Documentation]
+    Tools[Software, Hardware]
+    Capability[Incident Handling Capability]
 ```
 
 | Category | Requirements |
@@ -404,9 +464,20 @@ Tools (Software, Hardware) → Capability
 
 ### Jump Bag Essentials
 
-```
-Hardware: Forensic Laptop, Write Blockers, Hard Drives, Network Cables, USB Drives
-Software: FTK Imager, WinPmem, Wireshark, Autopsy, Volatility, TheHive
+```mermaid
+flowchart TD
+    H1[Forensic Laptop] --> Hardware[Hardware]
+    H2[Write Blockers] --> Hardware
+    H3[Hard Drives] --> Hardware
+    H4[Network Cables] --> Hardware
+    H5[USB Drives] --> Hardware
+    
+    S1[FTK Imager] --> Software[Software]
+    S2[WinPmem] --> Software
+    S3[Wireshark] --> Software
+    S4[Autopsy] --> Software
+    S5[Volatility] --> Software
+    S6[TheHive] --> Software
 ```
 
 ### Protective Measures
@@ -429,14 +500,24 @@ Software: FTK Imager, WinPmem, Wireshark, Autopsy, Volatility, TheHive
 
 ### Detection Sources
 
-```
-Employee Reports, Tool Alerts (EDR/IDS/Firewall/SIEM), Threat Hunting, Third-Party → Detection → Analyze & Triage
+```mermaid
+flowchart TD
+    S1[Employee Reports] --> Detection[Detection]
+    S2[Tool Alerts EDR/IDS/Firewall/SIEM] --> Detection
+    S3[Threat Hunting] --> Detection
+    S4[Third-Party] --> Detection
+    
+    Detection --> A[Analyze & Triage]
 ```
 
 ### Detection Layers (Defense in Depth)
 
-```
-Internet → Perimeter → Internal Network → Endpoint → Application
+```mermaid
+flowchart TD
+    Internet[Internet] --> Perimeter[Perimeter]
+    Perimeter --> Internal[Internal Network]
+    Internal --> Endpoint[Endpoint]
+    Endpoint --> Application[Application]
 ```
 
 ### Initial Investigation Questions
@@ -452,9 +533,17 @@ Internet → Perimeter → Internal Network → Endpoint → Application
 
 ### Building Incident Timeline
 
-```
-Date → Time → Hostname → Event Description → Data Source
-Example: 2025-10-01 → 03:12:02 → manage.insightnexus.com → Login with default credentials → Web Server Logs
+```mermaid
+flowchart LR
+    A[Date] --> B[Time]
+    B --> C[Hostname]
+    C --> D[Event Description]
+    D --> E[Data Source]
+    
+    F[2025-10-01] --> G[03:12:02]
+    G --> H[manage.insightnexus.com]
+    H --> I[Login with default credentials]
+    I --> J[Web Server Logs]
 ```
 
 | Date | Time (UTC) | Hostname | Event Description | Data Source |
@@ -474,21 +563,26 @@ Example: 2025-10-01 → 03:12:02 → manage.insightnexus.com → Login with defa
 
 ### IOC Creation & Usage
 
-```
-IP Addresses (C2 servers) → OpenIOC
-File Hashes (MD5, SHA256) → YARA
-Filenames → STIX
-Domain Names → OpenIOC
-Registry Keys → YARA
-User Accounts → STIX
+```mermaid
+flowchart TD
+    IP[IP Addresses C2 servers] --> OpenIOC
+    Hash[File Hashes MD5 SHA256] --> YARA
+    File[Filenames] --> STIX
+    Domain[Domain Names] --> OpenIOC
+    Reg[Registry Keys] --> YARA
+    User[User Accounts] --> STIX
 ```
 
 ### Investigation Cycle
 
-```
-Initial Data → Create IOCs → Search IOCs → Identify New Leads → Collect & Analyze → Update Timeline
-                                                                                          ↑↓
-                                                                                     (Repeat)
+```mermaid
+flowchart TD
+    A[Initial Data] --> B[Create IOCs]
+    B --> C[Search IOCs]
+    C --> D[Identify New Leads]
+    D --> E[Collect & Analyze]
+    E --> F[Update Timeline]
+    F -.->|Repeat| B
 ```
 
 ### AI in Threat Detection
@@ -507,11 +601,19 @@ Initial Data → Create IOCs → Search IOCs → Identify New Leads → Collect 
 
 ### Containment Strategy
 
-```
-Short-term (Preserve Evidence): Isolate VLAN, Pull Network Cable, Sinkhole C2 DNS
-Long-term (Persistent Changes): Change Passwords, Apply Firewall Rules, Deploy HIDS, Apply Patches
-↓                                              ↓
-                                    Containment Complete
+```mermaid
+flowchart TD
+    ST1[Isolate VLAN] --> SP[Preserve Evidence]
+    ST2[Pull Network Cable] --> SP
+    ST3[Sinkhole C2 DNS] --> SP
+    
+    LT1[Change Passwords] --> LP[Persistent Changes]
+    LT2[Apply Firewall Rules] --> LP
+    LT3[Deploy HIDS] --> LP
+    LT4[Apply Patches] --> LP
+    
+    SP --> Containment[Containment Complete]
+    LP --> Containment
 ```
 
 ### ⚠️ CRITICAL RULE
@@ -538,10 +640,16 @@ Long-term (Persistent Changes): Change Passwords, Apply Firewall Rules, Deploy H
 
 ### Recovery Stage
 
-```
-Restore Systems → Verify Functionality → Gradual Reintroduction → Heavy Monitoring
-                                                                                  ↓
-                                                              Unusual Logons, Unusual Processes, Registry Changes, C2 Attempts
+```mermaid
+flowchart LR
+    Restore_Systems --> Verify_Functionality
+    Verify_Functionality --> Gradual_Reintroduction
+    Gradual_Reintroduction --> Heavy_Monitoring
+    
+    Heavy_Monitoring --> Unusual_Logons
+    Heavy_Monitoring --> Unusual_Processes
+    Heavy_Monitoring --> Registry_Changes
+    Heavy_Monitoring --> C2_Attempts
 ```
 
 ---
@@ -606,8 +714,14 @@ Restore Systems → Verify Functionality → Gradual Reintroduction → Heavy Mo
 
 ### Attack Chain
 
-```
-Default Credentials (admin/admin) → ManageEngine Access → C2 to 103.112.60.117 (HTTPS) → Domain Admin Created → RDP to DEV-021 (Exposed RDP) → GPO Deploys MSI (java-update.msi) → Data Exfiltration (diagnostics_data.zip)
+```mermaid
+flowchart TD
+    A[Default Credentials admin/admin] --> B[ManageEngine Access]
+    B --> C[C2 to 103.112.60.117 HTTPS]
+    C --> D[Domain Admin Created]
+    D --> E[RDP to DEV-021 Exposed RDP]
+    E --> F[GPO Deploys MSI java-update.msi]
+    F --> G[Data Exfiltration diagnostics_data.zip]
 ```
 
 ### Timeline
@@ -869,11 +983,12 @@ level: medium
 
 ### 16.1 Incident Classification & Severity Levels
 
-```
-P1 (Critical) - Active APT/Ransomware/Data Exfiltration → Immediate Response
-P2 (High) - Malware/Unauthorized Access → < 1 Hour Response
-P3 (Medium) - Policy Violation/Suspicious → < 4 Hours Response
-P4 (Low) - Failed Logins/Minor Anomalies → < 24 Hours Response
+```mermaid
+flowchart TD
+    P1[P1 - Critical Active APT/Ransomware Data Exfiltration] --> Immediate[Immediate Response]
+    P2[P2 - High Malware/Unauthorized Access] --> OneHour[< 1 Hour Response]
+    P3[P3 - Medium Policy Violation/Suspicious] --> FourHours[< 4 Hours Response]
+    P4[P4 - Low Failed Logins/Minor Anomalies] --> TwentyFour[< 24 Hours Response]
 ```
 
 | Severity | Response Time | Examples | Resources |
@@ -885,8 +1000,14 @@ P4 (Low) - Failed Logins/Minor Anomalies → < 24 Hours Response
 
 ### 16.2 Chain of Custody
 
-```
-Evidence → Document → Hash Verification → Secure Storage → Custody Form → Forensic Analysis → Court Admissible
+```mermaid
+flowchart LR
+    Evidence --> Document
+    Document --> Hash_Verification
+    Hash_Verification --> Secure_Storage
+    Secure_Storage --> Custody_Form
+    Custody_Form --> Forensic_Analysis
+    Forensic_Analysis --> Court_Admissible
 ```
 
 **Required Documentation:**
@@ -914,11 +1035,21 @@ Evidence → Document → Hash Verification → Secure Storage → Custody Form 
 
 ### 16.4 Regulatory Frameworks
 
-```
-GDPR (EU Data Protection) → 4% Global Revenue Fine
-HIPAA (US Healthcare) → $1.5M/Violation Fine
-PCI-DSS (Payment Cards) → $100K/Month Fine
-SOX (US Financial) → Criminal Penalties
+```mermaid
+flowchart TD
+    GDPR --> Fine1
+    HIPAA --> Fine2
+    PCI_DSS --> Fine3
+    SOX --> Fine4
+    
+    GDPR[GDPR - EU Data Protection]
+    Fine1[4% Global Revenue]
+    HIPAA[HIPAA - US Healthcare]
+    Fine2[$1.5M/Violation]
+    PCI_DSS[PCI-DSS - Payment Cards]
+    Fine3[$100K/Month]
+    SOX[SOX - US Financial]
+    Fine4[Criminal Penalties]
 ```
 
 | Framework | Industry | Key Requirements |
@@ -941,17 +1072,35 @@ SOX (US Financial) → Criminal Penalties
 
 ### 16.6 SOC Tiers & Responsibilities
 
-```
-Tier 1 (Triage & Categorization) → Tier 2 (Investigation & Analysis) → Tier 3 (Threat Hunting & Forensics)
+```mermaid
+flowchart TD
+    Tier_1 --> Tier_2
+    Tier_2 --> Tier_3
+    
+    Tier_1[Tier 1 - Triage & Categorization]
+    Tier_2[Tier 2 - Investigation & Analysis]
+    Tier_3[Tier 3 - Threat Hunting & Forensics]
 ```
 
 ### 16.7 Threat Intelligence Integration
 
+```mermaid
+flowchart TD
+    External_Feeds --> TI_Platform
+    Internal_Sources --> TI_Platform
+    TI_Platform --> Use_Cases
+    
+    External_Feeds[CISA, Vendor Feeds, OSINT, ISACs]
+    Internal_Sources[Incident Data, Log Analysis, Hunting, Malware]
+    Use_Cases[IOC Blocking, Alert Enrichment, Threat Hunting, Detection Rules]
 ```
-External Feeds (CISA, Vendor Feeds, OSINT, ISACs) → TI Platform → Use Cases
-Internal Sources (Incident Data, Log Analysis, Hunting, Malware) ↗
-
-Use Cases: IOC Blocking, Alert Enrichment, Threat Hunting, Detection Rules
+        U4[Detection Rules]
+    end
+    
+    Use --> Block[Block at Perimeter]
+    Use --> Alert[Enrich Alerts]
+    Use --> Hunt[Hunt for TTPs]
+    Use --> Detect[Update Rules]
 ```
 
 ### 16.8 Common Attack Vectors & Detection
@@ -970,17 +1119,38 @@ Use Cases: IOC Blocking, Alert Enrichment, Threat Hunting, Detection Rules
 
 #### Playbook: Phishing Response
 
-```
-Phishing Alert → Triage → Analyze Email → Extract IOCs → Block IOCs → Notify User → Report/Close
-
-Extract IOCs: Sender Email, URLs, Attachments, Headers
-Block IOCs: Block Sender, Block URLs, Quarantine, Add TI
+```mermaid
+flowchart TD
+    Phishing_Alert --> Triage
+    Triage --> Analyze_Email
+    Analyze_Email --> Extract_IOCs
+    Extract_IOCs --> Block_IOCs
+    Block_IOCs --> Notify_User
+    Notify_User --> Report_Close
+    
+    Extract_IOCs --> Sender_Email
+    Extract_IOCs --> URLs
+    Extract_IOCs --> Attachments
+    Extract_IOCs --> Headers
+    
+    Block_IOCs --> Block_Sender
+    Block_IOCs --> Block_URLs
+    Block_IOCs --> Quarantine
+    Block_IOCs --> Add_TI
 ```
 
 #### Playbook: Malware Detection
 
-```
-Malware Detected → Isolate Endpoint → Collect Forensics → Analyze Malware → Identify Scope → Contain Spread → Eradicate → Recover → Close Case
+```mermaid
+flowchart TD
+    Malware_Detected --> Isolate_Endpoint
+    Isolate_Endpoint --> Collect_Forensics
+    Collect_Forensics --> Analyze_Malware
+    Analyze_Malware --> Identify_Scope
+    Identify_Scope --> Contain_Spread
+    Contain_Spread --> Eradicate
+    Eradicate --> Recover
+    Recover --> Close_Case
 ```
 
 ### 16.10 Common Tools Reference
