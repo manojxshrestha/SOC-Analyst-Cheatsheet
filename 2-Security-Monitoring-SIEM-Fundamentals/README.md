@@ -760,148 +760,18 @@ When this alert triggers:
 ---
 
 *Module 2 Complete - Security Monitoring & SIEM Fundamentals*
-### Official Documentation
 
-- [Elastic Documentation](https://www.elastic.co/guide/index.html)
-- [ECS Fields](https://www.elastic.co/guide/en/ecs/current/index.html)
-- [KQL Reference](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)
 
-### MITRE ATT&CK
-
-- [MITRE ATT&CK](https://attack.mitre.org)
-- [ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/)
-
+	
+	
+	
+	
+	
+	
+	
 ---
 
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	 Section 7 / 11
-Go to Questions
-SIEM Visualization Example 2: Failed Logon Attempts (Disabled Users)
-
-In this SIEM visualization example we want to create visualization to monitor failed login attempts against disabled users.
-
-We mention "failed" because it is not possible to log in with a disabled user, so it will never be successful even if the correct credentials are provided. In a scenario where the correct credentials are provided, the Windows logs will contain an additional SubStatus value of 0xC0000072, that indicates the reason of the failure.
-
-Navigate to the bottom of this section and click on Click here to spawn the target system!.
-
-Navigate to http://[Target IP]:5601, click on the side navigation toggle, and click on "Dashboard".
-
-A prebaked dashboard should be visible. Let's click on the "pencil"/edit icon.
-
-<img width="1888" height="652" alt="image" src="https://github.com/user-attachments/assets/70c4ba40-4418-4632-bf2a-2a038e839586" />
-
-
-Elastic dashboard interface displaying a list of dashboards. The screen shows a single dashboard titled 'SOC-Alerts' with an edit icon highlighted. A 'Create dashboard' button is visible.
-
-Now, to initiate the creation of our first visualization, we simply have to click on the "Create visualization" button.
-
-Upon initiating the creation of our first visualization, the following new window will appear with various options and settings.
-
-<img width="1030" height="638" alt="image" src="https://github.com/user-attachments/assets/b79dced2-5811-4402-93fe-aee0d2e2fd90" />
-
-
-Elastic dashboard interface with highlighted elements: 'Add filter' button, filter selection ('windows*'), search field for field names, and 'Bar vertical stacked' chart type.
-
-There are four things for us to notice on this window:
-
-    A filter option that allows us to filter the data before creating a graph. In this case our goal is to display failed logon attempts against disabled users only. We can use a filter to only consider event IDs that match 4625 – Failed logon attempt on a Windows system, like we did in the previous visualization example. In this case though, we should also take into account the SubStatus (winlog.event_data.SubStatus field) that indicates, when set to 0xC0000072, that the failure is due to a logon with disabled user. The following image demonstrates how we can specify such a filter.
-
-	<img width="1028" height="535" alt="image" src="https://github.com/user-attachments/assets/647f6a44-754c-4aea-8491-b3d96b15e155" />
-
-    Elastic dashboard with an active filter: 'event.code: 4625' and 'winlog.event_data.SubStatus: 0xc0000072'. Edit filter panel shows 'winlog.event_data.SubStatus' field set to '0xc0000072' (Disabled user) with operator 'is'.
-	
-    This field indicates the data set (index) that we are going to use. It is common for data from various infrastructure sources to be separated into different indices, such as network, Windows, Linux, etc. In this particular example, we will specify windows* in the "Index pattern".
-
-	
-This search bar provides us with the ability to double-check the existence of a specific field within our data set, serving as another way to ensure that we are looking at the correct data. Like in the previous visualization, we are interested in the user.name.keyword field. We can use the search bar to quickly perform a search and verify if this field is present and discovered within our selected data set. This allows us to confirm that we are accessing the desired field and working with accurate data.
-
-  <img width="460" height="1043" alt="image" src="https://github.com/user-attachments/assets/d2caf760-c9de-43b1-a096-5249c6b8ed67" />
-
-	
-	Elastic dashboard search interface showing a query for 'user.' with available fields like related.user.keyword and user.name.keyword.
-   
-	
-	Lastly, this drop-down menu enables us to select the type of visualization we want to create. The default option displayed in the earlier image is "Bar vertical stacked". If we click on that button, it will reveal additional available options (image redacted as not all options fit on the screen). From this expanded list, we can choose the desired visualization type that best suits our requirements and data presentation needs.
-
-	<img width="1030" height="793" alt="image" src="https://github.com/user-attachments/assets/d56c03ab-65d5-41d4-ab59-dd454e248040" />
-
-
-    Visualization type menu in Elastic showing options like Metric, Table, Bar horizontal, and Bar vertical stacked.
-
-For this visualization, let's select the "Table" option. After selecting the "Table", we can proceed to click on the "Rows" option. This will allow us to choose the specific data elements that we want to include in the table view.
-
-<img width="711" height="712" alt="image" src="https://github.com/user-attachments/assets/46011d9b-ea22-43bc-97c8-e46fb999b4dc" />
-
-
-Elastic table configuration interface with options to add or drag-and-drop fields into Rows, Columns, and Metrics.
-
-Let's configure the "Rows" settings as follows.
-
-<img width="728" height="935" alt="image" src="https://github.com/user-attachments/assets/1d91f4b6-1e9f-4712-a423-1f29b54adc1e" />
-
-
-Elastic Rows configuration for user.name.keyword, showing top 1000 values ranked by count of records in descending order.
-
-Moving forward, let's close the "Rows" window and proceed to enter the "Metrics" configuration.
-
-<img width="703" height="839" alt="image" src="https://github.com/user-attachments/assets/6424c33d-60f1-4fb3-a237-42128b598783" />
-
-
-Elastic table configuration with 'Top values of user.name.keyword' in Rows and options to add fields in Columns and Metrics.
-
-In the "Metrics" window, let's select "count" as the desired metric.
-
-<img width="606" height="554" alt="image" src="https://github.com/user-attachments/assets/592a6459-11e8-44b6-a167-239ac9fecbcd" />
-
-
-Elastic Metrics configuration with 'Count' function selected from options like Average, Median, and Sum.
-
-One final addition to the table is to include another "Rows" setting to show the machine where the failed logon attempt occurred. To do this, we will select the host.hostname.keyword field, which represents the computer reporting the failed logon attempt. This will allow us to display the hostname or machine name alongside the count of failed logon attempts, as shown in the image.
-
-<img width="1027" height="281" alt="image" src="https://github.com/user-attachments/assets/5d594be8-5eab-4d26-b378-1386f4abfbb3" />
-
-
-Elastic table showing top values of user.name.keyword as 'anni' and host.hostname.keyword as 'WS001' with a count of records as 1.
-
-Now we can see three columns in the table, which contain the following information:
-
-    The disabled user whose credentials generated the failed logon attempt event.
-    The machine on which the logon attempt occurred.
-    The number of times the event has occurred (based on the specified time frame or the entire data set, depending on the settings).
-
-Finally, click on "Save and return", and you will observe that the new visualization is added to the dashboard.
+## 7. Additional Resources
 	
 
 
