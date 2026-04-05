@@ -218,18 +218,18 @@ Let's see how the threat hunting process could have been applied to hunt for Emo
 
 ```mermaid
 graph TD
-    A[TTPs<br/>Tough<br/>Most Valuable] --> B[Tools<br/>Challenging]
-    B --> C[Network/Host<br/>Artifacts<br/>Annoying]
-    C --> D[Domain Names<br/>Simple]
-    D --> E[IP Addresses<br/>Easy]
-    E --> F[Hash Values<br/>Trivial<br/>Least Valuable]
+    A["TTPs<br/>Tough<br/>Most Valuable"] --> B["Tools<br/>Challenging"]
+    B --> C["Network/Host<br/>Artifacts<br/>Annoying"]
+    C --> D["Domain Names<br/>Simple"]
+    D --> E["IP Addresses<br/>Easy"]
+    E --> F["Hash Values<br/>Trivial<br/>Least Valuable"]
     
-    style A fill:#ff6b6b,stroke:#333,stroke-width:2px
-    style B fill:#feca57,stroke:#333,stroke-width:2px
-    style C fill:#ff9f43,stroke:#333,stroke-width:2px
-    style D fill:#1dd1a1,stroke:#333,stroke-width:2px
-    style E fill:#1dd1a1,stroke:#333,stroke-width:2px
-    style F fill:#c8d6e5,stroke:#333,stroke-width:2px
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#fff3e0,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#f5f5f5,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Level | Indicator | Difficulty to Change |
@@ -249,15 +249,15 @@ graph TD
 
 ```mermaid
 graph LR
-    ADV[ADVERSARY] -->|uses| CAP[CAPABILITY<br/>tools,TTPs]
-    CAP -->|delivered via| INF[INFRASTRUCTURE<br/>servers,domains,IPs]
-    INF -->|targets| VIC[VICTIM<br/>systems,data]
+    ADV["ADVERSARY<br/>(attacker)"] -->|uses| CAP["CAPABILITY<br/>(tools,TTPs)"]
+    CAP -->|delivered via| INF["INFRASTRUCTURE<br/>(servers,domains,IPs)"]
+    INF -->|targets| VIC["VICTIM<br/>(systems,data)"]
     VIC -->|attacked by| ADV
     
-    style ADV fill:#ff6b6b,stroke:#333,stroke-width:2px
-    style CAP fill:#feca57,stroke:#333,stroke-width:2px
-    style INF fill:#54a0ff,stroke:#333,stroke-width:2px
-    style VIC fill:#5f27cd,stroke:#333,stroke-width:2px,color:#fff
+    style ADV fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style CAP fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style INF fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style VIC fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Component | Description |
@@ -287,32 +287,32 @@ graph LR
 
 ```mermaid
 graph TD
-    A[Monitor Internal<br/>& External Reporting] --> B[Intelligence<br/>Assessment]
-    B --> C[Crisis Action<br/>Plans]
-    C --> D[Characterize<br/>the Problem]
-    D --> E[Disseminate]
+    A["Monitor Internal<br/>& External Reporting"] --> B["Intelligence<br/>Assessment"]
+    B --> C["Crisis Action<br/>Plans"]
+    C --> D["Characterize<br/>the Problem"]
+    D --> E["Disseminate"]
     
-    style A fill:#54a0ff,stroke:#333,color:#fff
-    style B fill:#5f27cd,stroke:#333,color:#fff
-    style C fill:#ff9f43,stroke:#333
-    style D fill:#1dd1a1,stroke:#333
-    style E fill:#ff6b6b,stroke:#333
+    style A fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#fff3e0,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Three Levels of CTI
 
 ```mermaid
 graph LR
-    S[Strategic<br/>Who? Why?<br/>C-Suite] --> O[Operational<br/>How? Where?<br/>Mid-Management]
-    O --> T[Tactical<br/>What? When?<br/>Network Defenders]
+    S["Strategic<br/>Who? Why?<br/>C-Suite"] --> O["Operational<br/>How? Where?<br/>Mid-Management"]
+    O --> T["Tactical<br/>What? When?<br/>Network Defenders"]
     
     S -.->|Overlaps| O
     O -.->|Overlaps| T
     T -.->|Overlaps| S
     
-    style S fill:#ff6b6b,stroke:#333,color:#fff
-    style O fill:#feca57,stroke:#333
-    style T fill:#1dd1a1,stroke:#333
+    style S fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style O fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style T fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Level | Audience | Focus | Questions |
@@ -371,11 +371,11 @@ graph LR
 
 ```mermaid
 graph LR
-    TI[Threat Intelligence<br/>Predictive] -->|Informs| TH[Threat Hunting<br/>Reactive/Proactive]
+    TI["Threat Intelligence<br/>Predictive"] -->|Informs| TH["Threat Hunting<br/>Reactive/Proactive"]
     TH -->|Findings enrich| TI
     
-    style TI fill:#54a0ff,stroke:#333,color:#fff
-    style TH fill:#ff6b6b,stroke:#333,color:#fff
+    style TI fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style TH fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 - CTI team analyzes adversary activities → shares with threat hunters
