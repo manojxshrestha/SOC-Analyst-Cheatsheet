@@ -175,30 +175,12 @@ flowchart LR
 #### 1️⃣ Reconnaissance
 
 ```mermaid
-graph TD
-    subgraph "Passive Reconnaissance"
-        P1[LinkedIn/Social Media]
-        P2[Job Postings]
-        P3[Company Documentation]
-        P4[WHOIS/Shodan]
-    end
+flowchart TD
+    Passive_Recon --> Target
+    Active_Recon --> Target
     
-    subgraph "Active Reconnaissance"
-        A1[Port Scanning]
-        A2[Service Enumeration]
-        A3[Vulnerability Scanning]
-        A4[Network Mapping]
-    end
-    
-    P1 --> Target
-    P2 --> Target
-    P3 --> Target
-    P4 --> Target
-    A1 --> Target
-    A2 --> Target
-    A3 --> Target
-    A4 --> Target
-    
+    Passive_Recon[LinkedIn, Job Postings, Documentation, WHOIS]
+    Active_Recon[Port Scanning, Service Enum, Vuln Scanning]
     Target[Target Organization]
 ```
 
@@ -218,16 +200,13 @@ graph TD
 #### 3️⃣ Delivery
 
 ```mermaid
-graph TD
-    D1[Phishing Emails] --> Target
-    D2[Malicious Website] --> Target
-    D3[USB/Dropped Devices] --> Target
-    D4[Watering Hole] --> Target
-    D5[Social Engineering] --> Target
-    
+flowchart TD
+    Phishing --> Target
+    Malicious_Website --> Target
+    USB_Devices --> Target
+    Watering_Hole --> Target
+    Social_Engineering --> Target
     Target[Victim]
-    
-    D1 -.->|Payload Types| Types[.exe, .dll, .bat, .vbs, .js, .hta, .ps1, .docm]
 ```
 
 **SOC Detection Focus:**
@@ -249,16 +228,16 @@ graph TD
 #### 5️⃣ Installation
 
 ```mermaid
-graph LR
-    I1[Droppers] --> P[Persistence]
-    I2[Backdoors] --> P
-    I3[Rootkits] --> P
-    I4[Scheduled Tasks] --> P
-    I5[Registry Keys] --> P
-    I6[Services] --> P
+flowchart LR
+    Droppers --> Persistence
+    Backdoors --> Persistence
+    Rootkits --> Persistence
+    Scheduled_Tasks --> Persistence
+    Registry_Keys --> Persistence
+    Services --> Persistence
     
-    P --> P1[Survive Reboot]
-    P --> P2[Deploy Additional Tools]
+    Persistence --> Survive_Reboot
+    Persistence --> Deploy_Additional_Tools
 ```
 
 **SOC Detection Focus:**
@@ -270,22 +249,18 @@ graph LR
 #### 6️⃣ Command & Control (C2)
 
 ```mermaid
-graph LR
-    Victim[Compromised System] -->|1. Beacon| C2[C2 Server]
-    C2 -->|2. Instructions| Victim
-    C2 -->|3. Additional Tools| Victim
+flowchart LR
+    Victim --> C2
+    C2 --> Victim
     
-    subgraph "C2 Methods"
-        HTTPS[HTTPS - Blends with normal web]
-        DNS[DNS Tunneling]
-        Social[Social Media C2]
-        Cloud[Cloud Services]
-    end
+    C2_Server[C2 Server]
+    Beacon[1. Beacon]
+    Instructions[2. Instructions]
+    Additional_Tools[3. Additional Tools]
     
-    HTTPS --> C2
-    DNS --> C2
-    Social --> C2
-    Cloud --> C2
+    Victim --> Beacon
+    C2 --> Instructions
+    C2 --> Additional_Tools
 ```
 
 **SOC Detection Focus:**
@@ -318,13 +293,11 @@ graph LR
 ### Concept Overview
 
 ```mermaid
-graph TD
-    subgraph "MITRE ATT&CK Structure"
-        Tactic[Tactic<br/>High-level Goal] -->|Contains| Tech[Technique<br/>Specific Method]
-        Tech -->|Implements| SubTech[Sub-technique<br/>Implementation]
-    end
+flowchart TD
+    Tactic --> Technique
+    Technique --> SubTech
     
-    Example1[Initial Access] --> Example2[T1190 - Exploit Public-Facing Application]
+    Example1[Initial Access] --> Example2[T1190 - Exploit Public-Facing]
     Example2 --> Example3[T1190.004 - SQL Injection]
 ```
 
@@ -350,38 +323,17 @@ graph TD
 ### Common Techniques for SOC Analysts
 
 ```mermaid
-graph TD
-    subgraph "Initial Access"
-        IA1[T1566 - Phishing]
-        IA2[T1190 - Exploit Public-Facing App]
-        IA3[T1078 - Valid Accounts]
-    end
+flowchart TD
+    Phishing --> Initial_Access
+    Exploit_App --> Initial_Access
+    Valid_Accounts --> Initial_Access
     
-    subgraph "Execution"
-        EX1[T1059.001 - PowerShell]
-        EX2[T1204 - User Execution]
-    end
+    PowerShell --> Execution
+    User_Execution --> Execution
     
-    subgraph "Persistence"
-        PS1[T1547.001 - Registry Run Keys]
-        PS2[T1053 - Scheduled Task]
-        PS3[T1543.003 - Windows Service]
-    end
-    
-    subgraph "Credential Access"
-        CA1[T1003.001 - LSASS Memory]
-        CA2[T1555 - Credential Manager]
-    end
-    
-    subgraph "Lateral Movement"
-        LM1[T1021.001 - RDP]
-        LM2[T1021.002 - SMB/Admin Shares]
-    end
-    
-    subgraph "Command & Control"
-        C21[T1071.001 - Web Protocols]
-        C22[T1071.004 - DNS]
-    end
+    Registry_Run_Keys --> Persistence
+    Scheduled_Task --> Persistence
+    Windows_Service --> Persistence
 ```
 
 | Tactic | Technique | ID | Detection Focus |
@@ -405,14 +357,19 @@ graph TD
 ## 5. Pyramid of Pain
 
 ```mermaid
-graph TD
-    subgraph "Pyramid of Pain"
-        Top[TTPs - ATT&CK<br/>Tools, Techniques<br/>Hardest to change] --> T2[Tools<br/>Malware, Exploits]
-        T2 --> T3[Network/Host Artifacts<br/>Registry, Mutex, Filenames]
-        T3 --> T4[Domain Names<br/>C2 domains]
-        T4 --> T5[IP Addresses<br/>C2 servers]
-        T5 --> Bottom[Hash Values<br/>File hashes]
-    end
+flowchart TD
+    TTP --> Tools
+    Tools --> Network_Artifacts
+    Network_Artifacts --> Domain_Names
+    Domain_Names --> IP_Addresses
+    IP_Addresses --> Hash_Values
+    
+    TTP[TTPs - Hardest to change]
+    Tools[Malware, Exploits]
+    Network_Artifacts[Registry, Mutex, Filenames]
+    Domain_Names[C2 domains]
+    IP_Addresses[C2 servers]
+    Hash_Values[File hashes]
 ```
 
 ### Understanding Each Level
@@ -477,28 +434,15 @@ flowchart TD
 ### Prerequisites Checklist
 
 ```mermaid
-graph TD
-    subgraph "People"
-        P1[Skilled IR Team]
-        P2[Trained Workforce]
-    end
+flowchart TD
+    People --> Capability
+    Policies --> Capability
+    Tools --> Capability
     
-    subgraph "Policies"
-        P3[Clear Policies]
-        P4[Documentation]
-    end
-    
-    subgraph "Tools"
-        P5[Software]
-        P6[Hardware]
-    end
-    
-    P1 --> Result[Incident Handling Capability]
-    P2 --> Result
-    P3 --> Result
-    P4 --> Result
-    P5 --> Result
-    P6 --> Result
+    People[Skilled IR Team, Trained Workforce]
+    Policies[Clear Policies, Documentation]
+    Tools[Software, Hardware]
+    Capability[Incident Handling Capability]
 ```
 
 | Category | Requirements |
@@ -697,22 +641,15 @@ flowchart TD
 ### Recovery Stage
 
 ```mermaid
-graph LR
-    R1[Restore Systems] --> R2[Verify Functionality]
-    R2 --> R3[Gradual Reintroduction]
-    R3 --> R4[Heavy Monitoring]
+flowchart LR
+    Restore_Systems --> Verify_Functionality
+    Verify_Functionality --> Gradual_Reintroduction
+    Gradual_Reintroduction --> Heavy_Monitoring
     
-    subgraph "Post-Recovery Monitoring"
-        M1[Unusual Logons]
-        M2[Unusual Processes]
-        M3[Registry Changes]
-        M4[C2 Attempts]
-    end
-    
-    R4 --> M1
-    R4 --> M2
-    R4 --> M3
-    R4 --> M4
+    Heavy_Monitoring --> Unusual_Logons
+    Heavy_Monitoring --> Unusual_Processes
+    Heavy_Monitoring --> Registry_Changes
+    Heavy_Monitoring --> C2_Attempts
 ```
 
 ---
@@ -1064,13 +1001,13 @@ flowchart TD
 ### 16.2 Chain of Custody
 
 ```mermaid
-graph LR
-    Evidence[Evidence Collection] --> Doc[Document Everything]
-    Doc --> Hash[Hash Verification]
-    Hash --> Store[Secure Storage]
-    Store --> Transfer[Chain of Custody Form]
-    Transfer --> Analysis[Forensic Analysis]
-    Analysis --> Court[Court-Admissible]
+flowchart LR
+    Evidence --> Document
+    Document --> Hash_Verification
+    Hash_Verification --> Secure_Storage
+    Secure_Storage --> Custody_Form
+    Custody_Form --> Forensic_Analysis
+    Forensic_Analysis --> Court_Admissible
 ```
 
 **Required Documentation:**
@@ -1099,11 +1036,20 @@ graph LR
 ### 16.4 Regulatory Frameworks
 
 ```mermaid
-graph TD
-    GDPR[GDPR<br/>EU Data Protection] --> Fine1[4% Global Revenue]
-    HIPAA[HIPAA<br/>US Healthcare] --> Fine2[$1.5M/Violation]
-    PCI_DSS[PCI-DSS<br/>Payment Cards] --> Fine3[$100K/Month]
-    SOX[SOX<br/>US Financial] --> Fine4[Criminal Penalties]
+flowchart TD
+    GDPR --> Fine1
+    HIPAA --> Fine2
+    PCI_DSS --> Fine3
+    SOX --> Fine4
+    
+    GDPR[GDPR - EU Data Protection]
+    Fine1[4% Global Revenue]
+    HIPAA[HIPAA - US Healthcare]
+    Fine2[$1.5M/Violation]
+    PCI_DSS[PCI-DSS - Payment Cards]
+    Fine3[$100K/Month]
+    SOX[SOX - US Financial]
+    Fine4[Criminal Penalties]
 ```
 
 | Framework | Industry | Key Requirements |
@@ -1127,72 +1073,27 @@ graph TD
 ### 16.6 SOC Tiers & Responsibilities
 
 ```mermaid
-graph TD
-    subgraph "SOC Tier Model"
-        T1[Tier 1: L1 Analyst<br/>Triage & Categorization] --> T2[Tier 2: L2 Analyst<br/>Investigation & Analysis]
-        T2 --> T3[Tier 3: L3 Analyst<br/>Threat Hunting & Advanced IR]
-        T3 --> Manager[SOC Manager<br/>Strategic & Leadership]
-    end
+flowchart TD
+    Tier_1 --> Tier_2
+    Tier_2 --> Tier_3
     
-    subgraph "Tier 1 Responsibilities"
-        R1[Alert Triage]
-        R2[Initial Categorization]
-        R3[Basic Investigation]
-        R4[Escalation]
-    end
-    
-    subgraph "Tier 2 Responsibilities"
-        R5[Deep Dive Analysis]
-        R6[Malware Analysis]
-        R7[Forensics]
-        R8[Incident Response]
-    end
-    
-    subgraph "Tier 3 Responsibilities"
-        R9[Threat Hunting]
-        R10[APT Detection]
-        R11[Tool Tuning]
-        R12[Playbook Development]
-    end
-    
-    T1 --> R1
-    T1 --> R2
-    T2 --> R5
-    T2 --> R6
-    T3 --> R9
-    T3 --> R10
+    Tier_1[Tier 1 - Triage & Categorization]
+    Tier_2[Tier 2 - Investigation & Analysis]
+    Tier_3[Tier 3 - Threat Hunting & Forensics]
 ```
 
 ### 16.7 Threat Intelligence Integration
 
 ```mermaid
-graph TD
-    TI[Threat Intelligence] --> Sources[External Feeds]
-    TI --> Internal[Internal Sources]
+flowchart TD
+    External_Feeds --> TI_Platform
+    Internal_Sources --> TI_Platform
+    TI_Platform --> Use_Cases
     
-    subgraph "External Feeds"
-        E1[CISA ALERTS]
-        E2[Vendor Feeds]
-        E3[OSINT/Threat Blogs]
-        E4[ISACs/ISSPs]
-    end
-    
-    subgraph "Internal Sources"
-        I1[Incident Data]
-        I2[Log Analysis]
-        I3[Hunting Results]
-        I4[Malware Analysis]
-    end
-    
-    Sources --> Integration[TI Platform]
-    Internal --> Integration
-    
-    Integration --> Use[Use Cases]
-    
-    subgraph "TI Use Cases"
-        U1[IOC Blocking]
-        U2[Alert Enrichment]
-        U3[Threat Hunting]
+    External_Feeds[CISA, Vendor Feeds, OSINT, ISACs]
+    Internal_Sources[Incident Data, Log Analysis, Hunting, Malware]
+    Use_Cases[IOC Blocking, Alert Enrichment, Threat Hunting, Detection Rules]
+```
         U4[Detection Rules]
     end
     
@@ -1219,50 +1120,37 @@ graph TD
 #### Playbook: Phishing Response
 
 ```mermaid
-graph TD
-    Start[Phishing Alert] --> Triage[Triage Alert]
-    Triage --> Analyze[Analyze Email]
-    Analyze --> Extract[Extract IOCs]
-    Extract --> Block[Block IOCs]
-    Block --> Notify[Notify User]
-    Notify --> Report[Report/Close]
+flowchart TD
+    Phishing_Alert --> Triage
+    Triage --> Analyze_Email
+    Analyze_Email --> Extract_IOCs
+    Extract_IOCs --> Block_IOCs
+    Block_IOCs --> Notify_User
+    Notify_User --> Report_Close
     
-    subgraph "Extract IOCs"
-        E1[Sender Email]
-        E2[URLs]
-        E3[Attachments]
-        E4[Headers]
-    end
+    Extract_IOCs --> Sender_Email
+    Extract_IOCs --> URLs
+    Extract_IOCs --> Attachments
+    Extract_IOCs --> Headers
     
-    subgraph "Block IOCs"
-        B1[Block sender domain]
-        B2[Block URLs in proxy]
-        B3[Quarantine attachment]
-        B4[Add to TI platform]
-    end
-    
-    Extract --> E1
-    Extract --> E2
-    Extract --> E3
-    Extract --> E4
-    Block --> B1
-    Block --> B2
-    Block --> B3
-    Block --> B4
+    Block_IOCs --> Block_Sender
+    Block_IOCs --> Block_URLs
+    Block_IOCs --> Quarantine
+    Block_IOCs --> Add_TI
 ```
 
 #### Playbook: Malware Detection
 
 ```mermaid
-graph TD
-    Alert[Malware Detected] --> Isolate[Isolate Endpoint]
-    Isolate --> Collect[Collect Forensics]
-    Collect --> Analyze[Analyze Malware]
-    Analyze --> Identify[Identify Scope]
-    Identify --> Contain[Contain Spread]
-    Contain --> Eradicate[Eradicate]
-    Eradicate --> Recover[Recover]
-    Recover --> Close[Close Case]
+flowchart TD
+    Malware_Detected --> Isolate_Endpoint
+    Isolate_Endpoint --> Collect_Forensics
+    Collect_Forensics --> Analyze_Malware
+    Analyze_Malware --> Identify_Scope
+    Identify_Scope --> Contain_Spread
+    Contain_Spread --> Eradicate
+    Eradicate --> Recover
+    Recover --> Close_Case
 ```
 
 ### 16.10 Common Tools Reference
