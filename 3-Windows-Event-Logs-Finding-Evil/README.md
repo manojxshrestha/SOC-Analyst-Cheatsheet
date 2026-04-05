@@ -39,8 +39,9 @@ This module covers **Windows Event Logs & Sysmon** - the primary data sources fo
 2. [Analyzing Evil With Sysmon & Event Logs](#2-analyzing-evil-with-sysmon--event-logs)
 3. [Event Tracing for Windows (ETW)](#3-event-tracing-for-windows-etw)
 4. [Tapping Into ETW](#4-tapping-into-etw)
-5. [Interview Questions](#5-interview-questions)
-6. [Additional Resources](#6-additional-resources)
+5. [Get-WinEvent - Mass Log Analysis](#5-get-winevent---mass-log-analysis)
+6. [Interview Questions](#6-interview-questions)
+7. [Additional Resources](#7-additional-resources)
 
 ---
 
@@ -1096,7 +1097,111 @@ SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x18 -ot file -p C:\
 
 ---
 
-## 5. Interview Questions
+## 5. Get-WinEvent - Mass Log Analysis
+
+> 📌 **WHY IT MATTERS**: For large organizations generating millions of logs daily, Get-WinEvent is essential for querying Windows Event logs en masse efficiently.
+
+The **Get-WinEvent** cmdlet is an indispensable tool in PowerShell for querying Windows Event logs. It provides the capability to retrieve different types of event logs, including classic Windows event logs (System, Application), and Event Tracing for Windows (ETW) logs.
+
+### Listing Available Logs
+
+```powershell
+# List all available logs with properties
+Get-WinEvent -ListLog * | Select-Object LogName, RecordCount, IsClassicLog, IsEnabled, LogMode, LogType | Format-Table -AutoSize
+```
+
+This shows:
+- **LogName**: Name of the log
+- **RecordCount**: Number of events in the log
+- **IsClassicLog**: Whether it's .evt (true) or .evtx (false) format
+- **IsEnabled**: If the log is currently enabled
+- **LogMode**: Circular, Retain, or AutoBackup
+- **LogType**: Administrative, Analytical, Debug, or Operational
+
+### Listing Event Providers
+
+```powershell
+# List all event providers
+Get-WinEvent -ListProvider * | Format-Table -AutoSize
+```
+
+Providers are the sources of events within the logs.
+
+### Retrieving Events from Specific Logs
+
+```powershell
+# Get last 50 events from System log
+Get-WinEvent -LogName 'System' -MaxEvents 50 | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+
+# Get events from WinRM operational log
+Get-WinEvent -LogName 'Microsoft-Windows-WinRM/Operational' -MaxEvents 30 | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+
+# Get oldest events first
+Get-WinEvent -LogName 'Microsoft-Windows-WinRM/Operational' -Oldest -MaxEvents 30 | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+```
+
+### Reading .evtx Files
+
+```powershell
+# Read events from exported .evtx file
+Get-WinEvent -Path 'C:\Tools\chainsaw\EVTX-ATTACK-SAMPLES\Execution\exec_sysmon_1_lolbin_pcalua.evtx' -MaxEvents 5 | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+```
+
+### Filtering with FilterHashtable
+
+```powershell
+# Filter by Event ID
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; ID=1,3} | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+
+# Filter by date range
+$startDate = (Get-Date -Year 2023 -Month 5 -Day 28).Date
+$endDate = (Get-Date -Year 2023 -Month 6 -Day 3).Date
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; ID=1,3; StartTime=$startDate; EndTime=$endDate} | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+
+# Filter from .evtx file
+Get-WinEvent -FilterHashtable @{Path='C:\Tools\chainsaw\EVTX-ATTACK-SAMPLES\Execution\sysmon_mshta_sharpshooter_stageless_meterpreter.evtx'; ID=1,3} | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+```
+
+### Filtering with FilterXml
+
+```powershell
+# Filter for specific DLL loading (clr.dll or mscoree.dll)
+$Query = @"
+<QueryList>
+    <Query Id="0">
+        <Select Path="Microsoft-Windows-Sysmon/Operational">*[System[(EventID=7)]] and *[EventData[Data='mscoree.dll']] or *[EventData[Data='clr.dll']]
+        </Select>
+    </Query>
+</QueryList>
+"@
+Get-WinEvent -FilterXml $Query | ForEach-Object {Write-Host $_.Message `n}
+```
+
+### Filtering with FilterXPath
+
+```powershell
+# Find Sysinternals tool installation (EULA acceptance)
+Get-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -FilterXPath "*[EventData[Data[@Name='Image']='C:\Windows\System32\reg.exe']] and *[EventData[Data[@Name='CommandLine']='`"C:\Windows\system32\reg.exe`" ADD HKCU\Software\Sysinternals /v EulaAccepted /t REG_DWORD /d 1 /f']]" | Select-Object TimeCreated, ID, ProviderName, LevelDisplayName, Message | Format-Table -AutoSize
+
+# Find network connections to suspicious IP
+Get-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' -FilterXPath "*[System[EventID=3] and EventData[Data[@Name='DestinationIp']='52.113.194.132']]"
+```
+
+### Getting All Properties
+
+```powershell
+# Get all properties of an event
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; ID=1} -MaxEvents 1 | Select-Object -Property *
+
+# Filter by encoded commands (-enc)
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; ID=1} | Where-Object {$_.Properties[21].Value -like "*-enc*"} | Format-List
+```
+
+> 💡 **TIP**: `Properties[21]` corresponds to the ParentCommandLine field in Sysmon Event ID 1.
+
+---
+
+## 7. Interview Questions
 
 ### Q1: What is the difference between Windows Event ID 4688 and Sysmon Event ID 1?
 
@@ -1212,7 +1317,7 @@ The `-ets` parameter tells Logman to query Event Tracing Sessions directly. With
 
 ---
 
-## 6. Additional Resources
+## 7. Additional Resources
 
 ### Tools
 
