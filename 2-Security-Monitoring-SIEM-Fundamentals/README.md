@@ -64,16 +64,11 @@ SIEM (Security Information and Event Management) combines:
 
 ### How Does A SIEM Solution Work?
 
-```mermaid
-flowchart LR
-    Firewalls --> SIEM
-    Servers --> SIEM
-    Endpoints --> SIEM
-    SIEM --> Collection
-    Collection --> Normalization
-    Normalization --> Correlation
-    Correlation --> Alerting
-    Alerting --> Dashboard
+```
+Firewalls → SIEM
+Servers → SIEM
+Endpoints → SIEM
+SIEM → Collection → Normalization → Correlation → Alerting → Dashboard
 ```
 
 **Data Flow:**
@@ -129,9 +124,8 @@ flowchart LR
 
 The Elastic Stack is an open-source collection of applications:
 
-```mermaid
-flowchart TB
-    Beats --> Logstash --> Elasticsearch --> Kibana
+```
+Beats → Logstash → Elasticsearch → Kibana
 ```
 
 ### Components
@@ -233,9 +227,8 @@ A **Security Operations Center (SOC)** is a facility with a team responsible for
 - Incident response
 - Security event management
 
-```mermaid
-flowchart TB
-    Monitor --> Detect --> Analyze --> Respond
+```
+Monitor → Detect → Analyze → Respond
 ```
 
 ### SOC Team Roles
@@ -279,9 +272,8 @@ A framework documenting adversary attack methods:
 - **Tactics** - The goal/objective
 - **Techniques** - How they achieve the goal
 
-```mermaid
-flowchart LR
-    Recon --> Initial_Access --> Execution --> Persistence --> Priv_Esc --> Defense_Evasion --> Cred_Access --> Discovery --> Lateral_Movement --> Exfiltration
+```
+Recon → Initial Access → Execution → Persistence → Priv Esc → Defense Evasion → Cred Access → Discovery → Lateral Movement → Exfiltration
 ```
 
 ### ATT&CK Use Cases in Security Operations
@@ -303,16 +295,14 @@ flowchart LR
 
 A **use case** defines specific conditions that trigger an alert:
 
-```mermaid
-flowchart LR
-    Failed_Logins --> Correlation --> Single_Alert --> SOC_Notification
+```
+Failed Logins → Correlation → Single Alert → SOC Notification
 ```
 
 ### Use Case Development Lifecycle
 
-```mermaid
-flowchart TB
-    Requirements --> Data_Points --> Log_Validation --> Design --> Implementation --> Documentation --> Onboarding --> Testing --> Fine_Tuning
+```
+Requirements → Data Points → Log Validation → Design → Implementation → Documentation → Onboarding → Testing → Fine Tuning
 ```
 
 ### Steps to Build SIEM Use Cases
