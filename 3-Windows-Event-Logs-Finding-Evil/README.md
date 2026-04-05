@@ -1124,6 +1124,50 @@ Desktop showing Process Hacker with running processes, PowerShell executing comm
 ```powershell
 # Execute Seatbelt (legitimate but used by attackers)
 PS C:\Tools\GhostPack Compiled Binaries>.\Seatbelt.exe TokenPrivileges
+
+                        %&&@@@&&
+                        &&&&&&&%%%,                       #&&@@@@@@%%%%%%###############%
+                        &%&   %&%%                        &////(((&%%%%%#%################//((((###%%%%%%%%%%%%%%%
+%%%%%%%%%%%######%%%#%%####%  &%%**#                      @////(((&%%%%%%######################(((((((((((((((((((
+#%#%%%%%%%#######%#%%#######  %&%,,,,,,,,,,,,,,,,         @////(((&%%%%%#%#####################(((((((((((((((((((
+#%#%%%%%%#####%%#%#%%#######  %%%,,,,,,  ,,.   ,,         @////(((&%%%%%%%######################(#(((#(#((((((((((
+#####%%%####################  &%%......  ...   ..         @////(((&%%%%%%%###############%######((#(#(####((((((((
+#######%##########%#########  %%%......  ...   ..         @////(((&%%%%%#########################(#(#######((#####
+###%##%%####################  &%%...............          @////(((&%%%%%%%%##############%#######(#########((#####
+#####%######################  %%%..                       @////(((&%%%%%%%################
+                        &%&   %%%%%      Seatbelt         %////(((&%%%%%%%%#############*
+                        &%%&&&%%%%%        v1.2.1         ,(((&%%%%%%%%%%%%%%%%%,
+                         #%%%%##,
+
+
+====== TokenPrivileges ======
+
+Current Token's Privileges
+
+                     SeIncreaseQuotaPrivilege:  DISABLED
+                          SeSecurityPrivilege:  DISABLED
+                     SeTakeOwnershipPrivilege:  DISABLED
+                        SeLoadDriverPrivilege:  DISABLED
+                     SeSystemProfilePrivilege:  DISABLED
+                        SeSystemtimePrivilege:  DISABLED
+              SeProfileSingleProcessPrivilege:  DISABLED
+              SeIncreaseBasePriorityPrivilege:  DISABLED
+                    SeCreatePagefilePrivilege:  DISABLED
+                            SeBackupPrivilege:  DISABLED
+                           SeRestorePrivilege:  DISABLED
+                          SeShutdownPrivilege:  DISABLED
+                             SeDebugPrivilege:  SE_PRIVILEGE_ENABLED
+                 SeSystemEnvironmentPrivilege:  DISABLED
+                      SeChangeNotifyPrivilege:  SE_PRIVILEGE_ENABLED_BY_DEFAULT, SE_PRIVILEGE_ENABLED
+                    SeRemoteShutdownPrivilege:  DISABLED
+                            SeUndockPrivilege:  DISABLED
+                      SeManageVolumePrivilege:  DISABLED
+                       SeImpersonatePrivilege:  SE_PRIVILEGE_ENABLED_BY_DEFAULT, SE_PRIVILEGE_ENABLED
+                      SeCreateGlobalPrivilege:  SE_PRIVILEGE_ENABLED_BY_DEFAULT, SE_PRIVILEGE_ENABLED
+                SeIncreaseWorkingSetPrivilege:  DISABLED
+                          SeTimeZonePrivilege:  DISABLED
+                SeCreateSymbolicLinkPrivilege:  DISABLED
+    SeDelegateSessionUserImpersonatePrivilege:  DISABLED
 ```
 
 This triggers Sysmon Event ID 7 (Image Load):
@@ -1139,7 +1183,7 @@ This triggers Sysmon Event ID 7 (Image Load):
 
 ```cmd
 # Collect .NET Runtime events (keywords: JitKeyword, InteropKeyword, LoaderKeyword, NGenKeyword)
-SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x2038 -ot file -p C:\windows\temp\etw.json
+c:\Tools\SilkETW_SilkService_v8\v8\SilkETW>SilkETW.exe -t user -pn Microsoft-Windows-DotNETRuntime -uk 0x2038 -ot file -p C:\windows\temp\etw.json
 ```
 
 <img width="3065" height="1729" alt="image" src="https://github.com/user-attachments/assets/b17264e2-014b-4f60-8bc5-7109a71c5ce6" />
