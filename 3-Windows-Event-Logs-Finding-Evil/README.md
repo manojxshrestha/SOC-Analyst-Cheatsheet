@@ -324,7 +324,9 @@ Sysmon Event 7: Image loaded, ProcessID 2792, Image spoolsv.exe, ImageLoaded clr
 
 ### Detection Example 3: Detecting Credential Dumping
 
-Another critical aspect of cybersecurity is detecting credential dumping activities. One widely used tool for credential dumping is Mimikatz, offering various methods for extracting Windows credentials. One specific command, "sekurlsa::logonpasswords", enables the dumping of password hashes or plaintext passwords by accessing the Local Security Authority Subsystem Service (LSASS). LSASS is responsible for managing user credentials and is a primary target for credential-dumping tools like Mimikatz.
+Another critical aspect of cybersecurity is detecting credential dumping activities. One widely used tool for credential dumping is **Mimikatz**, offering various methods for extracting Windows credentials. One specific command, **`sekurlsa::logonpasswords`**, enables the dumping of password hashes or plaintext passwords by accessing the **LSASS** (Local Security Authority Subsystem Service). LSASS is responsible for managing user credentials and is a primary target for credential-dumping tools like Mimikatz.
+
+> ⚠️ **WARNING**: Mimikatz is a powerful post-exploitation tool used by both red teams and real attackers. Understanding how it works is essential for blue team defenders.
 
 The attack can be executed as follows:
 
@@ -338,10 +340,10 @@ C:\Tools\Mimikatz> mimikatz.exe
  '## v ##'       Vincent LE TOUX             ( vincent.letoux@gmail.com )
   '#####'        > http://pingcastle.com / http://mysmartlogon.com   ***/
 
-mimikatz # privilege::debug
+mimikatz # privilege::debug          <-- Enables SeDebugPrivilege
 Privilege '20' OK
 
-mimikatz # sekurlsa::logonpasswords
+mimikatz # sekurlsa::logonpasswords   <-- Dumps credentials from LSASS
 
 Authentication Id : 0 ; 1128191 (00000000:001136ff)
 Session           : RemoteInteractive from 2
@@ -354,7 +356,7 @@ SID               : S-1-5-21-2712802632-2324259492-1677155984-500
          [00000003] Primary
          * Username : Administrator
          * Domain   : DESKTOP-NU10MTO
-         * NTLM     : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+         * NTLM     : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX        <-- NTLM HASH
          * SHA1     : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX0812156b
         tspkg :
         wdigest :
@@ -369,19 +371,50 @@ SID               : S-1-5-21-2712802632-2324259492-1677155984-500
         credman :
 ```
 
+> 🔴 **CRITICAL**: The output reveals **NTLM hashes**, **Kerberos tickets**, and **plaintext passwords** (if available). This is a major security breach!
+
 As we can see, the output of the "sekurlsa::logonpasswords" command provides powerful insights into compromised credentials.
 
-To detect this activity, we can rely on a different Sysmon event. Instead of focusing on DLL loads, we shift our attention to process access events. By checking Sysmon event ID 10, which represents "ProcessAccess" events, we can identify any suspicious attempts to access LSASS.
+### How to Detect Mimikatz Activity
+
+To detect this activity, we can rely on a different Sysmon event. Instead of focusing on DLL loads, we shift our attention to process access events. By checking **Sysmon Event ID 10** ("ProcessAccess"), we can identify any suspicious attempts to access LSASS.
+
+> 📌 **KEY DETECTION**: Sysmon Event ID 10 is your best friend for detecting credential dumping!
 
 <img width="1000" height="271" alt="image" src="https://github.com/user-attachments/assets/34ce1b68-e298-4a74-9654-db55143ba6c6" />
 
 <img width="1000" height="397" alt="image" src="https://github.com/user-attachments/assets/ffac5cd8-2923-4d9a-ae18-22f91e4c14a3" />
 
-Event ID 10: ProcessAccess details process access events for detecting hacking tools targeting processes like Lsass.exe for credential theft. Sysmon Event 10: Process accessed, SourceImage AgentEXE.exe, TargetImage lsass.exe, SourceUser DESKTOP-R4PEEIF\waldo, TargetUser NT AUTHORITY\SYSTEM.
+### 🚨 Indicators of Compromise (IOCs)
 
-For instance, if we observe a random file ("AgentEXE" in this case) from a random folder ("Downloads" in this case) attempting to access LSASS, it indicates unusual behavior. Additionally, the SourceUser being different from the TargetUser (e.g., "waldo" as the SourceUser and "SYSTEM" as the TargetUser) further emphasizes the abnormality. It's also worth noting that as part of the mimikatz-based credential dumping process, the user must request SeDebugPrivileges. As the name suggests, it's primarily used for debugging. This can be another Indicator of Compromise (IOC).
+For instance, if we observe a random file ("AgentEXE" in this case) from a random folder ("Downloads" in this case) attempting to access LSASS, it indicates unusual behavior.
 
-Please note that some legitimate processes may access LSASS, such as authentication-related processes or security tools like AV or EDR.
+| IOC | Description |
+|-----|-------------|
+| **SourceImage** | Process accessing LSASS (e.g., AgentEXE.exe from Downloads) |
+| **TargetImage** | Should be lsass.exe |
+| **SourceUser** vs **TargetUser** | Different users indicate privilege escalation |
+| **SeDebugPrivilege** | Required for LSASS access - another detection opportunity |
+
+Additionally, the SourceUser being different from the TargetUser (e.g., "waldo" as the SourceUser and "SYSTEM" as the TargetUser) further emphasizes the abnormality.
+
+> 🔑 **PRIVILEGE CHECK**: As part of the mimikatz-based credential dumping process, the user must request **SeDebugPrivilege**. This can be another Indicator of Compromise (IOC)!
+
+### ⚠️ Important Note
+
+Please note that some legitimate processes may access LSASS, such as authentication-related processes or security tools like AV or EDR. You'll need to create allowlists for known good processes to reduce false positives.
+
+### Detection Query Example
+
+```powershell
+# Sysmon Event ID 10 - Look for LSASS access
+EventID=10 TargetImage="*lsass.exe"
+```
+
+Filter for:
+- Source processes from unexpected locations
+- Unusual SourceUser accessing SYSTEM processes
+- Processes that don't normally need LSASS access
 
 ---
 
