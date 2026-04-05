@@ -40,7 +40,8 @@ This module covers the **foundations of SIEM and SOC operations**. You'll learn 
 4. [MITRE ATT&CK & Security Operations](#4-mitre-attck--security-operations)
 5. [SIEM Use Case Development](#5-siem-use-case-development)
 6. [SIEM Visualization - Dashboard Development](#6-siem-visualization---dashboard-development)
-7. [Additional Resources](#7-additional-resources)
+7. [Interview Questions](#8-interview-questions)
+8. [Additional Resources](#9-additional-resources)
 
 ---
 
@@ -673,7 +674,249 @@ When this alert triggers:
 
 ---
 
-## 7. Additional Resources
+## 8. Interview Questions
+
+### Q1: What is the difference between SIEM and SOC?
+
+**Answer:**
+- **SIEM (Security Information and Event Management)** is a technology platform that aggregates, correlates, and analyzes security data from across an organization's IT infrastructure. It provides centralized visibility, log management, and detection capabilities.
+- **SOC (Security Operations Center)** is a team of people, processes, and technology working together to monitor, detect, analyze, and respond to security incidents. It's the operational capability that uses SIEM as one of its core tools.
+
+Think of it this way: SIEM is the **tool**, SOC is the **team and process** that uses the tool.
+
+---
+
+### Q2: Explain the SIEM data flow from source to alert.
+
+**Answer:**
+
+```mermaid
+flowchart TD
+    Sources[Data Sources] --> Collectors[Log Collectors/Agents]
+    Collectors --> Normalization[Log Normalization]
+    Normalization --> Index[Index & Store]
+    Index --> Correlation[Correlation Engine]
+    Correlation --> Detection[Detection Rules]
+    Detection --> Alert[Generate Alert]
+    Alert --> Analyst[SOC Analyst Review]
+    Analyst --> Response[Response/Remediation]
+```
+
+1. **Data Sources**: Firewalls, IDS/IPS, endpoints, servers, applications, cloud services
+2. **Collection**: Agents (e.g., Beats, Wazuh agents) or syslog collectors gather logs
+3. **Normalization**: Parsing and mapping raw logs to a common schema (e.g., ECS)
+4. **Storage**: Indexed in searchable database (Elasticsearch, Splunk indexes)
+5. **Correlation**: Rules evaluate events against patterns and thresholds
+6. **Alert Generation**: Trigger notifications when conditions are met
+7. **Analyst Review**: SOC analyst investigates and determines response
+8. **Response**: Containment, remediation, and documentation
+
+---
+
+### Q3: What is log normalization and why is it important?
+
+**Answer:**
+
+Log normalization is the process of transforming diverse log formats into a standardized structure with consistent field names, timestamps, and value formats.
+
+**Why it matters:**
+- Different sources use different formats (Apache vs. Windows Event Log vs. Firewall)
+- Enables cross-source correlation and search
+- Makes dashboarding and reporting consistent
+- Reduces complexity for analysts writing queries
+
+**Example:**
+```
+Raw: [10/Oct/2024:13:55:36 +0000] "GET /admin HTTP/1.1" 200 1234
+Normalized:
+  timestamp: 2024-10-10T13:55:36Z
+  method: GET
+  uri: /admin
+  status_code: 200
+  bytes: 1234
+```
+
+---
+
+### Q4: How do you reduce alert fatigue in a SOC?
+
+**Answer:**
+
+Alert fatigue occurs when analysts become overwhelmed by too many alerts, leading to ignored or missed critical incidents.
+
+**Strategies to reduce alert fatigue:**
+
+| Approach | Description |
+|----------|-------------|
+| **Tune detection rules** | Adjust thresholds, add exclusion criteria, reduce false positives |
+| **Implement alert prioritization** | Use severity levels to focus on critical alerts first |
+| **Aggregation & correlation** | Group related alerts into incidents to reduce noise |
+| **Threat intelligence enrichment** | Prioritize alerts with known malicious IOCs |
+| **Automated playbooks** | Auto-investigate and enrich alerts before human review |
+| **Regular rule review** | Remove or adjust rules generating excessive noise |
+| **Use machine learning** | Anomaly detection to identify truly suspicious behavior |
+
+---
+
+### Q5: Explain the Elastic Stack components.
+
+**Answer:**
+
+```mermaid
+flowchart LR
+    Beats[Beats] --> Elasticsearch[Elasticsearch]
+    Logstash[Logstash/Fleet] --> Elasticsearch
+    Kibana[Kibana/Sentinel] --> Elasticsearch
+    
+    Elasticsearch --> Storage[Index & Search]
+    Kibana --> Visualize[Visualize & Analyze]
+```
+
+| Component | Purpose |
+|-----------|---------|
+| **Beats** | Lightweight data collectors (Filebeat, Metricbeat, Winlogbeat, etc.) |
+| **Logstash** | Data processing pipeline - parsing, transformation, enrichment |
+| **Fleet** | Centralized management for Elastic Agents |
+| **Elasticsearch** | Distributed search and analytics engine - stores and indexes data |
+| **Kibana** | Web UI for visualization, dashboards, and searching |
+| **Elastic Agent** | Unified agent replacing Beats - collects logs, metrics, EDR data |
+
+---
+
+### Q6: What is ECS (Elastic Common Schema)?
+
+**Answer:**
+
+ECS is a standardized schema for organizing log data in Elasticsearch. It defines consistent field names and data types across different data sources.
+
+**Key ECS Fields:**
+- `@timestamp` - Event time
+- `host.name` - Hostname
+- `source.ip` - Source IP address
+- `destination.ip` - Destination IP address
+- `user.name` - Username
+- `event.action` - Action performed
+- `event.category` - Event category (e.g., "authentication")
+- `event.type` - Event type (e.g., "access")
+
+**Benefits:**
+- Cross-vendor compatibility
+- Simplified search and visualization
+- Easier correlation between different log types
+
+---
+
+### Q7: Write a basic KQL query to find failed logins.
+
+**Answer:**
+
+**Basic query (Elasticsearch/Kibana):**
+```
+event.category:authentication AND event.outcome:failure
+```
+
+**Windows Security Event Log:**
+```
+EventID:4625 AND winlog.event_data.Status:"0xC000006D"
+```
+
+**Splunk equivalent:**
+```
+index=security EventID=4625
+```
+
+**Finding multiple failed attempts:**
+```
+event.category:authentication AND event.outcome:failure
+| stats count by source.ip, user.name
+| where count > 5
+```
+
+---
+
+### Q8: Describe the use case development lifecycle.
+
+**Answer:**
+
+```mermaid
+flowchart TD
+    Identify[1. Identify Threat] --> Specify[2. Specify Detection]
+    Specify --> Develop[3. Develop Rule]
+    Develop --> Test[4. Test & Tune]
+    Test --> Deploy[5. Deploy to Prod]
+    Deploy --> Monitor[6. Monitor & Optimize]
+    Monitor --> Review[7. Periodic Review]
+    Review --> Identify
+```
+
+1. **Identify Threat**: Research threat landscape, MITRE ATT&CK, recent incidents
+2. **Specify Detection**: Define logic, data sources, expected output
+3. **Develop Rule**: Write Sigma rule, convert to SIEM-specific query
+4. **Test & Tune**: Validate against test data, adjust for false positives
+5. **Deploy to Prod**: Implement with appropriate alerting
+6. **Monitor & Optimize**: Track effectiveness, tune as needed
+7. **Periodic Review**: Regular assessment of rule relevance
+
+---
+
+### Q9: What factors determine alert severity?
+
+**Answer:**
+
+| Factor | Description |
+|--------|-------------|
+| **Asset criticality** | Is the affected system critical (DC, database, exposed server)? |
+| **Attack stage** | Is it early stage (recon) or post-exploitation (data exfil)? |
+| **Threat intelligence** | Is the IOC known malicious (high confidence)? |
+| **Event context** | Is it part of a broader attack campaign? |
+| **Data sensitivity** | Does it involve sensitive/PII data? |
+| **Compliance impact** | Does it violate regulatory requirements? |
+| **Likelihood** | How likely is it to be a real threat vs. false positive? |
+
+**Severity Levels:**
+- **Critical (P1)**: Active breach, ransomware, data exfiltration
+- **High (P2)**: Malware, successful exploitation, privilege escalation
+- **Medium (P3)**: Failed attempts, suspicious activity
+- **Low (P4)**: Informational, policy violations
+
+---
+
+### Q10: How do you map a detection rule to MITRE ATT&CK?
+
+**Answer:**
+
+**Why map to ATT&CK?**
+- Standardized taxonomy for threat reporting
+- Helps identify detection gaps
+- Prioritize coverage based on threat landscape
+
+**Steps to map a rule:**
+
+1. **Identify the technique**: What behavior is being detected?
+   - Example: PowerShell encoded commands → T1059.001
+
+2. **Find the tactic**: What is the attacker's goal?
+   - T1059.001 (PowerShell) is under "Execution" tactic
+
+3. **Map the detection**:
+   ```yaml
+   detection:
+     event.action: "powershell_execution"
+     command_line: "*encodedcommand*"
+   mapped_tactic: Execution
+   mapped_technique: T1059.001 - PowerShell
+   ```
+
+4. **Document coverage**: Track which techniques your rules detect
+
+**Tools:**
+- MITRE ATT&CK Navigator - visualize coverage
+- Sigma rules include "tags" for ATT&CK mapping
+- SIEM dashboards show detection by tactic
+
+---
+
+## 9. Additional Resources
 
 ### Official Documentation
 
