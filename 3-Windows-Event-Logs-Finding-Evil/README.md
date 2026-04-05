@@ -45,47 +45,6 @@ This module covers **Windows Event Logs & Sysmon** - the primary data sources fo
 
 ---
 
-## 0. Overview
-
-This module covers **Windows Event Logs & Sysmon** - the primary data sources for detecting malicious activity on Windows endpoints. You'll learn how to analyze security logs, use Sysmon for enhanced detection, identify suspicious behavior, and find evil using Windows event log analysis.
-
-### Key Takeaways
-
-| Concept | Description |
-|---------|-------------|
-| **Windows Event Logs** | Records of system, security, and application events |
-| **Security Event IDs** | Windows security log event identifiers |
-| **Sysmon** | System Monitor - enhanced logging for security |
-| **DLL Hijacking** | Loading malicious DLLs via legitimate processes |
-| **Process Injection** | Injecting code into legitimate processes |
-| **Credential Dumping** | Extracting credentials from LSASS |
-
-### Prerequisites
-
-- Basic understanding of Windows OS
-- Familiarity with Windows administration
-- Understanding of Windows Event Viewer
-
-### Module Duration
-
-- **Theory**: 3-4 hours
-- **Hands-on Practice**: 4-5 hours
-- **Total**: ~8-9 hours
-
----
-
-## Table of Contents
-
-0. [Overview](#0-overview)
-1. [Windows Event Logging Basics](#1-windows-event-logging-basics)
-2. [Analyzing Evil With Sysmon & Event Logs](#2-analyzing-evil-with-sysmon--event-logs)
-3. [Event Tracing for Windows (ETW)](#3-event-tracing-for-windows-etw)
-4. [Tapping Into ETW](#4-tapping-into-etw)
-5. [Interview Questions](#5-interview-questions)
-6. [Additional Resources](#6-additional-resources)
-
----
-
 ## 1. Windows Event Logging Basics
 
 Windows event logging offers comprehensive logging capabilities for application errors, security events, and diagnostic information. As cybersecurity professionals, we leverage these logs extensively for analysis and intrusion detection.
@@ -1201,7 +1160,7 @@ Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; 
 
 ---
 
-## 7. Interview Questions
+## 6. Interview Questions
 
 ### Q1: What is the difference between Windows Event ID 4688 and Sysmon Event ID 1?
 
@@ -1317,7 +1276,7 @@ The `-ets` parameter tells Logman to query Event Tracing Sessions directly. With
 
 ---
 
-## 7. Additional Resources
+## 6. Additional Resources
 
 ### Tools
 
