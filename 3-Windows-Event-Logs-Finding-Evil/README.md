@@ -142,20 +142,20 @@ By constructing such queries, we can narrow down our focus to the account respon
 Find below an indicative (non-exhaustive) list of useful Windows event logs:
 
 **Windows System Logs**
-- **Event ID 1074** (System Shutdown/Restart): Indicates when and why the system was shut down or restarted
-- **Event ID 6005** (The Event log service was started): Marks the time when the Event Log Service was started (system boot-up)
-- **Event ID 6006** (The Event log service was stopped): Signifies when the Event Log Service was stopped
-- **Event ID 6013** (Windows uptime): Shows the uptime of the system in seconds (helps detect unauthorized reboots)
-- **Event ID 7040** (Service status change): Indicates a change in service startup type
+- 📌 **Event ID 1074** (System Shutdown/Restart): Indicates when and why the system was shut down or restarted
+- 📌 **Event ID 6005** (The Event log service was started): Marks the time when the Event Log Service was started (system boot-up)
+- 📌 **Event ID 6006** (The Event log service was stopped): Signifies when the Event Log Service was stopped
+- 📌 **Event ID 6013** (Windows uptime): Shows the uptime of the system in seconds (helps detect unauthorized reboots)
+- 📌 **Event ID 7040** (Service status change): Indicates a change in service startup type
 
 **Windows Security Logs**
-- **Event ID 1102** (The audit log was cleared): Often a sign of an attempt to remove evidence
-- **Event ID 4624** (Successful Logon): Records successful logon events
-- **Event ID 4625** (Failed Logon): Logs failed logon attempts - multiple could indicate brute-force
-- **Event ID 4648** (Explicit credentials): Triggered when a user logs on with explicit credentials to run a program (lateral movement)
-- **Event ID 4672** (Special Privileges Assigned): Logged whenever an account logs on with super user privileges
-- **Event ID 4698** (Scheduled task created): Triggered when a scheduled task is created (persistence)
-- **Event ID 7045** (Service installed): New services might suggest malware installation
+- 🚨 **Event ID 1102** (The audit log was cleared): Often a sign of an attempt to remove evidence
+- 🔑 **Event ID 4624** (Successful Logon): Records successful logon events
+- ⚠️ **Event ID 4625** (Failed Logon): Logs failed logon attempts - multiple could indicate brute-force
+- 🔍 **Event ID 4648** (Explicit credentials): Triggered when a user logs on with explicit credentials to run a program (lateral movement)
+- 🔑 **Event ID 4672** (Special Privileges Assigned): Logged whenever an account logs on with super user privileges
+- 🔴 **Event ID 4698** (Scheduled task created): Triggered when a scheduled task is created (persistence)
+- 🔴 **Event ID 7045** (Service installed): New services might suggest malware installation
 
 ---
 
@@ -176,7 +176,15 @@ Sysmon's primary components include:
 
 Sysmon's unique capability lies in its ability to log information that typically doesn't appear in the Security Event logs, and this makes it a powerful tool for deep system monitoring and cybersecurity forensic analysis.
 
-Sysmon categorizes different types of system activity using event IDs, where each ID corresponds to a specific type of event. For example, Event ID 1 corresponds to "Process Creation" events, and Event ID 3 refers to "Network Connection" events.
+Sysmon categorizes different types of system activity using event IDs, where each ID corresponds to a specific type of event. For example, **Event ID 1** corresponds to "Process Creation" events, and **Event ID 3** refers to "Network Connection" events.
+
+For more granular control over what events get logged, Sysmon uses an XML-based configuration file:
+
+> 🔑 **MUST-KNOW Sysmon Event IDs**:
+> - **Event ID 1**: Process Creation
+> - **Event ID 3**: Network Connection
+> - **Event ID 7**: Image Load (DLL loading)
+> - **Event ID 10**: ProcessAccess (credential dumping detection)
 
 For more granular control over what events get logged, Sysmon uses an XML-based configuration file. The configuration file allows you to include or exclude certain types of events based on different attributes like process names, IP addresses, etc. Popular Sysmon configuration files:
 - https://github.com/SwiftOnSecurity/sysmon-config (Comprehensive)
