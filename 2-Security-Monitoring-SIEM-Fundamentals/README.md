@@ -304,16 +304,8 @@ flowchart LR
 A **use case** defines specific conditions that trigger an alert:
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#999', 'nodeBorder': '#999'}}}%%
 flowchart LR
-    A[10 Failed Logins] --> B[SIEM Correlation]
-    B --> C[Single Alert]
-    C --> D[SOC Notification]
-    
-    style A fill:#fff3e0,stroke:#999
-    style B fill:#e3f2fd,stroke:#999
-    style C fill:#e3f2fd,stroke:#999
-    style D fill:#e8f5e9,stroke:#999
+    Failed_Logins --> Correlation --> Single_Alert --> SOC_Notification
 ```
 
 ### Use Case Development Lifecycle
