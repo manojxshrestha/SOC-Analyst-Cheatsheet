@@ -680,34 +680,197 @@ C:\Tools> logman.exe query -ets
 
 This shows all active ETW sessions including **Sysmon Event Tracing Sessions**.
 
-        cmd-session
+```cmd
 C:\Tools> logman.exe query -ets
+```
 
 ```
 Data Collector Set                      Type                          Status
 -------------------------------------------------------------------------------
 Circular Kernel Context Logger          Trace                         Running
 Eventlog-Security                       Trace                         Running
+DiagLog                                 Trace                         Running
+Diagtrack-Listener                      Trace                         Running
+EventLog-Application                    Trace                         Running
 EventLog-Microsoft-Windows-Sysmon-Operational Trace                         Running
+EventLog-System                         Trace                         Running
+LwtNetLog                               Trace                         Running
+Microsoft-Windows-Rdp-Graphics-RdpIdd-Trace Trace                         Running
+NetCore                                 Trace                         Running
+NtfsLog                                 Trace                         Running
+RadioMgr                                Trace                         Running
+UBPM                                    Trace                         Running
+WdiContextLog                           Trace                         Running
+WiFiSession                             Trace                         Running
+SHS-06012023-115154-7-7f                Trace                         Running
+UserNotPresentTraceSession              Trace                         Running
+8696EAC4-1288-4288-A4EE-49EE431B0AD9    Trace                         Running
+ScreenOnPowerStudyTraceSession          Trace                         Running
 SYSMON TRACE                            Trace                         Running
+MSDTC_TRACE_SESSION                     Trace                         Running
 SysmonDnsEtwSession                     Trace                         Running
-...
+MpWppTracing-20230601-115025-00000003-ffffffff Trace                         Running
+WindowsUpdate_trace_log                 Trace                         Running
+Admin_PS_Provider                       Trace                         Running
+Terminal-Services-LSM-ApplicationLag-3764 Trace                         Running
+Microsoft.Windows.Remediation           Trace                         Running
+SgrmEtwSession                          Trace                         Running
 ```
 
 > 🔑 **IMPORTANT**: The **"-ets"** parameter is vital to the command. Without it, Logman will not identify the Event Tracing Session!
 
-### Key Commands
+When we examine an Event Tracing Session directly, we uncover specific session details including the Name, Max Log Size, Log Location, and the subscribed providers.
+
+### Querying Session Details
 
 ```cmd
-# Query specific session details
-logman.exe query "EventLog-System" -ets
-
-# List all available providers
-logman.exe query providers
-
-# Query specific provider (e.g., Winlogon)
-logman.exe query providers Microsoft-Windows-Winlogon
+C:\Tools> logman.exe query "EventLog-System" -ets
 ```
+
+```
+Name:                 EventLog-System
+Status:               Running
+Root Path:            %systemdrive%\PerfLogs\Admin
+Segment:              Off
+Schedules:            On
+Segment Max Size:     100 MB
+
+Name:                 EventLog-System\EventLog-System
+Type:                 Trace
+Append:               Off
+Circular:             Off
+Overwrite:            Off
+Buffer Size:          64
+Buffers Lost:         0
+Buffers Written:      47
+Buffer Flush Timer:   1
+Clock Type:           System
+File Mode:            Real-time
+
+Provider:
+Name:                 Microsoft-Windows-FunctionDiscoveryHost
+Provider Guid:        {538CBBAD-4877-4EB2-B26E-7CAEE8F0F8CB}
+Level:                255
+KeywordsAll:          0x0
+KeywordsAny:          0x8000000000000000 (System)
+Properties:           65
+Filter Type:          0
+
+Provider:
+Name:                 Microsoft-Windows-Subsys-SMSS
+Provider Guid:        {43E63DA5-41D1-4FBF-ADED-1BBED98FDD1D}
+Level:                255
+KeywordsAll:          0x0
+KeywordsAny:          0x4000000000000000 (System)
+Properties:           65
+Filter Type:          0
+
+Provider:
+Name:                 Microsoft-Windows-Kernel-General
+Provider Guid:        {A68CA8B7-004F-D7B6-A698-07E2DE0F1F5D}
+Level:                255
+KeywordsAll:          0x0
+KeywordsAny:          0x8000000000000000 (System)
+Properties:           65
+Filter Type:          0
+
+Provider:
+Name:                 Microsoft-Windows-FilterManager
+Provider Guid:        {F3C5E28E-63F6-49C7-A204-E48A1BC4B09D}
+Level:                255
+KeywordsAll:          0x0
+KeywordsAny:          0x8000000000000000 (System)
+Properties:           65
+Filter Type:          0
+```
+
+> 📌 **KEY INFO**: For each provider, you can get:
+> - **Provider GUID**: Exclusive identifier
+> - **Level**: Filtering for warning, informational, critical events
+> - **Keywords Any**: Filter based on event type
+
+### Listing All Providers
+
+> 🔴 **FACT**: Windows 10 includes **more than 1,000 built-in providers**!
+
+```cmd
+C:\Tools> logman.exe query providers
+```
+
+```
+Provider                                 GUID
+-------------------------------------------------------------------------------
+ACPI Driver Trace Provider               {DAB01D4D-2D48-477D-B1C3-DAAD0CE6F06B}
+Active Directory Domain Services: SAM    {8E598056-8993-11D2-819E-0000F875A064}
+Active Directory: Kerberos Client        {BBA3ADD2-C229-4CDB-AE2B-57EB6966B0C4}
+Active Directory: NetLogon               {F33959B4-DBEC-11D2-895B-00C04F79AB69}
+ADODB.1                                  {04C8A86F-3369-12F8-4769-24E484A9E725}
+ADOMD.1                                  {7EA56435-3F2F-3F63-A829-F0B35B5CAD41}
+Application Popup                        {47BFA2B7-BD54-4FAC-B70B-29021084CA8F}
+Application-Addon-Event-Provider         {A83FA99F-C356-4DED-9FD6-5A5EB8546D68}
+ATA Port Driver Tracing Provider         {D08BD885-501E-489A-BAC6-B7D24BFE6BBF}
+AuthFw NetShell Plugin                   {935F4AE6-845D-41C6-97FA-380DAD429B72}
+BFE Trace Provider                       {106B464A-8043-46B1-8CB8-E92A0CD7A560}
+BITS Service Trace                       {4A8AAA94-CFC4-46A7-8E4E-17BC45608F0A}
+Certificate Services Client Trace        {F01B7774-7ED7-401E-8088-B576793D7841}
+Circular Kernel Session Provider         {54DEA73A-ED1F-42A4-AF71-3E63D056F174}
+Critical Section Trace Provider          {3AC66736-CC59-4CFF-8115-8DF50E39816B}
+Disk Class Driver Tracing Provider       {945186BF-3DD6-4F3F-9C8E-9EDD3FC9D558}
+Layer2 Security HC Diagnostics Trace     {2E8D9EC5-A712-48C4-8CE0-631EB0C1CD65}
+Local Security Authority (LSA)           {CC85922F-DB41-11D2-9244-006008269001}
+LsaSrv                                   {199FE037-2B82-40A9-82AC-E1D46C792B99}
+Microsoft-Antimalware-AMFilter           {CFEB0608-330E-4410-B00D-56D8DA9986E6}
+Microsoft-Antimalware-Engine             {0A002690-3839-4E3A-B3B6-96D8DF868D99}
+Microsoft-Antimalware-Protection         {E4B70372-261F-4C54-8FA6-A5A7914D73DA}
+Microsoft-Antimalware-RTP                {8E92DEEF-5E17-413B-B927-59B2F06A3CFC}
+Microsoft-Antimalware-Service            {751EF305-6C6E-4FED-B847-02EF79D26AEF}
+Microsoft-Antimalware-ShieldProvider     {928F7D29-0577-5BE5-3BD3-B6BDAB9AB307}
+Microsoft-AppV-Client                    {E4F68870-5AE8-4E5B-9CE7-CA9ED75B0245}
+Microsoft-IE                             {9E3B3947-CA5D-4614-91A2-7B624E0E7244}
+Microsoft-IEFRAME                        {5C8BB950-959E-4309-8908-67961A1205D5}
+Microsoft-JScript                        {57277741-3638-4A4B-BDBA-0AC6E45DA56C}
+Microsoft-Windows-AAD                    {4DE9BC9C-B27A-43C9-8994-0915F1A5E24F}
+Microsoft-Windows-ACL-UI                 {EA4CC8B8-A150-47A3-AFB9-C8D194B19452}
+...
+```
+
+> 📌 **TIP**: Filter providers using `findstr`:
+
+```cmd
+C:\Tools> logman.exe query providers | findstr "Winlogon"
+```
+
+Output:
+```
+Microsoft-Windows-Winlogon               {DBE9B383-7CF3-4331-91CC-A3CB16A3B538}
+Windows Winlogon Trace                   {D451642C-63A6-11D7-9720-00B0D03E0347}
+```
+
+### Querying Provider Details
+
+```cmd
+C:\Tools> logman.exe query providers Microsoft-Windows-Winlogon
+```
+
+```
+Provider                                 GUID
+-------------------------------------------------------------------------------
+Microsoft-Windows-Winlogon               {DBE9B383-7CF3-4331-91CC-A3CB16A3B538}
+
+Value               Keyword              Description
+-------------------------------------------------------------------------------
+0x4000000000000000  Microsoft-Windows-Winlogon/Operational
+0x8000000000000000  Microsoft-Windows-Winlogon/Diagnostic
+0x2000000000000000  System               System
+
+Value               Level                Description
+-------------------------------------------------------------------------------
+0x02                win:Error            Error
+0x03                win:Warning          Warning
+0x04                win:Informational    Information
+```
+
+> 📌 **NOTE**: The `Microsoft-Windows-Winlogon/Operational` keyword references the event logs generated from this provider.
 
 ### Important ETW Providers for Security
 
