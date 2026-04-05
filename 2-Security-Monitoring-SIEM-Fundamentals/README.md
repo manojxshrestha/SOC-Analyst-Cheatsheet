@@ -26,7 +26,8 @@ This module covers the **foundations of SIEM and SOC operations**. You'll learn 
 3. [SOC Definition & Fundamentals](#3-soc-definition--fundamentals)
 4. [MITRE ATT&CK & Security Operations](#4-mitre-attck--security-operations)
 5. [SIEM Use Case Development](#5-siem-use-case-development)
-6. [Additional Resources](#6-additional-resources)
+6. [SIEM Visualization - Dashboard Development](#6-siem-visualization---dashboard-development)
+7. [Additional Resources](#7-additional-resources)
 
 ---
 
@@ -418,8 +419,347 @@ flowchart TB
 
 ---
 
-## 6. Additional Resources
+## 6. SIEM Visualization - Dashboard Development
 
+### Creating Failed Logon Attempts Dashboard
+
+Dashboards in SIEM solutions serve as containers for multiple visualizations, allowing us to organize and display data in a meaningful way.
+
+In this and the following sections, we will create a dashboard and some visualizations from scratch.
+
+#### Step 1: Navigate to Dashboard
+
+Navigate to http://[Target IP]:5601, click on the side navigation toggle, and click on "Dashboard".
+
+Delete the existing "SOC-Alerts" dashboard as follows.
+
+<img width="1337" height="559" alt="Delete existing SOC-Alerts dashboard" src="https://github.com/user-attachments/assets/75a0b506-1d57-4683-95b6-983577b90915" />
+
+> **Description**: Elastic dashboard interface showing 'SOC-Alerts' with options to delete or create a dashboard.
+
+When visiting the Dashboard page again we will be presented with a message indicating that no dashboards currently exist. Additionally, there will be an option available to create a new Dashboard and its first visualization. To initiate the creation of our first dashboard, we simply have to click on the "Create new dashboard" button.
+
+<img width="1913" height="1169" alt="Create first dashboard" src="https://github.com/user-attachments/assets/224600e5-5fe3-4bb7-a976-7556a2b1b8dd" />
+
+> **Description**: Elastic interface prompting to create the first dashboard with options to install sample data and create a new dashboard.
+
+<img width="1913" height="1169" alt="Dashboard options" src="https://github.com/user-attachments/assets/fef349ef-1e9f-46ed-b5e7-6cbd427b9f21" />
+
+#### Step 2: Create First Visualization
+
+Now, to initiate the creation of our first visualization, we simply have to click on the "Create visualization" button.
+
+<img width="1096" height="928" alt="Create visualization button" src="https://github.com/user-attachments/assets/25f03fbf-3322-4095-8e6e-b7fbff5bed7b" />
+
+> **Description**: Elastic interface for editing a new dashboard, prompting to add the first visualization with options to create or add from library.
+
+Upon initiating the creation of our first visualization, the following new window will appear with various options and settings.
+
+Before proceeding with any configuration, it is important for us to first click on the calendar icon to open the time picker. Then, we need to specify the date range as "last 15 years". Finally, we can click on the "Apply" button to apply the specified date range to the data.
+
+<img width="1030" height="638" alt="Time picker configuration" src="https://github.com/user-attachments/assets/018b5957-5c94-463b-ad6f-8219595c5418" />
+
+> **Description**: Elastic dashboard creation interface with options to add filter, select index pattern 'windows*', search field names, and choose 'Bar vertical stacked' visualization.
+
+There are four things for us to notice on this window:
+
+1. **Filter Option** - A filter option that allows us to filter the data before creating a graph. For example, if our goal is to display failed logon attempts, we can use a filter to only consider event IDs that match 4625 – Failed logon attempt on a Windows system.
+
+<img width="1029" height="637" alt="Add filter for event code" src="https://github.com/user-attachments/assets/6fc32ca5-8a3a-4d6d-8185-d8021b2b9895" />
+
+> **Description**: Elastic dashboard interface with 'Add filter' option open, setting filter for 'event.code' to '4625' using operator 'is'.
+
+2. **Index Pattern** - This field indicates the data set (index) that we are going to use. It is common for data from various infrastructure sources to be separated into different indices, such as network, Windows, Linux, etc. In this particular example, we will specify `windows*` in the "Index pattern".
+
+3. **Field Search** - This search bar provides us with the ability to double-check the existence of a specific field within our data set. For example, let's say we are interested in the `user.name.keyword` field. We can use the search bar to quickly perform a search and verify if this field is present.
+
+<img width="460" height="1043" alt="Search for user fields" src="https://github.com/user-attachments/assets/c6f52bfd-3ce2-4824-a68a-bca856749799" />
+
+> **Description**: Elastic dashboard interface with a filter for 'event.code: 4625' and search for fields starting with 'user.' showing available fields like 'user.name.keyword'.
+
+> **Note**: We should use the `.keyword` field when it comes to aggregations.
+
+4. **Visualization Type** - This drop-down menu enables us to select the type of visualization we want to create. The default option is "Bar vertical stacked".
+
+<img width="1030" height="793" alt="Visualization type options" src="https://github.com/user-attachments/assets/7e5a3f12-9cf9-47f4-999b-e3dcd5f9388f" />
+
+> **Description**: Elastic interface showing visualization type options with 'Bar vertical stacked' selected, including other options like 'Metric' and 'Table'.
+
+#### Step 3: Configure Table Visualization
+
+For this visualization, let's select the "Table" option. After selecting the "Table", we can proceed to click on the "Rows" option. This will allow us to choose the specific data elements that we want to include in the table view.
+
+<img width="711" height="712" alt="Table configuration" src="https://github.com/user-attachments/assets/09b89951-297c-4a84-b611-d5803bb542fc" />
+
+> **Description**: Elastic table configuration interface with options to add or drag-and-drop fields for rows, columns, and metrics.
+
+Let's configure the "Rows" settings as follows.
+
+<img width="728" height="935" alt="Configure rows with user.name" src="https://github.com/user-attachments/assets/48a5227e-509b-48f5-a4a4-a03ca14f8d9d" />
+
+> **Description**: Elastic interface for configuring rows, selecting 'user.name.keyword' field, displaying top 1000 values, ranked by count of records in descending order.
+
+> **Note**: You will notice "Rank by Alphabetical" and not "Rank by Count of records" like in the screenshot above. This is OK. By the time you perform the next configuration below, Count of records will become available.
+
+Moving forward, let's close the "Rows" window and proceed to enter the "Metrics" configuration.
+
+<img width="703" height="839" alt="Metrics configuration" src="https://github.com/user-attachments/assets/4a1cdd58-0d8b-4788-838d-494cd92435e4" />
+
+> **Description**: Elastic table configuration showing 'windows*' index pattern, with 'Top values of user.name.keyword' in rows, and options to add fields to columns and metrics.
+
+In the "Metrics" window, let's select "count" as the desired metric.
+
+<img width="606" height="554" alt="Select Count metric" src="https://github.com/user-attachments/assets/26b8d863-7f0f-491e-9680-d2a6243b332a" />
+
+> **Description**: Elastic metrics configuration interface showing quick functions like Average, Count, and Sum, with 'Count' selected.
+
+As soon as we select "Count" as the metric, we will observe that the table gets populated with data.
+
+<img width="1029" height="504" alt="Table populated with data" src="https://github.com/user-attachments/assets/413427a5-f77a-4130-b2d4-27f09efa68d0" />
+
+> **Description**: Elastic table showing top values of 'user.name.keyword' with counts, and metrics configuration set to 'Count' for records.
+
+One final addition to the table is to include another "Rows" setting to show the machine where the failed logon attempt occurred. To do this, we will select the `host.hostname.keyword` field, which represents the computer reporting the failed logon attempt.
+
+<img width="1033" height="398" alt="Add hostname row" src="https://github.com/user-attachments/assets/d992d2af-2443-4e07-b3b1-bc2d1222533b" />
+
+> **Description**: Elastic table showing top values of 'user.name.keyword' and 'host.hostname.keyword' with record counts, configured in rows.
+
+Now we can see three columns in the table, which contain the following information:
+
+- The username of the individuals logging in (Note: It currently displays both users and computers. Ideally, a filter should be implemented to exclude computer devices and only display users)
+- The machine on which the logon attempt occurred
+- The number of times the event has occurred (based on the specified time frame or the entire data set, depending on the settings)
+
+Finally, click on "Save and return", and you will observe that the new visualization is added to the dashboard.
+
+<img width="1030" height="761" alt="Dashboard with table visualization" src="https://github.com/user-attachments/assets/88bb1297-59eb-4b78-b735-e2fc44a49ede" />
+
+> **Description**: Elastic dashboard showing a table with top values of user names and hostnames, and their record counts.
+
+Let's not forget to save the dashboard as well. We can do so by simply clicking on the "Save" button.
+
+<img width="1917" height="1053" alt="Save dashboard dialog" src="https://github.com/user-attachments/assets/9f8f7c54-f9a1-425a-b54a-6e322ffbda10" />
+
+> **Description**: Elastic interface showing 'Save dashboard' dialog with title 'SOC-Alerts', description for HTB Academy's SOC Analyst Job-Role Path, and option to store time with dashboard.
+
+### Refining The Visualization
+
+Suppose the SOC Manager suggested the following refinements:
+
+- Clearer column names should be specified in the visualization
+- The Logon Type should be included in the visualization
+- The results in the visualization should be sorted
+- The DESKTOP-DPOESND, WIN-OK9BH1BCKSD, and WIN-RMMGJA7T9TC usernames should not be monitored
+- Computer accounts should not be monitored (not a good practice)
+
+Let's refine the visualization we created, so that it fulfills the suggestions above.
+
+Navigate to http://[Target IP]:5601, click on the side navigation toggle, and click on "Dashboard".
+
+The dashboard we previously created should be visible. Let's click on the "pencil"/edit icon.
+
+<img width="1888" height="652" alt="Edit dashboard" src="https://github.com/user-attachments/assets/6fce909a-de6a-4395-a9eb-0a1c728de829" />
+
+> **Description**: Elastic dashboard interface showing a list with 'SOC-Alerts' and options to create or edit a dashboard.
+
+Let's now click on the "gear" button at the upper-right corner of our visualization, and then click on "Edit lens".
+
+<img width="1913" height="985" alt="Edit lens option" src="https://github.com/user-attachments/assets/7236e5f6-0c57-493e-bc36-ace8f5f852c7" />
+
+> **Description**: Elastic dashboard editing 'SOC-Alerts' with a table of top user and hostnames, and options to edit lens, clone panel, or edit panel title.
+
+#### Update Column Names
+
+"Top values of user.name.keyword" should be changed as follows.
+
+<img width="476" height="801" alt="Rename username column" src="https://github.com/user-attachments/assets/66081177-c2ba-4239-b932-49809e37bf56" />
+
+> **Description**: Elastic interface for configuring rows, selecting 'user.name.keyword' field, displaying top 1000 values, ranked alphabetically in ascending order, with display name 'Username'.
+
+"Top values of host.hostname.keyword" should be changed as follows.
+
+<img width="473" height="789" alt="Rename hostname column" src="https://github.com/user-attachments/assets/fe6741ab-3c34-43fa-93f1-0f1e99438812" />
+
+> **Description**: Elastic interface for configuring rows, selecting 'host.hostname.keyword' field, displaying top 1000 values, ranked by count of records in descending order, with display name 'Event logged by'.
+
+The "Logon Type" can be added as follows (we will use the `winlog.logon.type.keyword` field).
+
+<img width="456" height="791" alt="Add logon type field" src="https://github.com/user-attachments/assets/de706f04-fbe0-4a10-8744-bdcbfe95c8e4" />
+
+> **Description**: Rows configuration panel with 'winlog.logon.type.keyword' field selected, number of values set to 1000, ranked by count of records in descending order, display name 'Logon Type'.
+
+"Count of records" should be changed as follows.
+
+<img width="459" height="1062" alt="Rename count metric" src="https://github.com/user-attachments/assets/02abd6e2-1484-41be-b9c8-f53a0519a201" />
+
+> **Description**: Metrics panel with 'Count' function selected, field set to 'Records', display name '# of logins', text alignment 'Right'.
+
+We can introduce result sorting as follows.
+
+<img width="1915" height="1196" alt="Sorted results" src="https://github.com/user-attachments/assets/3b3a0711-ed53-4825-b59b-c9f725ade54c" />
+
+> **Description**: Elastic dashboard showing a table with columns: Username, Event logged by, Logon Type, and '# of logins' sorted descending.
+
+All we have to do now is click on "Save and return".
+
+#### Exclude Specific Usernames
+
+The DESKTOP-DPOESND, WIN-OK9BH1BCKSD, and WIN-RMMGJA7T9TC usernames can be excluded by specifying additional filters as follows.
+
+<img width="1430" height="1046" alt="Exclude usernames filter" src="https://github.com/user-attachments/assets/50b992fa-8462-4492-a88d-55f7be415e27" />
+
+> **Description**: Elastic dashboard with filter settings: Field 'user.name.keyword', operator 'is not', value 'DESKTOP-DPOESND'.
+
+#### Exclude Computer Accounts
+
+Computer accounts can be excluded by specifying the following KQL query and clicking on the "Update" button.
+
+```kql
+NOT user.name: *$ AND winlog.channel.keyword: Security
+```
+
+> **Note**: The `AND winlog.channel.keyword: Security` part is to ensure that no unrelated logs are accounted for.
+
+<img width="1919" height="1063" alt="Final visualization with filters" src="https://github.com/user-attachments/assets/417227e8-8f9e-4caa-9860-41d76ae25c5e" />
+
+> **Description**: Elastic dashboard with filters: NOT user.name:*$ AND winlog.channel.keyword: Security, showing a table with columns: Username, Event logged by, Logon Type, and '# of logins'.
+
+This is our visualization after all the refinements we performed.
+
+<img width="1917" height="1071" alt="Final refined dashboard" src="https://github.com/user-attachments/assets/df3e0567-bb2d-4444-a92d-dfd00d8839cc" />
+
+> **Description**: Elastic dashboard with filters applied, displaying a table with columns: Username, Event logged by, Logon Type, and '# of logins'.
+
+Finally, let's give our visualization a title by clicking on "No Title".
+
+<img width="1917" height="1059" alt="Add panel title" src="https://github.com/user-attachments/assets/f7f6e2d1-e9e9-45f4-8208-0342a0fc54db" />
+
+> **Description**: Customize panel dialog open with 'Show panel title' option.
+
+Don't forget to click on the "Save" button (the one on the upper-right hand side of the window).
+
+### Failed Logon Attempts (Disabled Users) - Visualization Example 2
+
+This visualization builds upon the previous failed logon attempts dashboard but focuses specifically on detecting login attempts to **disabled user accounts** - a significant security indicator that may suggest account compromise or credential stuffing attacks.
+
+> **Security Note**: When an attacker obtains credentials for a disabled account, they may attempt to use those credentials without knowing the account is disabled. Detecting these attempts is crucial as it could indicate:
+> - Previous legitimate user credentials that were disabled (departed employee)
+> - Stolen credentials from a decommissioned account
+> - Credential stuffing attempts using old credential databases
+
+#### Understanding the Windows Event
+
+Windows Security Event **4625** (Failed Logon) includes a **SubStatus** field that indicates the reason for the failure. The SubStatus `0xC0000072` specifically indicates:
+
+| SubStatus | Meaning |
+|-----------|---------|
+| `0xC0000072` | Account is currently disabled |
+
+#### Step-by-Step Configuration
+
+##### Step 1: Create New Visualization
+
+Navigate to your dashboard in Kibana and create a new visualization using the same index pattern `windows*`.
+
+##### Step 2: Add Filter for Disabled Accounts
+
+Add a filter using the following criteria:
+
+- **Field**: `winlog.event_data.SubStatus`
+- **Operator**: `is`
+- **Value**: `0xc0000072`
+
+This filter ensures we only capture failed logon attempts where the account is disabled.
+
+<img width="1029" height="637" alt="Filter for disabled accounts" src="https://github.com/user-attachments/assets/6fc32ca5-8a3a-4d6d-8185-d8021b2b9895" />
+
+> **Description**: Elastic dashboard interface with 'Add filter' option, setting filter for SubStatus to 0xc0000072 to capture disabled account logon failures.
+
+##### Step 3: Add Event Code Filter
+
+Additionally, filter for Event ID 4625 (Failed Logon):
+
+```kql
+event.code:4625 AND winlog.event_data.SubStatus:0xc0000072
+```
+
+##### Step 4: Configure Table Visualization
+
+Select **Table** visualization and configure the following **Rows**:
+
+| Field | Display Name | Settings |
+|-------|--------------|----------|
+| `user.name.keyword` | Username | Top 1000 values, Rank by Count |
+| `host.hostname.keyword` | Source Machine | Top 1000 values, Rank by Count |
+
+##### Step 5: Configure Metrics
+
+In the **Metrics** section:
+- Select **Count** as the metric
+- Display Name: `# of Failed Attempts`
+
+##### Step 6: Add Time Range
+
+Set the time picker to cover a significant period (e.g., last 30 days or last 15 years depending on data available).
+
+##### Step 7: Exclude Computer Accounts
+
+Add a KQL filter to exclude computer accounts (accounts ending with `$`):
+
+```kql
+NOT user.name: *$
+```
+
+##### Step 8: Save the Visualization
+
+Save the visualization with an appropriate title such as "Failed Logon - Disabled Accounts".
+
+#### Sample Query
+
+The resulting KQL query should look like:
+
+```kql
+event.code:4625 AND winlog.event_data.SubStatus:0xc0000072 AND NOT user.name:*$
+```
+
+#### Why This Matters
+
+| Aspect | Importance |
+|--------|------------|
+| **Detection** | Identifies unauthorized access attempts on disabled accounts |
+| **Investigation** | Helps determine if attacker knows about old/departed user credentials |
+| **Response** | May indicate need for credential rotation and account cleanup |
+| **Compliance** | Provides audit trail for access attempts on sensitive accounts |
+
+#### Investigation Workflow
+
+When this alert triggers:
+
+1. **Identify the target account** - Which disabled account is being targeted?
+2. **Check source IP** - Is this from internal or external IP?
+3. **Review frequency** - Is this a one-time attempt or part of a brute force campaign?
+4. **Check for related alerts** - Are there similar attempts on other disabled accounts?
+5. **Escalate** - If external source and frequent, escalate to Tier 2/3
+
+---
+
+## 7. Additional Resources
+
+### Official Documentation
+
+- [Elastic Documentation](https://www.elastic.co/guide/index.html)
+- [ECS Fields](https://www.elastic.co/guide/en/ecs/current/index.html)
+- [KQL Reference](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)
+
+### MITRE ATT&CK
+
+- [MITRE ATT&CK](https://attack.mitre.org)
+- [ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/)
+
+---
+
+*Module 2 Complete - Security Monitoring & SIEM Fundamentals*
 ### Official Documentation
 
 - [Elastic Documentation](https://www.elastic.co/guide/index.html)
