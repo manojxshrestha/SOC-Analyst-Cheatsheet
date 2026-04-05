@@ -1188,13 +1188,15 @@ c:\Tools\SilkETW_SilkService_v8\v8\SilkETW>SilkETW.exe -t user -pn Microsoft-Win
 
 <img width="3065" height="1729" alt="image" src="https://github.com/user-attachments/assets/b17264e2-014b-4f60-8bc5-7109a71c5ce6" />
 
-> 📌 **KEYWORDS TO MONITOR**:
-| Keyword | Purpose |
-|---------|---------|
-| **JitKeyword** | JIT compilation - reveals methods being compiled at runtime |
-| **InteropKeyword** | Managed/Unmanaged code interactions |
-| **LoaderKeyword** | Assembly loading process details |
-| **NGenKeyword** | Native Image Generator events - detects precompiled assemblies |
+> 📌 **KEYWORDS TO MONITOR** (used in SilkETW command `-uk 0x2038`):
+| Keyword | What It Tells You | Why It Matters |
+|---------|------------------|----------------|
+| **JitKeyword** | What methods are being compiled on-the-fly | Reveals actual code execution |
+| **InteropKeyword** | When .NET calls Windows APIs (native functions) | Detects system interactions |
+| **LoaderKeyword** | Which assemblies are being loaded | Shows what .NET programs are running |
+| **NGenKeyword** | Precompiled native images being used | Detects pre-built attack tools |
+
+> 💡 **IN PLAIN ENGLISH**: These keywords let us see what a .NET program is actually DOING - not just that it exists!
 
 The ETW data reveals:
 - Assembly name being loaded
