@@ -324,16 +324,16 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Phishing --> Initial_Access
-    Exploit_App --> Initial_Access
-    Valid_Accounts --> Initial_Access
+    Phishing[T1566-Phishing] --> Initial_Access
+    Exploit_App[T1190-Exploit] --> Initial_Access
+    Valid_Accounts[T1078-Valid] --> Initial_Access
     
-    PowerShell --> Execution
-    User_Execution --> Execution
+    PowerShell[T1059.001-PowerShell] --> Execution
+    User_Execution[T1204-User Exec] --> Execution
     
-    Registry_Run_Keys --> Persistence
-    Scheduled_Task --> Persistence
-    Windows_Service --> Persistence
+    Registry_Run_Keys[T1547.001] --> Persistence
+    Scheduled_Task[T1053-Sched] --> Persistence
+    Windows_Service[T1543.003] --> Persistence
 ```
 
 | Tactic | Technique | ID | Detection Focus |
@@ -358,18 +358,11 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    TTP --> Tools
-    Tools --> Network_Artifacts
-    Network_Artifacts --> Domain_Names
-    Domain_Names --> IP_Addresses
-    IP_Addresses --> Hash_Values
-    
-    TTP[TTPs - Hardest to change]
-    Tools[Malware, Exploits]
-    Network_Artifacts[Registry, Mutex, Filenames]
-    Domain_Names[C2 domains]
-    IP_Addresses[C2 servers]
-    Hash_Values[File hashes]
+    TTP[TTPs - Hardest to change] --> Tools[Malware, Exploits]
+    Tools --> Network_Artifacts[Registry, Mutex, Filenames]
+    Network_Artifacts --> Domain_Names[C2 domains]
+    Domain_Names --> IP_Addresses[C2 servers]
+    IP_Addresses --> Hash_Values[File hashes]
 ```
 
 ### Understanding Each Level
@@ -1093,14 +1086,6 @@ flowchart TD
     External_Feeds[CISA, Vendor Feeds, OSINT, ISACs]
     Internal_Sources[Incident Data, Log Analysis, Hunting, Malware]
     Use_Cases[IOC Blocking, Alert Enrichment, Threat Hunting, Detection Rules]
-```
-        U4[Detection Rules]
-    end
-    
-    Use --> Block[Block at Perimeter]
-    Use --> Alert[Enrich Alerts]
-    Use --> Hunt[Hunt for TTPs]
-    Use --> Detect[Update Rules]
 ```
 
 ### 16.8 Common Attack Vectors & Detection
