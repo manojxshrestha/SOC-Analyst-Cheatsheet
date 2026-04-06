@@ -381,16 +381,20 @@ graph TD
 
 ```mermaid
 graph TD
-    A["T1566-Phishing"] --> G["Initial Access"]
+    A["T1566-Phishing"] --> G
     B["T1190-Exploit"] --> G
     C["T1078-Valid Accounts"] --> G
     
-    D["T1059.001-PowerShell"] --> H["Execution"]
+    D["T1059.001-PowerShell"] --> H
     E["T1204-User Exec"] --> H
     
-    F["T1547.001-Registry Run Keys"] --> I["Persistence"]
+    F["T1547.001-Registry Run Keys"] --> I
     J["T1053-Sched Task"] --> I
     K["T1543.003-Windows Service"] --> I
+    
+    G["Initial Access"]
+    H["Execution"]
+    I["Persistence"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -472,9 +476,6 @@ graph TD
     B --> C["Containment, Eradication<br/>& Recovery ~15%"]
     C --> D["Post-Incident<br/>~5%"]
     
-    D -.-> A
-    D -.-> B
-    
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
     style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
@@ -509,14 +510,11 @@ graph TD
 
 ```mermaid
 graph TD
-    A["People"] --> D["Capability"]
-    B["Policies"] --> D
-    C["Tools"] --> D
+    A["People<br/>Skilled IR Team"] --> D
+    B["Policies<br/>Clear Policies"] --> D
+    C["Tools<br/>Software, Hardware"] --> D
     
-    A["People"]["Skilled IR Team, Trained Workforce"]
-    B["Policies"]["Clear Policies, Documentation"]
-    C["Tools"]["Software, Hardware"]
-    D["Capability"]["Incident Handling Capability"]
+    D["Incident Handling<br/>Capability"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -545,18 +543,20 @@ graph TD
 
 ```mermaid
 graph TD
-    A["Forensic Laptop"] --> G["Hardware"]
+    A["Forensic Laptop"] --> G
     B["Write Blockers"] --> G
     C["Hard Drives"] --> G
     D["Network Cables"] --> G
     E["USB Drives"] --> G
     
-    F["FTK Imager"] --> H["Software"]
-    G["WinPmem"] --> H
+    F["FTK Imager"] --> H
     I["Wireshark"] --> H
     J["Autopsy"] --> H
     K["Volatility"] --> H
     L["TheHive"] --> H
+    
+    G["Hardware"]
+    H["Software"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -594,10 +594,12 @@ graph TD
 
 ```mermaid
 graph TD
-    A["Employee Reports"] --> G["Detection"]
+    A["Employee Reports"] --> G
     B["Tool Alerts<br/>EDR/IDS/Firewall/SIEM"] --> G
     C["Threat Hunting"] --> G
     D["Third-Party"] --> G
+    
+    G["Detection"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -642,21 +644,11 @@ graph LR
     C --> D["Event Description"]
     D --> E["Data Source"]
     
-    F["2025-10-01"] --> G["03:12:02"]
-    G --> H["manage.insightnexus.com"]
-    H --> I["Login with default credentials"]
-    I --> J["Web Server Logs"]
-    
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
     style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
     style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
     style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
-    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
-    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
-    style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Date | Time (UTC) | Hostname | Event Description | Data Source |
