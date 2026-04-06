@@ -9,10 +9,11 @@
 1. [Introduction To Splunk & SPL](#1-introduction-to-splunk--spl)
 2. [Splunk Architecture](#2-splunk-architecture)
 3. [Intrusion Detection With Splunk (Real-world Scenario)](#3-intrusion-detection-with-splunk-real-world-scenario)
-4. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
-5. [SPL Commands Reference](#4-spl-commands-reference)
-6. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
-7. [Practical Exercises](#6-practical-exercises)
+4. [Detecting Attacker Behavior With Splunk Based On TTPs](#4-detecting-attacker-behavior-with-splunk-based-on-ttps)
+5. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
+6. [SPL Commands Reference](#4-spl-commands-reference)
+7. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
+8. [Practical Exercises](#6-practical-exercises)
 
 ---
 
@@ -1104,6 +1105,224 @@ index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni
 6. **UNKNOWN memory regions** in call stacks indicate potential shellcode
 7. **Alert creation** requires filtering false positives (JIT, WOW64, Explorer)
 8. **Alert bypass** is possible - always think about evasion techniques
+
+---
+
+## 4. Detecting Attacker Behavior With Splunk Based On TTPs
+
+### Introduction
+
+> 📌 **WHY IT MATTERS**: Effective threat detection requires understanding attacker TTPs and network normal behaviors. Detection focuses on patterns matching known malicious behaviors OR deviations from expected norms.
+
+### Two Approaches to Detection
+
+| Approach | Description | Method |
+|----------|-------------|--------|
+| **TTP-Based** | Leverage knowledge of specific threats and attack vectors | Game of "spot the known" - recognize characteristic behaviors |
+| **Anomaly-Based** | Use statistical analysis to identify abnormal behavior | Game of "spot the unusual" - highlight deviations from norm |
+
+> 📌 **KEY INSIGHT**: Both approaches require understanding your data and environment, then carefully tuning queries/thresholds to balance detection accuracy with false positive avoidance.
+
+---
+
+### Approach 1: Crafting SPL Searches Based On Known TTPs
+
+> 🔴 **STRATEGY**: Focus on recognizing patterns we've seen before that are indicative of specific threats or attack vectors.
+
+#### Example 1: Detection Of Reconnaissance Activities Using Native Windows Binaries
+
+> 📌 **ATTACK CONTEXT**: Attackers use native Windows binaries (net.exe, ipconfig.exe, whoami.exe, etc.) to gather environment info, find privilege escalation opportunities, and perform lateral movement.
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 Image="*\\ipconfig.exe" OR Image="*\\net.exe" OR Image="*\\whoami.exe" OR Image="*\\netstat.exe" OR Image="*\\nbtstat.exe" OR Image="*\\hostname.exe" OR Image="*\\tasklist.exe" | stats count by Image, CommandLine | sort - count
+```
+
+![Reconnaissance Detection](https://github.com/user-attachments/assets/28d1dc86-5871-4ca2-a82a-15bb88646b6b)
+
+> 🔴 **DETECTION**: Look for execution of native binaries with unusual command lines - clear indication of reconnaissance.
+
+---
+
+#### Example 2: Detection Of Malicious Payloads On Reputable Domains (githubusercontent.com)
+
+> 📌 **ATTACK CONTEXT**: Attackers host payloads on whitelisted domains like githubusercontent.com because company proxies often allow them.
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=22 QueryName="*github*" | stats count by Image, QueryName
+```
+
+![GitHub Detection](https://github.com/user-attachments/assets/ed6df3cf-c1ee-41cc-a389-16b4b3ad8c7e)
+
+> 🔴 **DETECTION**: DNS queries to githubusercontent.com indicate potential payload downloads.
+
+---
+
+#### Example 3: Detection Of PsExec Usage
+
+> 📌 **ATTACK CONTEXT**: PsExec is a legitimate admin tool that's frequently abused. It copies a service executable to Admin$ share and uses Service Control Manager API.
+
+**MITRE ATT&CK Techniques**: T1569.002, T1021.002, T1570
+
+##### Case 1: Leveraging Sysmon Event ID 13 (Registry Value Set)
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=13 Image="C:\\Windows\\system32\\services.exe" TargetObject="HKLM\\System\\CurrentControlSet\\Services\\*\\ImagePath" | rex field=Details "(?<reg_file_name>[^\\\]+)$" | eval file_name = if(isnull(file_name),reg_file_name,lower(file_name)) | stats values(Image) AS Image, values(Details) AS RegistryDetails, values(_time) AS EventTimes, count by file_name, ComputerName
+```
+
+![PsExec Registry](https://github.com/user-attachments/assets/7659d8af-9f67-4693-a59f-5eab6f7f12f3)
+
+> 📌 **QUERY BREAKDOWN**:
+> - EventCode 13 = Registry value set
+> - Image = services.exe (Windows service manager)
+> - TargetObject = ImagePath registry value
+> - rex extracts file name from Details
+> - stats aggregates by file and computer
+
+##### Case 2: Leveraging Sysmon Event ID 11 (File Created)
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=11 Image=System | stats count by TargetFilename
+```
+
+![PsExec File](https://github.com/user-attachments/assets/d82ab1b6-2d99-4a0f-b66e-25c5ff207778)
+
+##### Case 3: Leveraging Sysmon Event ID 18 (Named Pipe Connected)
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=18 Image=System | stats count by PipeName
+```
+
+![PsExec Pipe](https://github.com/user-attachments/assets/c1749cf7-3e70-4fc7-8d3a-23d7cf1bf331)
+
+> 🔴 **DETECTION**: Look for PSEXESVC-related artifacts in registry, files, or named pipes.
+
+---
+
+#### Example 4: Detection Of Archive Files For Tool Transfer/Data Exfiltration
+
+> 📌 **ATTACK CONTEXT**: Attackers use zip, rar, or 7z files to transfer tools or exfiltrate data.
+
+```splunk
+index="main" EventCode=11 (TargetFilename="*.zip" OR TargetFilename="*.rar" OR TargetFilename="*.7z") | stats count by ComputerName, User, TargetFilename | sort - count
+```
+
+![Archive Detection](https://github.com/user-attachments/assets/2549f9e1-4b12-4b34-b31b-bcdbf574f757)
+
+> 🔴 **DETECTION**: Archive file creation in unusual locations indicates tool transfer or exfiltration.
+
+---
+
+#### Example 5: Detection Of PowerShell/MS Edge For Downloading Payloads
+
+> 📌 **ATTACK CONTEXT**: PowerShell and MS Edge are commonly used to download malicious payloads.
+
+##### PowerShell Downloads
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=11 Image="*powershell.exe*" | stats count by Image, TargetFilename | sort + count
+```
+
+![PowerShell Downloads](https://github.com/user-attachments/assets/5b78aac0-fa3e-4f8a-b607-cf14ac14f58d)
+
+##### MS Edge Downloads (Zone.Identifier)
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=11 Image="*msedge.exe" TargetFilename="*Zone.Identifier" | stats count by TargetFilename | sort + count
+```
+
+![Edge Downloads](https://github.com/user-attachments/assets/6d216d62-0f74-41d2-85c8-4edc51e3cd1d)
+
+> 📌 **ZONE IDENTIFIER**: The `Zone.Identifier` ADS tracks where a file was downloaded from - indicates internet-sourced files.
+
+---
+
+#### Example 6: Detection Of Execution From Atypical Locations (Downloads Folder)
+
+> 📌 **ATTACK CONTEXT**: Attackers often execute malware from user-accessible folders like Downloads.
+
+```splunk
+index="main" EventCode=1 | regex Image="C:\\\\Users\\\\.*\\\\Downloads\\\\.*" | stats count by Image
+```
+
+![Downloads Execution](https://github.com/user-attachments/assets/60f488de-e63d-4cec-889a-af4f0bab7c25)
+
+> 🔴 **DETECTION**: Process creation in Downloads folder - especially suspicious executables like PsExec64.exe, SharpHound.exe
+
+---
+
+#### Example 7: Detection Of Executables/DLLs Outside Windows Directory
+
+```splunk
+index="main" EventCode=11 (TargetFilename="*.exe" OR TargetFilename="*.dll") TargetFilename!="*\\windows\\*" | stats count by User, TargetFilename | sort + count
+```
+
+![Non-Windows EXE](https://github.com/user-attachments/assets/0595e694-c932-46b4-8db1-0f33b2e55726)
+
+> 🔴 **DETECTION**: EXE/DLL creation outside Windows directory - potential malware activity.
+
+---
+
+#### Example 8: Detection Of Misspelled Legitimate Binaries
+
+> 📌 **ATTACK CONTEXT**: Attackers disguise malware by misspelling legitimate binaries (e.g., PSEXESVC → PSEXESVC, psexesvc)
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 (CommandLine="*psexe*.exe" NOT (CommandLine="*PSEXESVC.exe" OR CommandLine="*PsExec64.exe")) OR (ParentCommandLine="*psexe*.exe" NOT (ParentCommandLine="*PSEXESVC.exe" OR ParentCommandLine="*PsExec64.exe")) OR (ParentImage="*psexe*.exe" NOT (ParentImage="*PSEXESVC.exe" OR ParentImage="*PsExec64.exe")) OR (Image="*psexe*.exe" NOT (Image="*PSEXESVC.exe" OR Image="*PsExec64.exe")) | table Image, CommandLine, ParentImage, ParentCommandLine
+```
+
+![Misspelled Binaries](https://github.com/user-attachments/assets/aed52ac2-6ea3-4303-aae8-de6cca6ffc98)
+
+> 🔴 **DETECTION**: Variations of PSEXE in process fields indicate attempt to masquerade as PsExec.
+
+---
+
+#### Example 9: Detection Of Non-Standard Ports
+
+> 📌 **ATTACK CONTEXT**: Attackers use non-standard ports to avoid detection by basic port monitoring.
+
+```splunk
+index="main" EventCode=3 NOT (DestinationPort=80 OR DestinationPort=443 OR DestinationPort=22 OR DestinationPort=21) | stats count by SourceIp, DestinationIp, DestinationPort | sort - count
+```
+
+![Non-Standard Ports](https://github.com/user-attachments/assets/810481d3-d00c-47d9-94c4-eab3f03a2dce)
+
+> 🔴 **DETECTION**: Network connections to non-standard ports (exclude 80, 443, 22, 21) indicate suspicious activity.
+
+---
+
+### TTP Detection Queries Reference
+
+| Detection Category | SPL Query | EventCode |
+|-------------------|-----------|-----------|
+| Reconnaissance (binaries) | `EventCode=1 Image="*\\net.exe" OR Image="*\\whoami.exe"...` | 1 |
+| GitHub downloads | `EventCode=22 QueryName="*github*"` | 22 |
+| PsExec registry | `EventCode=13 Image="*services.exe" TargetObject="*ImagePath"` | 13 |
+| PsExec file | `EventCode=11 Image=System` | 11 |
+| PsExec pipe | `EventCode=18 Image=System` | 18 |
+| Archive files | `EventCode=11 ("*.zip" OR "*.rar" OR "*.7z")` | 11 |
+| PowerShell downloads | `EventCode=11 Image="*powershell.exe*"` | 11 |
+| Downloads execution | `EventCode=1 \| regex Image="C:\\\\Users\\\\.*\\\\Downloads"` | 1 |
+| Non-Windows EXE/DLL | `EventCode=11 ("*.exe" OR "*.dll") TargetFilename!="*\\windows\\*"` | 11 |
+| Misspelled binaries | `EventCode=1 "*psexe*.exe" NOT "*PSEXESVC.exe"` | 1 |
+| Non-standard ports | `EventCode=3 NOT (port=80 OR port=443 OR port=22 OR port=21)` | 3 |
+
+---
+
+### Summary
+
+> 📌 **KEY TAKEAWAYS**:
+
+1. **Two detection approaches**: TTP-based (known patterns) and anomaly-based (statistical)
+2. **Native binary usage** - reconnaissance detected via EventCode 1
+3. **Whitelisted domains** - githubusercontent.com downloads detected via EventCode 22
+4. **PsExec detection** - use EventCodes 13, 11, and 18 in combination
+5. **Archive files** - tool transfer/exfiltration detected via EventCode 11
+6. **Downloads folder** - suspicious execution detected via regex matching
+7. **Non-Windows executables** - malware activity detected via EventCode 11
+8. **Binary misspelling** - evasion technique detected via string matching
+9. **Non-standard ports** - lateral movement detected via EventCode 3
+
+> 🔴 **IMPORTANT**: TTP-based detection alone is insufficient - attackers continuously evolve and use obscure/unknown TTPs to evade detection. Combine with anomaly-based detection for comprehensive coverage.
 
 ---
 
