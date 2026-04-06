@@ -419,7 +419,7 @@ graph TD
 
 ```mermaid
 graph TD
-    A["TTPs<br/>Hardest to change"] --> B["Malware<br/>Exploits"] --> C["Registry<br/>Mutex<br/>Filenames"] --> D["C2 domains"] --> E["C2 servers"] --> F["File hashes"]
+    A["TTPs<br/>Hardest to change"] --> B["Malware, Exploits"] --> C["Registry, Mutex"] --> D["C2 domains"] --> E["C2 servers"] --> F["File hashes"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
