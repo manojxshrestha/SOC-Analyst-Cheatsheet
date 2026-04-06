@@ -1110,39 +1110,11 @@ index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni
 *Module 5/15 - Understanding Log Sources & Investigating with Splunk*
 *Built with research + HTB Academy materials*
 
+---
 
-Now, navigate to http://[Target IP]:8000, open the Search & Reporting application, and answer the questions below.
-Connect to HTB
-Target(s)
+### Practical Exercises
 
-Spawn the target system to get IPs and answer questions
-
-Enable step-by-step solutions
-PRO
-
-Question 1
-
-+1
-Navigate to http://[Target IP]:8000, open the "Search & Reporting" application, and find through an SPL search against all data the other process that dumped lsass. Enter its name as your answer. Answer format: _.exe
-Question 2
-
-+1
-Navigate to http://[Target IP]:8000, open the "Search & Reporting" application, and find through SPL searches against all data the method through which the other process dumped lsass. Enter the misused DLL's name as your answer. Answer format: _.dll
-Question 3
-
-+1
-Navigate to http://[Target IP]:8000, open the "Search & Reporting" application, and find through an SPL search against all data any suspicious loads of clr.dll that could indicate a C# injection/execute-assembly attack. Then, again through SPL searches, find if any of the suspicious processes that were returned in the first place were used to temporarily execute code. Enter its name as your answer. Answer format: _.exe
-Question 4
-
-+1
-Navigate to http://[Target IP]:8000, open the "Search & Reporting" application, and find through SPL searches against all data the two IP addresses of the C2 callback server. Answer format: 10.0.0.1XX and 10.0.0.XX
-Question 5
-
-+1
-Navigate to http://[Target IP]:8000, open the "Search & Reporting" application, and find through SPL searches against all data the port that one of the two C2 callback server IPs used to connect to one of the compromised machines. Enter it as your answer.
-
-
-
+> 🔴 **COMING SOON**: Practical exercises will be added here after all sections are completed.
 
 
 
