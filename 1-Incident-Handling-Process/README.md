@@ -298,12 +298,12 @@ graph LR
 
 ```mermaid
 graph LR
-    A["Victim"] --> B["C2"]
+    A[Victim] --> B[C2]
     B --> A
     
-    B --> C["1. Beacon"]
-    B --> D["2. Instructions"]
-    B --> E["3. Additional Tools"]
+    B --> C[1. Beacon]
+    B --> D[2. Instructions]
+    B --> E[3. Additional Tools]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -343,7 +343,7 @@ graph LR
 
 ```mermaid
 graph TD
-    A["Tactic"] --> B["Technique"] --> C["Sub-Technique"]
+    A[Tactic] --> B[Technique] --> C[Sub-Technique]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -373,16 +373,16 @@ graph TD
 
 ```mermaid
 graph TD
-    A["T1566-Phishing"] --> G["Initial Access"]
-    B["T1190-Exploit"] --> G
-    C["T1078-Valid Accounts"] --> G
+    A[T1566 Phishing] --> G[Initial Access]
+    B[T1190 Exploit] --> G
+    C[T1078 Valid Accounts] --> G
     
-    D["T1059.001-PowerShell"] --> H["Execution"]
-    E["T1204-User Exec"] --> H
+    D[T1059.001 PowerShell] --> H[Execution]
+    E[T1204 User Execution] --> H
     
-    F["T1547.001-Registry Run Keys"] --> I["Persistence"]
-    J["T1053-Sched Task"] --> I
-    K["T1543.003-Windows Service"] --> I
+    F[T1547.001 Registry Run Keys] --> I[Persistence]
+    J[T1053 Scheduled Task] --> I
+    K[T1543.003 Windows Service] --> I
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -419,7 +419,7 @@ graph TD
 
 ```mermaid
 graph TD
-    A["TTPs<br/>Hardest to change"] --> B["Malware, Exploits"] --> C["Registry, Mutex"] --> D["C2 domains"] --> E["C2 servers"] --> F["File hashes"]
+    A[TTPs - Hardest to change] --> B[Malware, Exploits] --> C[Registry, Mutex] --> D[C2 domains] --> E[C2 servers] --> F[File hashes]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -456,9 +456,9 @@ graph TD
 
 ```mermaid
 graph TD
-    A["Preparation<br/>~40%"] --> B["Detection & Analysis<br/>~40%"]
-    B --> C["Containment, Eradication<br/>& Recovery ~15%"]
-    C --> D["Post-Incident<br/>~5%"]
+    A[Preparation ~40%] --> B[Detection & Analysis ~40%]
+    B --> C[Containment, Eradication & Recovery ~15%]
+    C --> D[Post-Incident ~5%]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -494,9 +494,9 @@ graph TD
 
 ```mermaid
 graph TD
-    A["People<br/>Skilled IR Team"] --> D["Incident Handling<br/>Capability"]
-    B["Policies<br/>Clear Policies"] --> D
-    C["Tools<br/>Software, Hardware"] --> D
+    A[People - Skilled IR Team] --> D[Incident Handling Capability]
+    B[Policies - Clear Policies] --> D
+    C[Tools - Software, Hardware] --> D
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -525,17 +525,17 @@ graph TD
 
 ```mermaid
 graph TD
-    A["Forensic Laptop"] --> G["Hardware"]
-    B["Write Blockers"] --> G
-    C["Hard Drives"] --> G
-    D["Network Cables"] --> G
-    E["USB Drives"] --> G
+    A[Forensic Laptop] --> G[Hardware]
+    B[Write Blockers] --> G
+    C[Hard Drives] --> G
+    D[Network Cables] --> G
+    E[USB Drives] --> G
     
-    F["FTK Imager"] --> H["Software"]
-    I["Wireshark"] --> H
-    J["Autopsy"] --> H
-    K["Volatility"] --> H
-    L["TheHive"] --> H
+    F[FTK Imager] --> H[Software]
+    I[Wireshark] --> H
+    J[Autopsy] --> H
+    K[Volatility] --> H
+    L[TheHive] --> H
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -1113,9 +1113,19 @@ level: medium
 ```mermaid
 graph TD
     P1[P1 - Critical Active APT/Ransomware Data Exfiltration] --> Immediate[Immediate Response]
-    P2[P2 - High Malware/Unauthorized Access] --> OneHour[< 1 Hour Response]
-    P3[P3 - Medium Policy Violation/Suspicious] --> FourHours[< 4 Hours Response]
-    P4[P4 - Low Failed Logins/Minor Anomalies] --> TwentyFour[< 24 Hours Response]
+    P2[P2 - High Malware/Unauthorized Access] --> OneHour[Response within 1 Hour]
+    P3[P3 - Medium Policy Violation/Suspicious] --> FourHours[Response within 4 Hours]
+    P4[P4 - Low Failed Logins/Minor Anomalies] --> TwentyFour[Response within 24 Hours]
+
+    style P1 fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style P2 fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style P3 fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style P4 fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+
+    style Immediate fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style OneHour fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style FourHours fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style TwentyFour fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Severity | Response Time | Examples | Resources |
@@ -1135,6 +1145,14 @@ graph LR
     Secure_Storage --> Custody_Form
     Custody_Form --> Forensic_Analysis
     Forensic_Analysis --> Court_Admissible
+
+    style Evidence fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Document fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Hash_Verification fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Secure_Storage fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Custody_Form fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Forensic_Analysis fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Court_Admissible fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 **Required Documentation:**
@@ -1168,15 +1186,25 @@ graph TD
     HIPAA --> Fine2
     PCI_DSS --> Fine3
     SOX --> Fine4
-    
+
     GDPR[GDPR - EU Data Protection]
     Fine1[4% Global Revenue]
     HIPAA[HIPAA - US Healthcare]
-    Fine2[$1.5M/Violation]
+    Fine2[$1.5M per violation]
     PCI_DSS[PCI-DSS - Payment Cards]
-    Fine3[$100K/Month]
+    Fine3[$100K per month]
     SOX[SOX - US Financial]
     Fine4[Criminal Penalties]
+
+    style GDPR fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style HIPAA fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style PCI_DSS fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style SOX fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+
+    style Fine1 fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Fine2 fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Fine3 fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Fine4 fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Framework | Industry | Key Requirements |
@@ -1203,10 +1231,14 @@ graph TD
 graph TD
     Tier_1 --> Tier_2
     Tier_2 --> Tier_3
-    
+
     Tier_1[Tier 1 - Triage & Categorization]
     Tier_2[Tier 2 - Investigation & Analysis]
     Tier_3[Tier 3 - Threat Hunting & Forensics]
+
+    style Tier_1 fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Tier_2 fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Tier_3 fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### 16.7 Threat Intelligence Integration
@@ -1216,10 +1248,15 @@ graph TD
     External_Feeds --> TI_Platform
     Internal_Sources --> TI_Platform
     TI_Platform --> Use_Cases
-    
+
     External_Feeds[CISA, Vendor Feeds, OSINT, ISACs]
     Internal_Sources[Incident Data, Log Analysis, Hunting, Malware]
     Use_Cases[IOC Blocking, Alert Enrichment, Threat Hunting, Detection Rules]
+
+    style External_Feeds fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Internal_Sources fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style TI_Platform fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Use_Cases fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### 16.8 Common Attack Vectors & Detection
@@ -1246,16 +1283,34 @@ graph TD
     Extract_IOCs --> Block_IOCs
     Block_IOCs --> Notify_User
     Notify_User --> Report_Close
-    
+
     Extract_IOCs --> Sender_Email
     Extract_IOCs --> URLs
     Extract_IOCs --> Attachments
     Extract_IOCs --> Headers
-    
+
     Block_IOCs --> Block_Sender
     Block_IOCs --> Block_URLs
     Block_IOCs --> Quarantine
     Block_IOCs --> Add_TI
+
+    style Phishing_Alert fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Triage fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Analyze_Email fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Extract_IOCs fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Block_IOCs fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Notify_User fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Report_Close fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+
+    style Sender_Email fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style URLs fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Attachments fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Headers fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+
+    style Block_Sender fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Block_URLs fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Quarantine fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Add_TI fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 #### Playbook: Malware Detection
@@ -1270,6 +1325,16 @@ graph TD
     Contain_Spread --> Eradicate
     Eradicate --> Recover
     Recover --> Close_Case
+
+    style Malware_Detected fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Isolate_Endpoint fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Collect_Forensics fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Analyze_Malware fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Identify_Scope fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Contain_Spread fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Eradicate fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Recover fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Close_Case fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### 16.10 Common Tools Reference
