@@ -310,7 +310,6 @@ graph LR
     style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
     style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
     style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
-    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 **SOC Detection Focus:**
@@ -381,20 +380,16 @@ graph TD
 
 ```mermaid
 graph TD
-    A["T1566-Phishing"] --> G
+    A["T1566-Phishing"] --> G["Initial Access"]
     B["T1190-Exploit"] --> G
     C["T1078-Valid Accounts"] --> G
     
-    D["T1059.001-PowerShell"] --> H
+    D["T1059.001-PowerShell"] --> H["Execution"]
     E["T1204-User Exec"] --> H
     
-    F["T1547.001-Registry Run Keys"] --> I
+    F["T1547.001-Registry Run Keys"] --> I["Persistence"]
     J["T1053-Sched Task"] --> I
     K["T1543.003-Windows Service"] --> I
-    
-    G["Initial Access"]
-    H["Execution"]
-    I["Persistence"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -510,11 +505,11 @@ graph TD
 
 ```mermaid
 graph TD
+    D["Incident Handling<br/>Capability"]
+    
     A["People<br/>Skilled IR Team"] --> D
     B["Policies<br/>Clear Policies"] --> D
     C["Tools<br/>Software, Hardware"] --> D
-    
-    D["Incident Handling<br/>Capability"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -543,6 +538,9 @@ graph TD
 
 ```mermaid
 graph TD
+    G["Hardware"]
+    H["Software"]
+    
     A["Forensic Laptop"] --> G
     B["Write Blockers"] --> G
     C["Hard Drives"] --> G
@@ -554,9 +552,6 @@ graph TD
     J["Autopsy"] --> H
     K["Volatility"] --> H
     L["TheHive"] --> H
-    
-    G["Hardware"]
-    H["Software"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
