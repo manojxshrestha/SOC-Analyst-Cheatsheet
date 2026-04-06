@@ -1101,53 +1101,6 @@ index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni
 *Module 5/15 - Understanding Log Sources & Investigating with Splunk*
 *Built with research + HTB Academy materials*
 
-### Hunting Queries
-
-        shellsession
-index="main" EventCode=10 lsass | stats count by SourceImage
-
-<img width="1000" height="345" alt="image" src="https://github.com/user-attachments/assets/3da4fec0-323d-461e-922c-04a9fb9877ac" />
-
-        shellsession
-index="main" EventCode=10 lsass SourceImage="C:\\Windows\\System32\\notepad.exe"
-
-<img width="1000" height="552" alt="image" src="https://github.com/user-attachments/assets/a79e01fd-85c2-4c2b-993b-70d80329d82b" />
-
-        shellsession
-index="main" CallTrace="*UNKNOWN*" | stats count by EventCode
-
-<img width="1000" height="445" alt="image" src="https://github.com/user-attachments/assets/a75f544e-0189-493b-a140-b8a063ae6895" />
-
-        shellsession
-index="main" CallTrace="*UNKNOWN*" | stats count by SourceImage
-
-<img width="1000" height="552" alt="image" src="https://github.com/user-attachments/assets/e3e07488-9e7c-4f61-a318-94da56564ac5" />
-
-        shellsession
-index="main" CallTrace="*UNKNOWN*" | where SourceImage!=TargetImage | stats count by SourceImage
-
-<img width="1000" height="522" alt="image" src="https://github.com/user-attachments/assets/68db7f4c-6e17-43e3-93f9-a52ad8cd3c5c" />
-
-        shellsession
-index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* | where SourceImage!=TargetImage | stats count by SourceImage
-
-<img width="1000" height="522" alt="image" src="https://github.com/user-attachments/assets/62944c0e-48cd-468d-acb1-ec1f8a3a1083" />
-
-        shellsession
-index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* CallTrace!=*wow64* | where SourceImage!=TargetImage | stats count by SourceImage
-
-<img width="1000" height="526" alt="image" src="https://github.com/user-attachments/assets/3dbbc784-a799-4d54-9e7d-731bd70324d0" />
-
-        shellsession
-index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* CallTrace!=*wow64* SourceImage!="C:\\Windows\\Explorer.EXE" | where SourceImage!=TargetImage | stats count by SourceImage
-
-<img width="1919" height="372" alt="image" src="https://github.com/user-attachments/assets/2173d47e-0fc5-4232-8403-c8d53b4ddabb" />
-
-        shellsession
-index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* CallTrace!=*wow64* SourceImage!="C:\\Windows\\Explorer.EXE" | where SourceImage!=TargetImage | stats count by SourceImage, TargetImage, CallTrace
-
-<img width="1000" height="522" alt="image" src="https://github.com/user-attachments/assets/06e17075-651e-4e11-997d-7d69b03bc0f7" />
-
 
 Now, navigate to http://[Target IP]:8000, open the Search & Reporting application, and answer the questions below.
 Connect to HTB
