@@ -547,3 +547,153 @@ index=* sourcetype=* | rare limit=10 field1, field2, field3
 
 *Module 5/15 - Understanding Log Sources & Investigating with Splunk*
 *Built with research + HTB Academy materials*
+
+---
+
+## 2. Using Splunk Applications
+
+### What Are Splunk Apps?
+
+> 📌 **DEFINITION**: Splunk applications (apps) are packages that extend Splunk capabilities to manage specific types of operational data. Each app is tailored to handle data from specific technologies or use cases, acting as a pre-built knowledge package.
+
+### Key Features of Splunk Apps
+
+- ✅ Custom data inputs
+- ✅ Custom visualizations
+- ✅ Dashboards
+- ✅ Alerts
+- ✅ Reports
+
+> 🔴 **MULTIPLE WORKSPACES**: Splunk Apps enable coexistence of multiple workspaces on a single Splunk instance, catering to different use cases and user roles.
+
+### Splunk Apps for SIEM
+
+> 📌 **SECURITY APPS**: Apps designed for SIEM purposes provide capabilities to:
+- ✅ Ingest security-related data
+- ✅ Analyze security events
+- ✅ Visualize security data
+- ✅ Detect complex threats
+- ✅ Perform in-depth investigations
+
+### Important Considerations
+
+> ⚠️ **RESOURCE & LICENSING NOTES**:
+- Many apps can be **resource-intensive**
+- Ensure Splunk deployment is **sized correctly** for additional workload
+- Verify **correct licenses** for premium apps
+- Be aware of **increased license usage** due to added data inputs
+
+---
+
+### Installing Sysmon App for Splunk
+
+> 📌 **APP**: We'll use the Sysmon App for Splunk by Mike Haag - provides insights and visibility into Sysmon deployments.
+
+#### Step 1: Sign Up for Splunkbase Account
+
+![Splunkbase Homepage](https://github.com/user-attachments/assets/09c68d8d-e8fb-42a8-a0a7-79e110c1790c)
+
+> 🔴 Register at [splunkbase](https://splunkbase.splunk.com) - the marketplace for Splunk apps.
+
+#### Step 2: Download the Sysmon App
+
+![Sysmon App Page](https://github.com/user-attachments/assets/67191690-2c77-4461-ade3-a284870d88a8)
+
+#### Step 3: Add App to Search Head
+
+![Manage Apps](https://github.com/user-attachments/assets/8837ea63-83c8-402e-9786-12dacc22204e)
+
+![Apps List](https://github.com/user-attachments/assets/c2046f3e-49fb-40ad-b174-20e665bb5d2c)
+
+> 📌 Navigate to: **Apps** → **Manage Apps** → **Install from file**
+
+![Apps List](https://github.com/user-attachments/assets/7dfc3530-8e07-4070-9310-23436c7768cd)
+
+#### Step 4: Configure the Macro
+
+> 🔴 **IMPORTANT**: Adjust the application's macro so events are loaded correctly.
+
+1. Go to **Settings** → **Advanced Search** → **Search Macros**
+
+![Settings Menu](https://github.com/user-attachments/assets/75f01a1e-d193-4fad-bc10-e9c325f19164)
+
+![Advanced Search](https://github.com/user-attachments/assets/94e40a09-c907-4d43-bbd0-bd7434a339f7)
+
+2. Find the **sysmon** macro under "Sysmon App for Splunk"
+
+![Search Macros](https://github.com/user-attachments/assets/a7407ab0-87ff-4106-a221-fda07f2b25a4)
+
+3. Edit the definition to:
+
+```
+index="main" sourcetype="WinEventLog:Sysmon"
+```
+
+![Edit Macro](https://github.com/user-attachments/assets/b6bff189-d74d-4a68-acf8-dcce2caba3a6)
+
+---
+
+### Using the Sysmon App
+
+#### Accessing the App
+
+> 📌 Locate **Sysmon App for Splunk** in the "Apps" column on Splunk home page
+
+#### File Activity Tab
+
+![File Creation Overview](https://github.com/user-attachments/assets/189bc9eb-5caf-41f6-98ad-98d32fcd7585)
+
+> ⚠️ If "Top Systems" shows no results, the dashboard needs fixing.
+
+Let's now specify "All time" on the time picker and click "Submit". Results are generated successfully; however, no results are appearing in the "Top Systems" section.
+
+![No Results](https://github.com/user-attachments/assets/74765fce-ec62-4dc5-a2c8-0b52893ab44f)
+
+#### Fixing the Search
+
+1. Click **"Edit"** in the upper right corner
+
+![Edit Search Option](https://github.com/user-attachments/assets/5362c2aa-1d80-43ef-a157-8a39c4725a33)
+
+2. The issue: Sysmon Event ID 11 doesn't have a field named **Computer**, but does have **ComputerName**
+
+![Edit Search Interface](https://github.com/user-attachments/assets/9a13cee4-9dd7-46c2-a17d-36400594558c)
+
+3. Fix: Change `top Computer` to `top ComputerName`
+
+4. Click **"Apply"**
+
+#### Results After Fix
+
+![Fixed Dashboard](https://github.com/user-attachments/assets/6ede27b9-5679-4602-8518-1694ad6d8f1c)
+
+> 📌 Results now generate successfully in "Top Systems" section.
+
+---
+
+### Practical Exercises
+
+> 📌 **SPLUNK PRACTICE TASKS**:
+
+1. **Explore Sysmon App** - Navigate to different tabs (File Activity, Network Activity, Reports)
+2. **Fix Dashboard Searches** - Modify searches when no results appear due to non-existent fields
+3. **Net View Report** - Fix the "Net - net view" report search
+4. **Network Connections** - Find connections initiated by SharpHound.exe
+
+> 🔴 **LEARNING EXERCISE**: Modify searches when no results are generated due to non-existent fields, continuing until desired results are obtained.
+
+---
+
+### Sysmon App Navigation Reference
+
+| Tab | Description |
+|-----|-------------|
+| **File Activity** | Monitor file creation events |
+| **Network Activity** | View network connections |
+| **Processes** | Process creation and termination |
+| **Reports** | Pre-built security reports |
+
+---
+
+*Module 5/15 - Understanding Log Sources & Investigating with Splunk*
+*Built with research + HTB Academy materials*
