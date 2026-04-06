@@ -82,11 +82,11 @@ graph LR
     D["Data theft"] --> E["System crash"] --> F["Unauthorized access"] --> G["Malware infection"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style B fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style C fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style D fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style E fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style F fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
