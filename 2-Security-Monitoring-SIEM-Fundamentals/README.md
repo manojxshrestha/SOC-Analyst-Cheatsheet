@@ -143,6 +143,11 @@ The Elastic Stack is an open-source collection of applications:
 ```mermaid
 graph TB
     Beats --> Logstash --> Elasticsearch --> Kibana
+
+    style Beats fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Logstash fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Elasticsearch fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Kibana fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Components
@@ -247,6 +252,11 @@ A **Security Operations Center (SOC)** is a facility with a team responsible for
 ```mermaid
 graph TB
     Monitor --> Detect --> Analyze --> Respond
+
+    style Monitor fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Detect fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Analyze fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Respond fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### SOC Team Roles
@@ -293,6 +303,17 @@ A framework documenting adversary attack methods:
 ```mermaid
 graph LR
     Recon --> Initial_Access --> Execution --> Persistence --> Priv_Esc --> Defense_Evasion --> Cred_Access --> Discovery --> Lateral_Movement --> Exfiltration
+
+    style Recon fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Initial_Access fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Execution fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Persistence fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Priv_Esc fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Defense_Evasion fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Cred_Access fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Discovery fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Lateral_Movement fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Exfiltration fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### ATT&CK Use Cases in Security Operations
@@ -317,6 +338,11 @@ A **use case** defines specific conditions that trigger an alert:
 ```mermaid
 graph LR
     Failed_Logins --> Correlation --> Single_Alert --> SOC_Notification
+
+    style Failed_Logins fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Correlation fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Single_Alert fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style SOC_Notification fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Use Case Development Lifecycle
@@ -324,6 +350,16 @@ graph LR
 ```mermaid
 graph TB
     Requirements --> Data_Points --> Log_Validation --> Design --> Implementation --> Documentation --> Onboarding --> Testing --> Fine_Tuning
+
+    style Requirements fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Data_Points fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Log_Validation fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Design fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Implementation fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Documentation fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Onboarding fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Testing fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Fine_Tuning fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Steps to Build SIEM Use Cases
