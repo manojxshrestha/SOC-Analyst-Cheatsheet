@@ -15,6 +15,8 @@
 7. [SPL Commands Reference](#4-spl-commands-reference)
 8. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
 9. [Practical Exercises](#6-practical-exercises)
+10. [Interview Questions](#interview-questions)
+11. [Additional Resources](#additional-resources)
 
 ---
 
@@ -1480,3 +1482,197 @@ index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | transaction ComputerN
 > 🔴 **COMING SOON**: Practical exercises will be added here after all sections are completed.
 
 
+
+---
+
+## Interview Questions
+
+### Splunk Fundamentals
+
+**Q1: What is Splunk and how does it work?**
+> 📌 **ANSWER**: Splunk is a machine data platform that collects, indexes, analyzes and visualizes machine data from any source. It works by forwarding data from sources to Splunk Enterprise, which indexes the data and makes it searchable through SPL (Search Processing Language).
+
+**Q2: What is the difference between `stats` and `eventstats` commands?**
+> 📌 **ANSWER**: 
+> - `stats` - calculates statistics grouped by fields, produces a single summary row per group
+> - `eventstats` - adds statistical results to each event, preserving the original event count
+> - `streamstats` - calculates statistics in a rolling window as events are processed
+
+**Q3: Explain the Splunk architecture components:**
+> 📌 **ANSWER**:
+> - **Forwarder** - collects and forwards data to indexer
+> - **Indexer** - processes and stores data in indexes
+> - **Search Head** - provides search interface and dashboards
+> - **Deployment Server** - manages forwarder configurations
+
+**Q4: What are Splunk indexes and their types?**
+> 📌 **ANSWER**:
+> - **Default index** - main internal index
+> - **Custom indexes** - user-created for specific data
+> - **Bucket types**: hot (active), warm (recent), cold (older), frozen (archived)
+
+---
+
+### SPL (Search Processing Language)
+
+**Q5: What is the difference between `search` and `where` commands?**
+> 📌 **ANSWER**: 
+> - `search` - filters events before processing (more efficient)
+> - `where` - filters results after stats/aggregation (less efficient)
+
+**Q6: How do you use `rex` command for field extraction?**
+> 📌 **ANSWER**: `rex` uses regular expressions to extract fields. Example:
+> ```splunk
+> | rex field=source ".(?P<extracted_field>.*)"
+> ```
+
+**Q7: What is `transaction` vs `mvevents` vs `stats`?**
+> 📌 **ANSWER**:
+> - `transaction` - groups events by shared field values (memory intensive)
+> - `mvevents` - converts multi-value fields to events
+> - `stats` - calculates aggregate statistics
+
+**Q8: Explain `bin` vs `bucket` commands:**
+> 📌 **ANSWER**: Both group events into time buckets. `bin` is the newer command, `bucket` is older but still supported. Syntax: `| bin span=1h _time`
+
+---
+
+### Security Monitoring & Detection
+
+**Q9: How would you detect a DCSync attack in Splunk?**
+> 📌 **ANSWER**:
+> ```splunk
+> index="main" EventCode=4662 Access_Mask=0x100 Account_Name!=*$
+> ```
+> Look for EventCode 4662 with Access Mask 0x100 (DS-Replication-Get-Changes-All) on non-machine accounts.
+
+**Q10: How do you detect LSASS dumping?**
+> 📌 **ANSWER**:
+> - Look for Sysmon EventCode 10 (ProcessAccess) targeting lsass.exe
+> - Check for unusual call stacks with UNKNOWN memory regions
+> - Query: `index="main" EventCode=10 lsass`
+
+**Q11: What Sysmon EventCodes are most important for detection?**
+> 📌 **ANSWER**:
+> | EventCode | Description | Use |
+> |-----------|-------------|-----|
+> | 1 | Process Creation | Detect malicious processes |
+> | 3 | Network Connection | C2 detection |
+> | 7 | Image Loaded | DLL hijacking |
+> | 8 | CreateRemoteThread | Code injection |
+> | 10 | ProcessAccess | Credential dumping |
+> | 11 | FileCreated | Malware droppers |
+> | 13 | Registry Value Set | Persistence |
+> | 17/18 | Named Pipes | Lateral movement |
+
+**Q12: How do you create an effective alert in Splunk?**
+> 📌 **ANSWER**:
+> 1. Start with a hunting query
+> 2. Filter false positives (legitimate processes, known paths)
+> 3. Test over time period
+> 4. Set threshold based on environment baselines
+> 5. Configure alert action (email, webhook)
+> 6. Schedule appropriately (real-time vs scheduled)
+
+---
+
+### Threat Hunting
+
+**Q13: Explain the two approaches to detection in Splunk:**
+> 📌 **ANSWER**:
+> 1. **TTP-Based** - Leverage known attack patterns and signatures
+> 2. **Anomaly-Based** - Use statistical analysis to find deviations from normal
+
+**Q14: What is the Pyramid of Pain?**
+> 📌 **ANSWER**: A model showing detection difficulty vs attacker cost:
+> - Easy to detect (low pain for attacker): Hashes, IPs, Domains
+> - Hard to detect (high pain for attacker): Tools, Tactics, Procedures
+
+**Q15: How would you investigate a potential compromise?**
+> 📌 **ANSWER**:
+> 1. Identify the affected system
+> 2. Review process creation events (EventCode 1)
+> 3. Check network connections (EventCode 3)
+> 4. Look for persistence mechanisms (registry, services)
+> 5. Analyze parent-child relationships
+> 6. Correlate across multiple data sources
+
+---
+
+### Splunk Admin & Tuning
+
+**Q16: How do you optimize Splunk searches?**
+> 📌 **ANSWER**:
+> - Use specific indexes and time ranges
+> - Prefer field-specific searches over wildcard
+> - Use `head` to limit results early
+> - Avoid `search` after `stats` (use `where`)
+> - Use `table` only at the end
+
+**Q17: What are Splunk macros and how do you use them?**
+> 📌 **ANSWER**: Macros are reusable search fragments defined in Settings. Usage: `| search [my_macro]`
+
+**Q18: Explain Splunk lookup types:**
+> 📌 **ANSWER**:
+> - **CSV lookups** - static data from CSV files
+> - **External lookups** - Python scripts or database queries
+> - **KV store lookups** - NoSQL database
+> - **Default lookups** - Splunk internal
+
+---
+
+### Scenario-Based Questions
+
+**Q19: You notice many PowerShell processes spawning from notepad.exe. How do you investigate?**
+> 📌 **ANSWER**:
+> ```splunk
+> index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 ParentImage="*notepad.exe" Image="*powershell.exe"
+> ```
+> Check CommandLine to see what commands were executed, investigate the source.
+
+**Q20: How would you detect data exfiltration via DNS?**
+> 📌 **ANSWER**:
+> - Monitor DNS queries to unusual domains
+> - Look for large DNS response sizes
+> - Check for DNS tunneling indicators
+> ```splunk
+> index="main" EventCode=22 | stats count by QueryName | where len(QueryName) > 50
+> ```
+
+---
+
+## Additional Resources
+
+### Official Documentation
+- [Splunk Documentation](https://docs.splunk.com/)
+- [Splunk Enterprise Security](https://www.splunk.com/en_us/products/enterprise-security.html)
+- [Sysmon Documentation](https://docs.microsoft.com/sysinternals/)
+
+### MITRE ATT&CK
+- [MITRE ATT&CK Framework](https://attack.mitre.org/)
+- [ATT&CK Navigator](https://attack navigator.mitre.org/)
+
+### Threat Intelligence
+- [AlienVault OTX](https://otx.alienvault.com/)
+- [VirusTotal](https://www.virustotal.com/)
+- [AbuseIPDB](https://www.abuseipdb.com/)
+
+### Tools & References
+- [Splunk Security Essentials](https://splunk.github.io/security_essentials/)
+- [Swift On Security Sysmon Config](https://github.com/SwiftOnSecurity/sysmon-config)
+- [Olaf Hartong Sysmon Modular](https://github.com/olafhartong/sysmon-modular)
+
+### Communities
+- [Splunk Answers](https://answers.splunk.com/)
+- r/dfir (Reddit)
+- SANS Digital Forensics
+- Blue Team Tools Discord
+
+### Books
+- "The Practice of Network Security Monitoring" - Richard Bejtlich
+- "Splunk Enterprise Security" - Joseph Green, et al.
+
+---
+
+*Module 5/15 - Understanding Log Sources & Investigating with Splunk*
+*Built with research + HTB Academy materials*
