@@ -41,7 +41,9 @@ Splunk is a powerful data analytics platform that can:
 
 ![Splunk Data Sources](https://github.com/user-attachments/assets/587c96f2-965b-499c-abc0-72c733735eb9)
 
-> 📌 **DATA FLOW**: Aggregated/API data → Heavy Forwarder | Event logs → Universal Forwarder | Wire data → Splunk Stream/HEC | Local files → Universal Forwarder
+![Splunk Architecture](https://github.com/user-attachments/assets/a5dd7fbc-245e-4c9c-b3b3-2963adbedc46)
+
+> 📌 **ARCHITECTURE**: Search Head for UI, Indexer for data processing, Forwarder for data collection
 
 ---
 
@@ -51,11 +53,9 @@ Splunk is a powerful data analytics platform that can:
 
 ```mermaid
 graph LR
-    F[Forwarder<br/>Data Collection] -->|sends data| I[Indexer<br/>Data Processing]
-    I -->|stores| DB[(Indexes)]
-    F -->|forwards| I
-    SH[Search Head<br/>UI & Queries] -->|searches| I
-    SH -->|visualizes| DB
+    F["Forwarder<br/>Data Collection"] -->|sends data| I["Indexer<br/>Data Processing"]
+    I -->|stores| DB["(Indexes)"]
+    SH["Search Head<br/>UI & Queries"] -->|searches| I
     
     style F fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
     style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
@@ -109,10 +109,12 @@ graph LR
 ### Basic Searching
 
 ```splunk
-index="main" "UNKNOWN"
+search index="main" "UNKNOWN"
 ```
 
-> 🔴 **KEY CONCEPT**: By default, a search returns all events. Use keywords, boolean operators (AND, OR, NOT), comparison operators, and wildcards (*) to narrow results.
+> 🔴 **KEY CONCEPT**: By default, a search returns all events, but it can be narrowed down with keywords, boolean operators (AND, OR, NOT), comparison operators, and wildcard characters.
+
+**Example**: By specifying the index as main, the query narrows down the search to only the events stored in the main index. The term UNKNOWN is then used as a keyword to filter and retrieve events that include this specific term.
 
 ### Wildcard Search
 
@@ -120,7 +122,7 @@ index="main" "UNKNOWN"
 index="main" "*UNKNOWN*"
 ```
 
-> 📌 Searches for events containing "UNKNOWN" anywhere in the event data.
+> 📌 Searches for events containing "UNKNOWN" anywhere in the event data. Wildcards (*) can replace any number of characters.
 
 ### Fields and Comparison Operators
 
@@ -128,35 +130,110 @@ index="main" "*UNKNOWN*"
 index="main" EventCode!=1
 ```
 
-> 🔴 Searches for events where EventCode is NOT equal to 1.
+> 🔴 Searches for events where EventCode is NOT equal to 1. Splunk automatically identifies fields like source, sourcetype, host, EventCode, etc.
 
-### SPL Commands Cheatsheet
-
-| Command | Syntax | Description |
-|---------|--------|-------------|
-| **fields** | `fields - User` | Include/exclude specific fields |
-| **table** | `table _time, host, Image` | Present results in tabular format |
-| **rename** | `rename Image as Process` | Rename a field in results |
-| **dedup** | `dedup Image` | Remove duplicate events |
-| **sort** | `sort - _time` | Sort results (use - for descending) |
-| **stats** | `stats count by _time, Image` | Statistical operations |
-| **chart** | `chart count by _time, Image` | Create data visualizations |
-| **eval** | `eval Process_Path=lower(Image)` | Create/redefine fields |
-| **rex** | `rex max_match=0 "[^%](?<guid>{.*})"` | Extract fields using regex |
-| **lookup** | `lookup malware_lookup.csv filename` | Enrich data with external sources |
-| **inputlookup** | `\| inputlookup malware_lookup.csv` | Retrieve data from lookup file |
-| **transaction** | `transaction Image startswith=eval(EventCode=1)` | Group related events |
-| **subsearch** | `NOT [ search ... \| top limit=100 Image ]` | Nested search for exclusions |
-
-### Time Range Commands
+### The fields Command
 
 ```splunk
-index="main" earliest=-7d EventCode!=1
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | fields - User
 ```
 
-> 📌 **Earliest/Latest**: Use negative numbers for relative time (e.g., -7d = 7 days ago) or absolute dates.
+> 📌 The fields command specifies which fields should be included or excluded. After retrieving process creation events, this excludes the User field from results.
 
-### The lookup Command Example
+### The table Command
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | table _time, host, Image
+```
+
+> 📌 Presents search results in tabular format with specified fields:
+> - `_time`: timestamp of the event
+> - `host`: name of the host where event occurred
+> - `Image`: name of the executable file representing the process
+
+### The rename Command
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | rename Image as Process
+```
+
+> 📌 Renames a field in search results. Image field represents executable name; renaming it to Process allows subsequent references.
+
+### The dedup Command
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | dedup Image
+```
+
+> 📌 Removes duplicate entries based on Image field. If same process is created multiple times, it appears only once.
+
+### The sort Command
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | sort - _time
+```
+
+> 📌 Sorts results in descending order (most recent first). Use `-` for descending.
+
+### The stats Command
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=3 | stats count by _time, Image
+```
+
+> 📌 Returns table where each row represents unique timestamp and process combination. Count shows network connection events per process at that time.
+
+### The chart Command
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=3 | chart count by _time, Image
+```
+
+> 📌 Creates visualization where each column represents a unique process. Easily see network events over time for each process.
+
+### The eval Command
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | eval Process_Path=lower(Image)
+```
+
+> 📌 Creates new field with lowercase version of Image field. Does not change original field.
+
+### The rex Command
+
+```splunk
+index="main" EventCode=4662 | rex max_match=0 "[^%](?<guid>{.*})" | table guid
+```
+
+> 🔴 **EXTRACTS GUIDs**: Useful because GUIDs are not automatically extracted from 4662 event logs.
+> - `rex max_match=0` ensures all occurrences are extracted (not just first)
+> - Pattern `{.*}` finds substrings beginning with { and ending with }
+> - `[^%]` ensures match doesn't begin with % character
+
+### The lookup Command
+
+#### Step 1: Create Lookup CSV File
+
+```csv
+filename, is_malware
+notepad.exe, false
+cmd.exe, false
+powershell.exe, false
+sharphound.exe, true
+randomfile.exe, true
+```
+
+#### Step 2: Add Lookup Table in Splunk UI
+
+![Lookup Settings](https://github.com/user-attachments/assets/c76f03a1-85a1-44b3-9d1b-e6ddd66cd17a)
+
+![Lookups Page](https://github.com/user-attachments/assets/91a165bf-c74c-4282-8b32-36c2dc310537)
+
+![Lookup Table Files](https://github.com/user-attachments/assets/4491381a-b5ae-4860-8ed5-a190076ade47)
+
+![Add Lookup File](https://github.com/user-attachments/assets/ec303f54-41e0-43fe-a1bc-90a0d45953c0)
+
+#### Step 3: Use Lookup in SPL
 
 ```splunk
 index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 
@@ -167,13 +244,46 @@ index="main" sourcetype="WinEventLog:Sysmon" EventCode=1
 ```
 
 **Step-by-step breakdown:**
-1. Search for Sysmon process creation events
-2. Extract filename from Image path using regex
-3. Convert filename to lowercase
-4. Lookup against malware CSV to check if malicious
-5. Display results in table
+1. `index="main" sourcetype="WinEventLog:Sysmon" EventCode=1`: Search for Sysmon process creation events
+2. `| rex field=Image "(?P<filename>[^\\]+)$"`: Extract filename after last backslash
+3. `| eval filename=lower(filename)`: Convert to lowercase for case-insensitive match
+4. `| lookup malware_lookup.csv filename OUTPUTNEW is_malware`: Check if malicious
+5. `| table filename, is_malware`: Display results
 
-### Transaction Command Example
+#### Alternative with dedup
+
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 
+| eval filename=mvdedup(split(Image, "\\")) 
+| eval filename=mvindex(filename, -1) 
+| eval filename=lower(filename) 
+| lookup malware_lookup.csv filename OUTPUTNEW is_malware 
+| table filename, is_malware 
+| dedup filename, is_malware
+```
+
+**Breakdown:**
+- `mvdedup(split(Image, "\\"))`: Split path into multivalue field, remove duplicates
+- `mvindex(filename, -1)`: Select last element (actual filename)
+- `dedup`: Remove duplicate entries
+
+### The inputlookup Command
+
+```splunk
+| inputlookup malware_lookup.csv
+```
+
+> 📌 Retrieves all records from lookup file without joining to search results. Used to verify lookup content.
+
+### Time Range Commands
+
+```splunk
+index="main" earliest=-7d EventCode!=1
+```
+
+> 📌 Retrieves events from last 7 days where EventCode is NOT 1. Use negative numbers for relative time.
+
+### The transaction Command
 
 ```splunk
 index="main" sourcetype="WinEventLog:Sysmon" (EventCode=1 OR EventCode=3) 
@@ -182,9 +292,14 @@ index="main" sourcetype="WinEventLog:Sysmon" (EventCode=1 OR EventCode=3)
 | dedup Image
 ```
 
-> 🔴 **THREAT HUNTING USE CASE**: Identifies sequences of process creation followed by network connection within 1 minute - useful for detecting malware behavior.
+> 🔴 **THREAT HUNTING USE CASE**: Groups events sharing common characteristics.
+> - Groups by Image field
+> - Starts with EventCode=1 (process creation)
+> - Ends with EventCode=3 (network connection)
+> - Max 1-minute window
+> - Identifies sequences of process creation followed by network connection - useful for detecting malware behavior
 
-### Subsearch Example
+### Subsearches
 
 ```splunk
 index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 
@@ -192,7 +307,11 @@ NOT [ search index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | top limi
 | table _time, Image, CommandLine, User, ComputerName
 ```
 
-> 📌 **USE CASE**: Find rare processes (not in top 100) that may indicate malicious activity.
+> 🔴 **RARE PROCESS HUNTING**:
+> - Main search: Process creation events
+> - `NOT []`: Excludes subsearch results
+> - Subsearch: Returns top 100 most common processes
+> - Result: Shows rare processes not in top 100 - may indicate malicious activity
 
 ---
 
@@ -206,11 +325,15 @@ NOT [ search index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | top limi
 | eventcount summarize=false index=* | table index
 ```
 
+> 📌 Uses eventcount to count events in all indexes. `summarize=false` shows counts separately.
+
 #### List All Source Types
 
 ```splunk
 | metadata type=sourcetypes
 ```
+
+> 📌 Returns all sourcetypes with metadata: firstTime, lastTime, totalCount
 
 #### List Source Types (Simplified)
 
@@ -230,11 +353,15 @@ NOT [ search index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | top limi
 sourcetype="WinEventLog:Security" | table _raw
 ```
 
+> 📌 Shows raw event data for specified sourcetype
+
 #### View All Fields for Sourcetype
 
 ```splunk
 sourcetype="WinEventLog:Security" | table *
 ```
+
+> ⚠️ Can produce very wide table if many fields exist
 
 #### Specific Field Extraction
 
@@ -249,12 +376,18 @@ sourcetype="WinEventLog:Security" | fieldsummary
 ```
 
 > 📌 **FIELDSUMMARY OUTPUT**:
-> - field: Field name
-> - count: Events containing the field
-> - distinct_count: Unique values
-> - max/min: Value range
-> - mean: Average value
-> - values: Sample values
+> | Field | Description |
+> |-------|-------------|
+> | field | The name of the field |
+> | count | Number of events containing the field |
+> | distinct_count | Number of distinct values |
+> | is_exact | Whether count is exact or estimated |
+> | max | Maximum value |
+> | mean | Mean value |
+> | min | Minimum value |
+> | numeric_count | Number of numeric values |
+> | stdev | Standard deviation |
+> | values | Sample values |
 
 #### Event Distribution Over Time
 
@@ -262,11 +395,15 @@ sourcetype="WinEventLog:Security" | fieldsummary
 index=* sourcetype=* | bucket _time span=1d | stats count by _time, index, sourcetype | sort - _time
 ```
 
+> 📌 Groups events into 1-day buckets, counts by time/index/sourcetype
+
 #### Rare Event Types
 
 ```splunk
 index=* sourcetype=* | rare limit=10 index, sourcetype
 ```
+
+> 📌 Finds 10 rarest combinations - may indicate abnormal behavior
 
 #### Rare Parent Processes
 
@@ -274,11 +411,15 @@ index=* sourcetype=* | rare limit=10 index, sourcetype
 index="main" | rare limit=20 useother=f ParentImage
 ```
 
+> 📌 Shows 20 least common ParentImage values
+
 #### Fields with Low Count
 
 ```splunk
 index=* sourcetype=* | fieldsummary | where count < 100 | table field, count, distinct_count
 ```
+
+> 📌 Shows fields appearing in less than 100 events
 
 #### Event Diversity
 
@@ -286,14 +427,52 @@ index=* sourcetype=* | fieldsummary | where count < 100 | table field, count, di
 index=* | sistats count by index, sourcetype, source, host
 ```
 
+> 📌 Shows event diversity across indexes, sources, and hosts
+
 ### Approach 2: Using Splunk User Interface
 
 > 🔴 **UI-BASED IDENTIFICATION**:
 
 1. **Data Sources**: Settings → Data inputs → Review input methods
 2. **Data Events**: Search & Reporting app → Fast/Verbose mode
-3. **Fields**: Click event → View selected/interesting fields
+3. **Fields**: Click event → View Selected/Interesting/All fields
 4. **Data Models**: Settings → Data Models → Explore hierarchical structures
+
+#### Search Modes
+
+![Fast Mode](https://github.com/user-attachments/assets/e67809cb-3ad2-404f-8580-c6f3cf6a4816)
+
+> 📌 **Search Modes**:
+> - **Fast Mode**: Quick scanning through data
+> - **Verbose Mode**: Dive deep into event details
+> - **Smart Mode**: Auto-detect best mode
+
+#### Event Details
+
+![Event Details](https://github.com/user-attachments/assets/9ccac67c-0a33-4c92-bb87-432d8c813242)
+
+> 📌 Click any event to expand and view:
+> - Raw event data
+> - All extracted fields
+> - Selected Fields (always shown: host, source, sourcetype)
+> - Interesting Fields (appear in ≥20% of events)
+
+#### Data Models
+
+![Data Models](https://github.com/user-attachments/assets/e950f00b-efea-4346-9239-73b22afc4390)
+
+> 📌 **Data Models** provide hierarchical view of data:
+> - Access: Settings → Data Models
+> - Each model has objects with relevant fields
+> - No SPL knowledge required
+
+#### Pivots
+
+![Pivots](https://github.com/user-attachments/assets/91e34536-4e67-4dbb-b707-9d3d076c8bbf)
+
+![Pivot Objects](https://github.com/user-attachments/assets/777196e0-65c5-40c6-b865-a4fe96aaab84)
+
+> 📌 **Pivots**: Drag-and-drop interface for reports/visualizations without writing SPL
 
 ---
 
@@ -311,6 +490,14 @@ index=* | sistats count by index, sourcetype, source, host
 6. **Lookup Enrichment** - Create and use lookup tables for malware detection
 
 > 🔴 **Remember**: Always follow your organization's data governance policies when exploring data!
+
+---
+
+### SPL Reference Resources
+
+- [Splunk Search Reference](https://docs.splunk.com/Documentation/SCS/current/SearchReference/Introduction)
+- [Splunk Cloud Search Reference](https://docs.splunk.com/Documentation/SplunkCloud/latest/SearchReference/)
+- [Splunk Cloud Search](https://docs.splunk.com/Documentation/SplunkCloud/latest/Search/)
 
 ---
 
