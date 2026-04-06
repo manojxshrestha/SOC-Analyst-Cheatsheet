@@ -66,6 +66,8 @@ SIEM (Security Information and Event Management) combines:
 ### How Does A SIEM Solution Work?
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffe5cc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Firewalls --> SIEM
     Servers --> SIEM
@@ -131,6 +133,7 @@ flowchart LR
 The Elastic Stack is an open-source collection of applications:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TB
     Beats --> Logstash --> Elasticsearch --> Kibana
 ```
@@ -235,6 +238,7 @@ A **Security Operations Center (SOC)** is a facility with a team responsible for
 - Security event management
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TB
     Monitor --> Detect --> Analyze --> Respond
 ```
@@ -281,6 +285,7 @@ A framework documenting adversary attack methods:
 - **Techniques** - How they achieve the goal
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Recon --> Initial_Access --> Execution --> Persistence --> Priv_Esc --> Defense_Evasion --> Cred_Access --> Discovery --> Lateral_Movement --> Exfiltration
 ```
@@ -305,6 +310,7 @@ flowchart LR
 A **use case** defines specific conditions that trigger an alert:
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Failed_Logins --> Correlation --> Single_Alert --> SOC_Notification
 ```
@@ -312,6 +318,7 @@ flowchart LR
 ### Use Case Development Lifecycle
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TB
     Requirements --> Data_Points --> Log_Validation --> Design --> Implementation --> Documentation --> Onboarding --> Testing --> Fine_Tuning
 ```
@@ -691,6 +698,7 @@ Think of it this way: SIEM is the **tool**, SOC is the **team and process** that
 **Answer:**
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Sources[Data Sources] --> Collectors[Log Collectors/Agents]
     Collectors --> Normalization[Log Normalization]
@@ -763,6 +771,7 @@ Alert fatigue occurs when analysts become overwhelmed by too many alerts, leadin
 **Answer:**
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Beats[Beats] --> Elasticsearch[Elasticsearch]
     Logstash[Logstash/Fleet] --> Elasticsearch
@@ -839,6 +848,7 @@ event.category:authentication AND event.outcome:failure
 **Answer:**
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Identify[1. Identify Threat] --> Specify[2. Specify Detection]
     Specify --> Develop[3. Develop Rule]
@@ -1240,6 +1250,7 @@ Think of it this way: SIEM is the **tool**, SOC is the **team and process** that
 **Answer:**
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Sources[Data Sources] --> Collectors[Log Collectors/Agents]
     Collectors --> Normalization[Log Normalization]
@@ -1312,6 +1323,7 @@ Alert fatigue occurs when analysts become overwhelmed by too many alerts, leadin
 **Answer:**
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Beats[Beats] --> Elasticsearch[Elasticsearch]
     Logstash[Logstash/Fleet] --> Elasticsearch
@@ -1388,6 +1400,7 @@ event.category:authentication AND event.outcome:failure
 **Answer:**
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Identify[1. Identify Threat] --> Specify[2. Specify Detection]
     Specify --> Develop[3. Develop Rule]
