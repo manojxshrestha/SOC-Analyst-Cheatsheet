@@ -8,10 +8,11 @@
 0. [Overview](#0-overview)
 1. [Introduction To Splunk & SPL](#1-introduction-to-splunk--spl)
 2. [Splunk Architecture](#2-splunk-architecture)
-3. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
-4. [SPL Commands Reference](#4-spl-commands-reference)
-5. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
-6. [Practical Exercises](#6-practical-exercises)
+3. [Intrusion Detection With Splunk (Real-world Scenario)](#3-intrusion-detection-with-splunk-real-world-scenario)
+4. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
+5. [SPL Commands Reference](#4-spl-commands-reference)
+6. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
+7. [Practical Exercises](#6-practical-exercises)
 
 ---
 
