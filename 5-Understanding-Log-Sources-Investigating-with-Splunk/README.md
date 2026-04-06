@@ -1096,57 +1096,11 @@ index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni
 7. **Alert creation** requires filtering false positives (JIT, WOW64, Explorer)
 8. **Alert bypass** is possible - always think about evasion techniques
 
-> 🔴 **FINAL LESSON**: Building alerts in lab is straightforward with limited data. Real-world scenarios require more nuanced mechanisms to pinpoint malicious activities among extensive datasets.
-
 ---
 
 *Module 5/15 - Understanding Log Sources & Investigating with Splunk*
 *Built with research + HTB Academy materials*
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-HTB Academy Logo
-Understanding Log Sources & Investigating with Splunk
-Understanding Log Sources & Investigating with Splunk 100%
-
-Section 3 / 6
-Go to Questions
-Intrusion Detection With Splunk (Real-world Scenario)
-Introduction
-
-The Windows Event Logs & Finding Evil module familiarized us with log exploration on a single machine to pinpoint malicious activity. Now, we're stepping up our game. We'll be conducting similar investigations, but on a much larger scale, across numerous machines to uncover irregular activities within the entire network instead of just one device. Our tools will still include Windows Event logs, but the scope of our work will broaden significantly, demanding careful scrutiny of a larger pool of information, and identifying and discarding false positives whenever possible.
-
-In this module, we'll be zooming in on specific malicious machines. We'll master the art of crafting precise queries and triggering alerts to proactively enhance the security of our environment.
-
-The strategy we'll follow to identify events will mirror our initial lessons. However, we're going up against a much larger data set instead of merely one collection of event logs. And from our vantage point at the Splunk dashboard, we'll aim to weed out false positives.
-Ingesting Data Sources
 
 At the start of creating hunts, alerts, or queries, the sheer volume of information and data can be daunting. Part of the art of being a cybersecurity professional involves pinpointing the most meaningful data, determining how to sift through it quickly and efficiently, and ensuring the robustness of our analysis.
 
