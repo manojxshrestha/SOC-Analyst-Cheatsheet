@@ -396,10 +396,6 @@ graph TD
     style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
     style K fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
-    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
-    style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
-    style K fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-```
 
 | Tactic | Technique | ID | Detection Focus |
 |--------|-----------|-----|-----------------|
