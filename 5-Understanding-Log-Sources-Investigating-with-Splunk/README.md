@@ -5,18 +5,19 @@
 
 ## Table of Contents
 
-0. [Overview](#0-overview)
-1. [Introduction To Splunk & SPL](#1-introduction-to-splunk--spl)
-2. [Splunk Architecture](#2-splunk-architecture)
-3. [Intrusion Detection With Splunk (Real-world Scenario)](#3-intrusion-detection-with-splunk-real-world-scenario)
-4. [Detecting Attacker Behavior With Splunk Based On TTPs](#4-detecting-attacker-behavior-with-splunk-based-on-ttps)
-5. [Detecting Attacker Behavior With Splunk Based On Analytics](#5-detecting-attacker-behavior-with-splunk-based-on-analytics)
-6. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
-7. [SPL Commands Reference](#4-spl-commands-reference)
-8. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
-9. [Practical Exercises](#6-practical-exercises)
-10. [Interview Questions](#interview-questions)
-11. [Additional Resources](#additional-resources)
+1. [Overview](#1-overview)
+2. [Introduction To Splunk & SPL](#2-introduction-to-splunk--spl)
+3. [Splunk Architecture](#3-splunk-architecture)
+4. [Using Splunk Applications](#4-using-splunk-applications)
+5. [Intrusion Detection With Splunk (Real-world Scenario)](#5-intrusion-detection-with-splunk-real-world-scenario)
+6. [Detecting Attacker Behavior With Splunk Based On TTPs](#6-detecting-attacker-behavior-with-splunk-based-on-ttps)
+7. [Detecting Attacker Behavior With Splunk Based On Analytics](#7-detecting-attacker-behavior-with-splunk-based-on-analytics)
+8. [Splunk as a SIEM Solution](#8-splunk-as-a-siem-solution)
+9. [SPL Commands Reference](#9-spl-commands-reference)
+10. [How To Identify The Available Data](#10-how-to-identify-the-available-data)
+11. [Practical Exercises](#11-practical-exercises)
+12. [Interview Questions](#interview-questions)
+13. [Additional Resources](#additional-resources)
 
 ---
 
