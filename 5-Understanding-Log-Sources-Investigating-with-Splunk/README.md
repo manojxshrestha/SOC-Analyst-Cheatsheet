@@ -1103,129 +1103,51 @@ index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni
 
 ### Hunting Queries
 
-
-Upon researching, we find that the first one is linked to DS-Replication-Get-Changes-All, which, as per its description, "...allows the replication of secret domain data".
-
-This gives us solid confirmation that a DCSync attempt was made and successfully executed by the Waldo user on the UNIWALDO domain. It's reasonable to presume that the Waldo user either possesses Domain Admin rights or has a certain level of access rights permitting this action. Furthermore, it's highly likely that the attacker has extracted all the accounts within the AD as well! This signifies a full compromise in our network, and we should consider rotating our krbtgt just in case a golden ticket was created.
-
-However, it's evident that we've barely scratched the surface of the attacker's activities. The attacker must have initially infiltrated the system and undertaken several maneuvers to obtain domain admin rights, orchestrate lateral movement, and dump the domain credentials. With this knowledge, we will adopt an additional hunt strategy to try and deduce how the attacker managed to obtain Domain Admin rights initially.
-
-We are aware of and have previously observed detections for lsass dumping as a prevalent credential harvesting technique. To spot this in our environment, we strive to identify processes opening handles to lsass, then evaluate whether we deem this behavior unusual or regular. Fortunately, Sysmon event code 10 can provide us with data on process access or processes opening handles to other processes. We'll deploy the following query to zero in on potential lsass dumping.
-
         shellsession
 index="main" EventCode=10 lsass | stats count by SourceImage
 
 <img width="1000" height="345" alt="image" src="https://github.com/user-attachments/assets/3da4fec0-323d-461e-922c-04a9fb9877ac" />
-
-
-Splunk search results showing 238 events for EventCode 10 with counts by SourceImage. 'C:\Windows\System32\lsass.exe' has the highest count of 99.
-
-We prefer sorting by count to make the data more comprehensible. While it's not always safe to make assumptions, it's generally accepted that an activity occurring frequently is "normal" in an environment. It's also harder to detect malicious activity in a sea of 99 events compared to spotting it in just 1 or 5 possible events. With this logic, we'll begin by examining any conspicuous strange process accesses to lsass.exe by any source image. The most noticeable ones are notepad (given its absurdity) and rundll32 (given its limited frequency). We can further explore these as we usually do.
 
         shellsession
 index="main" EventCode=10 lsass SourceImage="C:\\Windows\\System32\\notepad.exe"
 
 <img width="1000" height="552" alt="image" src="https://github.com/user-attachments/assets/a79e01fd-85c2-4c2b-993b-70d80329d82b" />
 
-
-Splunk search results for EventCode 10 with SourceImage 'C:\Windows\System32\notepad.exe'. TargetProcessId 640 accessing 'C:\Windows\System32\lsass.exe' with GrantedAccess 0x1FFFFF on host DESKTOP-EGSS5IS.
-
-We are investigating the instances of notepad opening the handle. The data at hand is limited, but it's clear that Sysmon seems to think it's related to credential dumping. We can use the call stack to glean additional information about what triggered what and from where to ascertain how this attack was conducted.
-
-<img width="1000" height="237" alt="image" src="https://github.com/user-attachments/assets/32d544d1-f70a-4ecf-878b-8410ac30e290" />
-
-
-Process accessed: Credential Dumping technique, SourceImage 'C:\Windows\System32\notepad.exe', TargetImage 'C:\Windows\System32\lsass.exe', GrantedAccess 0x1FFFFF, SourceUser 'DESKTOP-EGSS5IS\waldo', TargetUser 'NT AUTHORITY\SYSTEM'.
-
-To the untrained eye, it might not be immediately apparent that the callstack refers to an UNKNOWN segment into ntdll. In most cases, any form of shellcode will be located in what's termed an unbacked memory region. This implies that ANY API calls from this shellcode don't originate from any identifiable file on disk, but from arbitrary, or UNKNOWN, regions in memory that don't map to disk at all. While false positives can occur, the scenarios are limited to processes such as JIT processes, and they can mostly be filtered out.
-Creating Meaningful Alerts
-
-Armed with this newfound source of information, we can now aim to create alerts from malicious malware based on API calls from UNKNOWN regions of memory. It's crucial to remember that generating alerts differs from hunting. Our alerts must be resilient and effective, or we risk flooding our defense team with a glut of data, inadvertently providing a smokescreen for attackers to slip through our false positives. Moreover, we must ensure they aren't easily circumvented, where a few tweaks and seconds is all it takes.
-
-In this case, we'll attempt to create an alert that can detect threat actors based on them making calls from UNKNOWN memory regions. We want to focus on the malicious threads/regions while leaving standard items untouched to avoid alert fatigue. The approach we'll adopt in this lab will be more simplified and easier than many live environments due to the smaller amount of data we need to grapple with. However, the same concepts will apply when transitioning to an enterprise network – we'll just need to manage it against a much larger volume of data more effectively and creatively.
-
-We'll start by listing all the call stacks containing UNKNOWN during this lab period based on event code to see which can yield the most meaningful data.
-
         shellsession
 index="main" CallTrace="*UNKNOWN*" | stats count by EventCode
 
 <img width="1000" height="445" alt="image" src="https://github.com/user-attachments/assets/a75f544e-0189-493b-a140-b8a063ae6895" />
-
-
-Splunk search results showing 1,575 events with counts by EventCode. EventCode 10 has 1,575 occurrences.
-
-It appears that only event code 10 shows anything related to our CallTrace, so our alert will be tied to process access! This means we'll be alerting on anything attempting to open handles to other processes that don't map back to disk, assuming it's shellcode. We see 1575 counts though...so we'll begin by grouping based on SourceImage. Ordering can be applied by clicking on the arrows next to count.
 
         shellsession
 index="main" CallTrace="*UNKNOWN*" | stats count by SourceImage
 
 <img width="1000" height="552" alt="image" src="https://github.com/user-attachments/assets/e3e07488-9e7c-4f61-a318-94da56564ac5" />
 
-
-Splunk search results showing a list of executable files with their source paths and event counts.
-
-Here are the false positives we mentioned, and they're all JITs as well! .Net is a JIT, and Squirrel utilities are tied to electron, which is a chromium browser and also contains a JIT. Even with our smaller dataset, there's a lot to sift through, and we're not sure what's malicious and what's not. The most effective way to manage this is by linking a few queries together.
-
-First, we're not concerned when a process accesses itself (necessarily), so let's filter those out for now.
-
         shellsession
 index="main" CallTrace="*UNKNOWN*" | where SourceImage!=TargetImage | stats count by SourceImage
 
 <img width="1000" height="522" alt="image" src="https://github.com/user-attachments/assets/68db7f4c-6e17-43e3-93f9-a52ad8cd3c5c" />
-
-
-Splunk search results displaying executable file paths and their event counts.
-
-Next, we know that C Sharp will be hard to weed out, and we want a high-fidelity alert. So we'll exclude anything C Sharp related due to its JIT. We can achieve this by excluding the Microsoft.Net folders and anything that has ni.dll in its call trace or clr.dll.
 
         shellsession
 index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* | where SourceImage!=TargetImage | stats count by SourceImage
 
 <img width="1000" height="522" alt="image" src="https://github.com/user-attachments/assets/62944c0e-48cd-468d-acb1-ec1f8a3a1083" />
 
-
-Splunk search results showing executable file paths and event counts.
-
-In the next phase, we'll be focusing on eradicating anything related to WOW64 within its call stack. Why, you may ask? Well, it's quite often that WOW64 comprises regions of memory that are not backed by any specific file, a phenomenon we believe is linked to the Heaven's Gate mechanism, though we've yet to delve deep into this matter.
-
         shellsession
 index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* CallTrace!=*wow64* | where SourceImage!=TargetImage | stats count by SourceImage
 
 <img width="1000" height="526" alt="image" src="https://github.com/user-attachments/assets/3dbbc784-a799-4d54-9e7d-731bd70324d0" />
-
-
-Splunk search results showing executable file paths and event counts.
-
-Moving forward, we'll also exclude Explorer.exe, considering its versatile nature. It's akin to a wildcard, capable of undertaking an array of tasks. Identifying any malicious activity within Explorer directly is almost a Herculean task. The wide range of legitimate activities it performs and the multitude of tools that often dismiss it due to its intricacies make this process more challenging. It's tough to verify the UNKNOWN, especially in this context.
 
         shellsession
 index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* CallTrace!=*wow64* SourceImage!="C:\\Windows\\Explorer.EXE" | where SourceImage!=TargetImage | stats count by SourceImage
 
 <img width="1919" height="372" alt="image" src="https://github.com/user-attachments/assets/2173d47e-0fc5-4232-8403-c8d53b4ddabb" />
 
-
-Splunk search results showing executable file paths and event counts.
-
-With the steps outlined above, we've now established a reasonably robust alert system for our environment. This alert system is adept at identifying known threats. However, it's essential that we review the remaining data to verify its legitimacy. In addition, we must inspect the system to spot any unseen activities. To gain a more comprehensive understanding, we could reintroduce some fields we removed earlier, like TargetImage and CallTrace, or scrutinize each source image individually to weed out any remaining false positives.
-
         shellsession
 index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni.dll* CallTrace!=*clr.dll* CallTrace!=*wow64* SourceImage!="C:\\Windows\\Explorer.EXE" | where SourceImage!=TargetImage | stats count by SourceImage, TargetImage, CallTrace
 
 <img width="1000" height="522" alt="image" src="https://github.com/user-attachments/assets/06e17075-651e-4e11-997d-7d69b03bc0f7" />
 
-
-Splunk search results showing source and target executable file paths, call traces, and event counts.
-
-Please note that building this alert system was relatively straightforward in our current environment due to the limited data and false positives we had to deal with. However, in a real-world scenario, you might face extensive data that requires more nuanced mechanisms to pinpoint potentially malicious activities. Moreover, it's worth reflecting on the strength of this alert. How easily could it be bypassed? Unfortunately, there are a few ways to get past the alert we crafted.
-
-Imagine the ways to fortify this alert. For instance, a hacker could simply sidestep our alert by loading any random DLL with NI appended to its name. How could we enhance our alert further? What other ways could this alert be bypassed?
-
-Wrapping up, we've equipped ourselves with skills to sift through vast quantities of data, identify potential threats, explore our Security Information and Event Management (SIEM) for valuable data sources, trace attacks from their potential sources, and create potent alerts to keep a close watch on emerging threats. While the techniques we discussed were relatively simplified due to our smaller dataset of around 500.000 events, real-world scenarios may entail much larger or smaller datasets, requiring more rigorous techniques to identify malicious activities.
-
-As you advance in your cybersecurity journey, remember the importance of maintaining effective search strategies, getting innovative with analyzing massive datasets, leveraging open-source intelligence tools like Google to identify threats, and crafting robust alerts that aren't easily bypassed by incorporating arbitrary strings in your scripts.
-Practical Exercises
-
-Navigate to the bottom of this section and click on Click here to spawn the target system!
 
 Now, navigate to http://[Target IP]:8000, open the Search & Reporting application, and answer the questions below.
 Connect to HTB
