@@ -208,12 +208,8 @@ graph LR
 
 ```mermaid
 graph TD
-    A["Passive Recon"] --> C["Target"]
-    B["Active Recon"] --> C
-    
-    A["Passive Recon"]["LinkedIn, Job Postings, Documentation, WHOIS"]
-    B["Active Recon"]["Port Scanning, Service Enum, Vuln Scanning"]
-    C["Target"]["Target Organization"]
+    A["Passive Recon<br/>LinkedIn, WHOIS"] --> C["Target"]
+    B["Active Recon<br/>Port Scan, Vuln Scan"] --> C
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -237,12 +233,11 @@ graph TD
 
 ```mermaid
 graph TD
-    A["Phishing"] --> D["Target"]
+    A["Phishing"] --> D["Target<br/>Victim"]
     B["Malicious Website"] --> D
     C["USB Devices"] --> D
     E["Watering Hole"] --> D
     F["Social Engineering"] --> D
-    D["Target"]["Victim"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -306,14 +301,9 @@ graph LR
     A["Victim"] --> B["C2"]
     B --> A
     
-    C["C2 Server"]["C2 Server"]
-    D["1. Beacon"]["1. Beacon"]
-    E["2. Instructions"]["2. Instructions"]
-    F["3. Additional Tools"]["3. Additional Tools"]
-    
-    A --> D
-    B --> E
-    B --> F
+    B --> C["1. Beacon"]
+    B --> D["2. Instructions"]
+    B --> E["3. Additional Tools"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
@@ -482,8 +472,8 @@ graph TD
     B --> C["Containment, Eradication<br/>& Recovery ~15%"]
     C --> D["Post-Incident<br/>~5%"]
     
-    D -.->|Feedback| A
-    D -.->|Improvement| B
+    D -.-> A
+    D -.-> B
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
