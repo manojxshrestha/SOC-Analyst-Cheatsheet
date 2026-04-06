@@ -5,17 +5,17 @@
 
 ## Table of Contents
 
-1. [Overview](#1-overview)
-2. [Introduction To Splunk & SPL](#2-introduction-to-splunk--spl)
-3. [Splunk Architecture](#3-splunk-architecture)
+1. [Overview](#0-overview)
+2. [Introduction To Splunk & SPL](#1-introduction-to-splunk--spl)
+3. [Splunk Architecture](#2-splunk-architecture)
 4. [Using Splunk Applications](#4-using-splunk-applications)
 5. [Intrusion Detection With Splunk (Real-world Scenario)](#5-intrusion-detection-with-splunk-real-world-scenario)
 6. [Detecting Attacker Behavior With Splunk Based On TTPs](#6-detecting-attacker-behavior-with-splunk-based-on-ttps)
 7. [Detecting Attacker Behavior With Splunk Based On Analytics](#7-detecting-attacker-behavior-with-splunk-based-on-analytics)
-8. [Splunk as a SIEM Solution](#8-splunk-as-a-siem-solution)
-9. [SPL Commands Reference](#9-spl-commands-reference)
-10. [How To Identify The Available Data](#10-how-to-identify-the-available-data)
-11. [Practical Exercises](#11-practical-exercises)
+8. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
+9. [SPL Commands Reference](#4-spl-commands-reference)
+10. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
+11. [Practical Exercises](#practical-exercises)
 12. [Interview Questions](#interview-questions)
 13. [Additional Resources](#additional-resources)
 
@@ -507,7 +507,7 @@ index=* sourcetype=* | rare limit=10 field1, field2, field3
 
 ---
 
-## 6. Practical Exercises
+## 6. Practical Exercises (Data Identification)
 
 ### Key Exercises Summary
 
@@ -1478,11 +1478,9 @@ index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | transaction ComputerN
 
 ---
 
-### Practical Exercises
+## 11. Practical Exercises
 
 > 🔴 **COMING SOON**: Practical exercises will be added here after all sections are completed.
-
-
 
 ---
 
