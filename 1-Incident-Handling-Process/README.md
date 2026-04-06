@@ -498,9 +498,7 @@ graph TD
 
 ```mermaid
 graph TD
-    D["Incident Handling<br/>Capability"]
-    
-    A["People<br/>Skilled IR Team"] --> D
+    A["People<br/>Skilled IR Team"] --> D["Incident Handling<br/>Capability"]
     B["Policies<br/>Clear Policies"] --> D
     C["Tools<br/>Software, Hardware"] --> D
     
@@ -531,16 +529,13 @@ graph TD
 
 ```mermaid
 graph TD
-    G["Hardware"]
-    H["Software"]
-    
-    A["Forensic Laptop"] --> G
+    A["Forensic Laptop"] --> G["Hardware"]
     B["Write Blockers"] --> G
     C["Hard Drives"] --> G
     D["Network Cables"] --> G
     E["USB Drives"] --> G
     
-    F["FTK Imager"] --> H
+    F["FTK Imager"] --> H["Software"]
     I["Wireshark"] --> H
     J["Autopsy"] --> H
     K["Volatility"] --> H
@@ -582,12 +577,10 @@ graph TD
 
 ```mermaid
 graph TD
-    A["Employee Reports"] --> G
+    A["Employee Reports"] --> G["Detection"]
     B["Tool Alerts<br/>EDR/IDS/Firewall/SIEM"] --> G
     C["Threat Hunting"] --> G
     D["Third-Party"] --> G
-    
-    G["Detection"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
