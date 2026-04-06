@@ -8,25 +8,25 @@
 This module covers the **foundational concepts of incident handling** - the structured approach SOC analysts use to respond to security events and incidents. You'll learn how to distinguish between events and incidents, understand various attack frameworks, and master the NIST incident response lifecycle.
 
 ```mermaid
-flowchart TB
-    Events_vs_Incidents --> Cyber_Kill_Chain
-    Cyber_Kill_Chain --> MITRE_ATTCK
-    MITRE_ATTCK --> Pyramid_of_Pain
-    Pyramid_of_Pain --> NIST_IR_Lifecycle
+graph TB
+    A["Events vs<br/>Incidents"] --> B["Cyber<br/>Kill Chain"]
+    B --> C["MITRE<br/>ATTCK"]
+    C --> D["Pyramid<br/>of Pain"]
+    D --> E["NIST IR<br/>Lifecycle"]
     
-    Triage_Assess --> Document_Incidents
-    Document_Incidents --> Apply_Frameworks
-    Apply_Frameworks --> IR_Playbooks
+    F["Triage<br/>Assess"] --> G["Document<br/>Incidents"]
+    G --> H["Apply<br/>Frameworks"]
+    H --> I["IR<br/>Playbooks"]
     
-    style Events_vs_Incidents fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style Cyber_Kill_Chain fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style MITRE_ATTCK fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
-    style Pyramid_of_Pain fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
-    style NIST_IR_Lifecycle fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
-    style Triage_Assess fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style Document_Incidents fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style Apply_Frameworks fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
-    style IR_Playbooks fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Key Takeaways
@@ -77,7 +77,7 @@ flowchart TB
 ### Event vs Incident
 
 ```mermaid
-flowchart LR
+graph LR
     User_sends_email --> Mouse_click --> Firewall_allows_connection
     Data_theft --> System_crash --> Unauthorized_access --> Malware_infection
     
@@ -123,7 +123,7 @@ An event with **clear intent to cause harm** performed against a computer system
 ### Incident Manager Role
 
 ```mermaid
-flowchart TD
+graph TD
     Incident_Manager --> SOC_Manager
     Incident_Manager --> Authority
     Incident_Manager --> Communication_Point
@@ -184,7 +184,7 @@ flowchart TD
 ### 7 Stages Overview
 
 ```mermaid
-flowchart LR
+graph LR
     Recon --> Weaponize --> Delivery --> Exploitation --> Installation --> C2 --> Actions
 ```
 
@@ -193,7 +193,7 @@ flowchart LR
 #### 1️⃣ Reconnaissance
 
 ```mermaid
-flowchart TD
+graph TD
     Passive_Recon --> Target
     Active_Recon --> Target
     
@@ -218,7 +218,7 @@ flowchart TD
 #### 3️⃣ Delivery
 
 ```mermaid
-flowchart TD
+graph TD
     Phishing --> Target
     Malicious_Website --> Target
     USB_Devices --> Target
@@ -246,7 +246,7 @@ flowchart TD
 #### 5️⃣ Installation
 
 ```mermaid
-flowchart LR
+graph LR
     Droppers --> Persistence
     Backdoors --> Persistence
     Rootkits --> Persistence
@@ -267,7 +267,7 @@ flowchart LR
 #### 6️⃣ Command & Control (C2)
 
 ```mermaid
-flowchart LR
+graph LR
     Victim --> C2
     C2 --> Victim
     
@@ -311,7 +311,7 @@ flowchart LR
 ### Concept Overview
 
 ```mermaid
-flowchart TD
+graph TD
     Tactic --> Technique
     Technique --> SubTech
     
@@ -341,7 +341,7 @@ flowchart TD
 ### Common Techniques for SOC Analysts
 
 ```mermaid
-flowchart TD
+graph TD
     Phishing[T1566-Phishing] --> Initial_Access
     Exploit_App[T1190-Exploit] --> Initial_Access
     Valid_Accounts[T1078-Valid] --> Initial_Access
@@ -375,7 +375,7 @@ flowchart TD
 ## 5. Pyramid of Pain
 
 ```mermaid
-flowchart TD
+graph TD
     TTP[TTPs - Hardest to change] --> Tools[Malware, Exploits]
     Tools --> Network_Artifacts[Registry, Mutex, Filenames]
     Network_Artifacts --> Domain_Names[C2 domains]
@@ -409,7 +409,7 @@ flowchart TD
 ### The 4 Stages
 
 ```mermaid
-flowchart TD
+graph TD
     P[Preparation ~40%] --> D[Detection & Analysis ~40%]
     D --> C[Containment, Eradication & Recovery ~15%]
     C --> PI[Post-Incident ~5%]
@@ -445,7 +445,7 @@ flowchart TD
 ### Prerequisites Checklist
 
 ```mermaid
-flowchart TD
+graph TD
     People --> Capability
     Policies --> Capability
     Tools --> Capability
@@ -476,7 +476,7 @@ flowchart TD
 ### Jump Bag Essentials
 
 ```mermaid
-flowchart TD
+graph TD
     H1[Forensic Laptop] --> Hardware[Hardware]
     H2[Write Blockers] --> Hardware
     H3[Hard Drives] --> Hardware
@@ -512,7 +512,7 @@ flowchart TD
 ### Detection Sources
 
 ```mermaid
-flowchart TD
+graph TD
     S1[Employee Reports] --> Detection[Detection]
     S2[Tool Alerts EDR/IDS/Firewall/SIEM] --> Detection
     S3[Threat Hunting] --> Detection
@@ -524,7 +524,7 @@ flowchart TD
 ### Detection Layers (Defense in Depth)
 
 ```mermaid
-flowchart TD
+graph TD
     Internet[Internet] --> Perimeter[Perimeter]
     Perimeter --> Internal[Internal Network]
     Internal --> Endpoint[Endpoint]
@@ -545,7 +545,7 @@ flowchart TD
 ### Building Incident Timeline
 
 ```mermaid
-flowchart LR
+graph LR
     A[Date] --> B[Time]
     B --> C[Hostname]
     C --> D[Event Description]
@@ -575,7 +575,7 @@ flowchart LR
 ### IOC Creation & Usage
 
 ```mermaid
-flowchart TD
+graph TD
     IP[IP Addresses C2 servers] --> OpenIOC
     Hash[File Hashes MD5 SHA256] --> YARA
     File[Filenames] --> STIX
@@ -587,7 +587,7 @@ flowchart TD
 ### Investigation Cycle
 
 ```mermaid
-flowchart TD
+graph TD
     A[Initial Data] --> B[Create IOCs]
     B --> C[Search IOCs]
     C --> D[Identify New Leads]
@@ -613,7 +613,7 @@ flowchart TD
 ### Containment Strategy
 
 ```mermaid
-flowchart TD
+graph TD
     ST1[Isolate VLAN] --> SP[Preserve Evidence]
     ST2[Pull Network Cable] --> SP
     ST3[Sinkhole C2 DNS] --> SP
@@ -652,7 +652,7 @@ flowchart TD
 ### Recovery Stage
 
 ```mermaid
-flowchart LR
+graph LR
     Restore_Systems --> Verify_Functionality
     Verify_Functionality --> Gradual_Reintroduction
     Gradual_Reintroduction --> Heavy_Monitoring
@@ -726,7 +726,7 @@ flowchart LR
 ### Attack Chain
 
 ```mermaid
-flowchart TD
+graph TD
     A[Default Credentials admin/admin] --> B[ManageEngine Access]
     B --> C[C2 to 103.112.60.117 HTTPS]
     C --> D[Domain Admin Created]
@@ -995,7 +995,7 @@ level: medium
 ### 16.1 Incident Classification & Severity Levels
 
 ```mermaid
-flowchart TD
+graph TD
     P1[P1 - Critical Active APT/Ransomware Data Exfiltration] --> Immediate[Immediate Response]
     P2[P2 - High Malware/Unauthorized Access] --> OneHour[< 1 Hour Response]
     P3[P3 - Medium Policy Violation/Suspicious] --> FourHours[< 4 Hours Response]
@@ -1012,7 +1012,7 @@ flowchart TD
 ### 16.2 Chain of Custody
 
 ```mermaid
-flowchart LR
+graph LR
     Evidence --> Document
     Document --> Hash_Verification
     Hash_Verification --> Secure_Storage
@@ -1047,7 +1047,7 @@ flowchart LR
 ### 16.4 Regulatory Frameworks
 
 ```mermaid
-flowchart TD
+graph TD
     GDPR --> Fine1
     HIPAA --> Fine2
     PCI_DSS --> Fine3
@@ -1084,7 +1084,7 @@ flowchart TD
 ### 16.6 SOC Tiers & Responsibilities
 
 ```mermaid
-flowchart TD
+graph TD
     Tier_1 --> Tier_2
     Tier_2 --> Tier_3
     
@@ -1096,7 +1096,7 @@ flowchart TD
 ### 16.7 Threat Intelligence Integration
 
 ```mermaid
-flowchart TD
+graph TD
     External_Feeds --> TI_Platform
     Internal_Sources --> TI_Platform
     TI_Platform --> Use_Cases
@@ -1123,7 +1123,7 @@ flowchart TD
 #### Playbook: Phishing Response
 
 ```mermaid
-flowchart TD
+graph TD
     Phishing_Alert --> Triage
     Triage --> Analyze_Email
     Analyze_Email --> Extract_IOCs
@@ -1145,7 +1145,7 @@ flowchart TD
 #### Playbook: Malware Detection
 
 ```mermaid
-flowchart TD
+graph TD
     Malware_Detected --> Isolate_Endpoint
     Isolate_Endpoint --> Collect_Forensics
     Collect_Forensics --> Analyze_Malware

@@ -66,7 +66,7 @@ SIEM (Security Information and Event Management) combines:
 ### How Does A SIEM Solution Work?
 
 ```mermaid
-flowchart LR
+graph LR
     Firewalls --> SIEM
     Servers --> SIEM
     Endpoints --> SIEM
@@ -141,7 +141,7 @@ flowchart LR
 The Elastic Stack is an open-source collection of applications:
 
 ```mermaid
-flowchart TB
+graph TB
     Beats --> Logstash --> Elasticsearch --> Kibana
 ```
 
@@ -245,7 +245,7 @@ A **Security Operations Center (SOC)** is a facility with a team responsible for
 - Security event management
 
 ```mermaid
-flowchart TB
+graph TB
     Monitor --> Detect --> Analyze --> Respond
 ```
 
@@ -291,7 +291,7 @@ A framework documenting adversary attack methods:
 - **Techniques** - How they achieve the goal
 
 ```mermaid
-flowchart LR
+graph LR
     Recon --> Initial_Access --> Execution --> Persistence --> Priv_Esc --> Defense_Evasion --> Cred_Access --> Discovery --> Lateral_Movement --> Exfiltration
 ```
 
@@ -315,14 +315,14 @@ flowchart LR
 A **use case** defines specific conditions that trigger an alert:
 
 ```mermaid
-flowchart LR
+graph LR
     Failed_Logins --> Correlation --> Single_Alert --> SOC_Notification
 ```
 
 ### Use Case Development Lifecycle
 
 ```mermaid
-flowchart TB
+graph TB
     Requirements --> Data_Points --> Log_Validation --> Design --> Implementation --> Documentation --> Onboarding --> Testing --> Fine_Tuning
 ```
 
@@ -701,7 +701,7 @@ Think of it this way: SIEM is the **tool**, SOC is the **team and process** that
 **Answer:**
 
 ```mermaid
-flowchart TD
+graph TD
     Sources[Data Sources] --> Collectors[Log Collectors/Agents]
     Collectors --> Normalization[Log Normalization]
     Normalization --> Index[Index & Store]
@@ -773,7 +773,7 @@ Alert fatigue occurs when analysts become overwhelmed by too many alerts, leadin
 **Answer:**
 
 ```mermaid
-flowchart LR
+graph LR
     Beats[Beats] --> Elasticsearch[Elasticsearch]
     Logstash[Logstash/Fleet] --> Elasticsearch
     Kibana[Kibana/Sentinel] --> Elasticsearch
@@ -849,7 +849,7 @@ event.category:authentication AND event.outcome:failure
 **Answer:**
 
 ```mermaid
-flowchart TD
+graph TD
     Identify[1. Identify Threat] --> Specify[2. Specify Detection]
     Specify --> Develop[3. Develop Rule]
     Develop --> Test[4. Test & Tune]
@@ -1250,7 +1250,7 @@ Think of it this way: SIEM is the **tool**, SOC is the **team and process** that
 **Answer:**
 
 ```mermaid
-flowchart TD
+graph TD
     Sources[Data Sources] --> Collectors[Log Collectors/Agents]
     Collectors --> Normalization[Log Normalization]
     Normalization --> Index[Index & Store]
@@ -1322,7 +1322,7 @@ Alert fatigue occurs when analysts become overwhelmed by too many alerts, leadin
 **Answer:**
 
 ```mermaid
-flowchart LR
+graph LR
     Beats[Beats] --> Elasticsearch[Elasticsearch]
     Logstash[Logstash/Fleet] --> Elasticsearch
     Kibana[Kibana/Sentinel] --> Elasticsearch
@@ -1398,7 +1398,7 @@ event.category:authentication AND event.outcome:failure
 **Answer:**
 
 ```mermaid
-flowchart TD
+graph TD
     Identify[1. Identify Threat] --> Specify[2. Specify Detection]
     Specify --> Develop[3. Develop Rule]
     Develop --> Test[4. Test & Tune]
