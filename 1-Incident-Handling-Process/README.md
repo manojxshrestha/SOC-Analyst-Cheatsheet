@@ -8,8 +8,6 @@
 This module covers the **foundational concepts of incident handling** - the structured approach SOC analysts use to respond to security events and incidents. You'll learn how to distinguish between events and incidents, understand various attack frameworks, and master the NIST incident response lifecycle.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#cce5ff', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TB
     Events_vs_Incidents --> Cyber_Kill_Chain
     Cyber_Kill_Chain --> MITRE_ATTCK
@@ -19,6 +17,16 @@ flowchart TB
     Triage_Assess --> Document_Incidents
     Document_Incidents --> Apply_Frameworks
     Apply_Frameworks --> IR_Playbooks
+    
+    style Events_vs_Incidents fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Cyber_Kill_Chain fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style MITRE_ATTCK fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Pyramid_of_Pain fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style NIST_IR_Lifecycle fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Triage_Assess fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Document_Incidents fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Apply_Frameworks fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style IR_Playbooks fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Key Takeaways
@@ -69,10 +77,17 @@ flowchart TB
 ### Event vs Incident
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     User_sends_email --> Mouse_click --> Firewall_allows_connection
     Data_theft --> System_crash --> Unauthorized_access --> Malware_infection
+    
+    style User_sends_email fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Mouse_click fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Firewall_allows_connection fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Data_theft fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style System_crash fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Unauthorized_access fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Malware_infection fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Term | Definition | Example |
@@ -108,7 +123,6 @@ An event with **clear intent to cause harm** performed against a computer system
 ### Incident Manager Role
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Incident_Manager --> SOC_Manager
     Incident_Manager --> Authority
@@ -170,7 +184,6 @@ flowchart TD
 ### 7 Stages Overview
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Recon --> Weaponize --> Delivery --> Exploitation --> Installation --> C2 --> Actions
 ```
@@ -180,7 +193,6 @@ flowchart LR
 #### 1️⃣ Reconnaissance
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Passive_Recon --> Target
     Active_Recon --> Target
@@ -206,7 +218,6 @@ flowchart TD
 #### 3️⃣ Delivery
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Phishing --> Target
     Malicious_Website --> Target
@@ -235,7 +246,6 @@ flowchart TD
 #### 5️⃣ Installation
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Droppers --> Persistence
     Backdoors --> Persistence
@@ -257,7 +267,6 @@ flowchart LR
 #### 6️⃣ Command & Control (C2)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Victim --> C2
     C2 --> Victim
@@ -302,7 +311,6 @@ flowchart LR
 ### Concept Overview
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Tactic --> Technique
     Technique --> SubTech
@@ -333,7 +341,6 @@ flowchart TD
 ### Common Techniques for SOC Analysts
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Phishing[T1566-Phishing] --> Initial_Access
     Exploit_App[T1190-Exploit] --> Initial_Access
@@ -368,7 +375,6 @@ flowchart TD
 ## 5. Pyramid of Pain
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     TTP[TTPs - Hardest to change] --> Tools[Malware, Exploits]
     Tools --> Network_Artifacts[Registry, Mutex, Filenames]
@@ -403,7 +409,6 @@ flowchart TD
 ### The 4 Stages
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     P[Preparation ~40%] --> D[Detection & Analysis ~40%]
     D --> C[Containment, Eradication & Recovery ~15%]
@@ -440,7 +445,6 @@ flowchart TD
 ### Prerequisites Checklist
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     People --> Capability
     Policies --> Capability
@@ -472,7 +476,6 @@ flowchart TD
 ### Jump Bag Essentials
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     H1[Forensic Laptop] --> Hardware[Hardware]
     H2[Write Blockers] --> Hardware
@@ -509,7 +512,6 @@ flowchart TD
 ### Detection Sources
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     S1[Employee Reports] --> Detection[Detection]
     S2[Tool Alerts EDR/IDS/Firewall/SIEM] --> Detection
@@ -522,7 +524,6 @@ flowchart TD
 ### Detection Layers (Defense in Depth)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Internet[Internet] --> Perimeter[Perimeter]
     Perimeter --> Internal[Internal Network]
@@ -544,7 +545,6 @@ flowchart TD
 ### Building Incident Timeline
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     A[Date] --> B[Time]
     B --> C[Hostname]
@@ -575,7 +575,6 @@ flowchart LR
 ### IOC Creation & Usage
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     IP[IP Addresses C2 servers] --> OpenIOC
     Hash[File Hashes MD5 SHA256] --> YARA
@@ -588,7 +587,6 @@ flowchart TD
 ### Investigation Cycle
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     A[Initial Data] --> B[Create IOCs]
     B --> C[Search IOCs]
@@ -615,7 +613,6 @@ flowchart TD
 ### Containment Strategy
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     ST1[Isolate VLAN] --> SP[Preserve Evidence]
     ST2[Pull Network Cable] --> SP
@@ -655,7 +652,6 @@ flowchart TD
 ### Recovery Stage
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Restore_Systems --> Verify_Functionality
     Verify_Functionality --> Gradual_Reintroduction
@@ -730,7 +726,6 @@ flowchart LR
 ### Attack Chain
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     A[Default Credentials admin/admin] --> B[ManageEngine Access]
     B --> C[C2 to 103.112.60.117 HTTPS]
@@ -1000,7 +995,6 @@ level: medium
 ### 16.1 Incident Classification & Severity Levels
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     P1[P1 - Critical Active APT/Ransomware Data Exfiltration] --> Immediate[Immediate Response]
     P2[P2 - High Malware/Unauthorized Access] --> OneHour[< 1 Hour Response]
@@ -1018,7 +1012,6 @@ flowchart TD
 ### 16.2 Chain of Custody
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart LR
     Evidence --> Document
     Document --> Hash_Verification
@@ -1054,7 +1047,6 @@ flowchart LR
 ### 16.4 Regulatory Frameworks
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     GDPR --> Fine1
     HIPAA --> Fine2
@@ -1092,7 +1084,6 @@ flowchart TD
 ### 16.6 SOC Tiers & Responsibilities
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Tier_1 --> Tier_2
     Tier_2 --> Tier_3
@@ -1105,7 +1096,6 @@ flowchart TD
 ### 16.7 Threat Intelligence Integration
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     External_Feeds --> TI_Platform
     Internal_Sources --> TI_Platform
@@ -1133,7 +1123,6 @@ flowchart TD
 #### Playbook: Phishing Response
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Phishing_Alert --> Triage
     Triage --> Analyze_Email
@@ -1156,7 +1145,6 @@ flowchart TD
 #### Playbook: Malware Detection
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffcccc', 'primaryTextColor': '#000', 'lineColor': '#000'}}}%%
 flowchart TD
     Malware_Detected --> Isolate_Endpoint
     Isolate_Endpoint --> Collect_Forensics
