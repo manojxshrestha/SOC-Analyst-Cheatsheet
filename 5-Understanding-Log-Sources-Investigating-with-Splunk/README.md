@@ -556,7 +556,7 @@ index=* sourcetype=* | rare limit=10 field1, field2, field3
 
 ---
 
-## 2. Using Splunk Applications
+## 4. Using Splunk Applications
 
 ### What Are Splunk Apps?
 
@@ -701,7 +701,7 @@ Let's now specify "All time" on the time picker and click "Submit". Results are 
 
 ---
 
-## 3. Intrusion Detection With Splunk (Real-world Scenario)
+## 5. Intrusion Detection With Splunk (Real-world Scenario)
 
 ### Introduction
 
@@ -1112,7 +1112,7 @@ index="main" CallTrace="*UNKNOWN*" SourceImage!="*Microsoft.NET*" CallTrace!=*ni
 
 ---
 
-## 4. Detecting Attacker Behavior With Splunk Based On TTPs
+## 6. Detecting Attacker Behavior With Splunk Based On TTPs
 
 ### Introduction
 
@@ -1341,7 +1341,7 @@ index="main" EventCode=3 NOT (DestinationPort=80 OR DestinationPort=443 OR Desti
 
 ---
 
-## 5. Detecting Attacker Behavior With Splunk Based On Analytics
+## 7. Detecting Attacker Behavior With Splunk Based On Analytics
 
 ### Introduction
 
