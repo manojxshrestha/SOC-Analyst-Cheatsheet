@@ -794,6 +794,8 @@ index="main" uniwaldo.local
 index="main" *uniwaldo.local*
 ```
 
+![Wildcard Search](https://github.com/user-attachments/assets/2993b66a-f903-4f2c-b69f-5013a2c7da74)
+
 > ⚠️ Returns SAME results but MUCH more slowly!
 
 #### 3. Field-Targeted Search (Fastest)
@@ -801,6 +803,8 @@ index="main" *uniwaldo.local*
 ```splunk
 index="main" ComputerName="*uniwaldo.local"
 ```
+
+![Field Search](https://github.com/user-attachments/assets/5ce067f6-7274-471a-985c-31ad8252efbf)
 
 > 🔴 **KEY LESSON**: Targeted searches execute faster, lessen resource consumption, and reduce irrelevant data. Always aim searches at specific users, networks, machines!
 
@@ -956,6 +960,10 @@ index="main" EventCode=4662 Access_Mask=0x100 Account_Name!=*$
 > 📌 **GUIDs IDENTIFIED**:
 > - `{1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}` = DS-Replication-Get-Changes-All
 > - `{19195a5b-6da0-11d0-afd3-00c04fd930c9}`
+
+![Google Search](https://github.com/user-attachments/assets/94224996-ee54-4b4e-89ad-7df0256273ab)
+
+![GUID Table](https://github.com/user-attachments/assets/0925e619-87ad-4561-af52-324348e6e1a1)
 
 ![Microsoft Reference](https://github.com/user-attachments/assets/58f4baab-64cb-4917-bd7c-55d4c5c9d86e)
 
