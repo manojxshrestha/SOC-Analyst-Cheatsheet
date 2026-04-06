@@ -41,9 +41,16 @@ Splunk is a powerful data analytics platform that can:
 
 ![Splunk Data Sources](https://github.com/user-attachments/assets/587c96f2-965b-499c-abc0-72c733735eb9)
 
+> 📌 **DATA SOURCES**:
+> - Aggregated/API data → Heavy Forwarder
+> - Event logs and OS stats → Universal Forwarder
+> - Wire data → Splunk Stream or HTTP Event Collector
+> - Local file monitoring → Universal Forwarder
+> - DevOps, IoT, containers, syslog hosts
+
 ![Splunk Architecture](https://github.com/user-attachments/assets/a5dd7fbc-245e-4c9c-b3b3-2963adbedc46)
 
-> 📌 **ARCHITECTURE**: Search Head for UI, Indexer for data processing, Forwarder for data collection
+> 📌 **ARCHITECTURE**: Search Head for UI, Indexer for data processing, Forwarder for data collection. Includes agentless data sources like change tickets, logs, and metrics, with auto-load balanced indexing.
 
 ---
 
@@ -131,6 +138,8 @@ index="main" EventCode!=1
 ```
 
 > 🔴 Searches for events where EventCode is NOT equal to 1. Splunk automatically identifies fields like source, sourcetype, host, EventCode, etc.
+
+> 📌 **COMPARISON OPERATORS**: =, !=, <, >, <=, >=
 
 ### The fields Command
 
@@ -313,6 +322,8 @@ NOT [ search index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | top limi
 > - Subsearch: Returns top 100 most common processes
 > - Result: Shows rare processes not in top 100 - may indicate malicious activity
 
+> ⚠️ **NOTE**: This type of search can generate a lot of noise in environments where new and unique processes are frequently created. Careful tuning and context are important.
+
 ---
 
 ## 5. How To Identify The Available Data
@@ -388,6 +399,10 @@ sourcetype="WinEventLog:Security" | fieldsummary
 > | numeric_count | Number of numeric values |
 > | stdev | Standard deviation |
 > | values | Sample values |
+> | modes | The most common values |
+> | numBuckets | Number of buckets used to estimate distinct count |
+
+> ⚠️ Note: Values are calculated based on search results. Ensure time range is large enough to capture all possible fields.
 
 #### Event Distribution Over Time
 
@@ -428,6 +443,16 @@ index=* | sistats count by index, sourcetype, source, host
 ```
 
 > 📌 Shows event diversity across indexes, sources, and hosts
+
+#### Rare Field Combinations
+
+```splunk
+index=* sourcetype=* | rare limit=10 field1, field2, field3
+```
+
+> 📌 Find uncommon combinations of field values. Replace field1, field2, field3 with actual field names.
+
+---
 
 ### Approach 2: Using Splunk User Interface
 
