@@ -10,10 +10,11 @@
 2. [Splunk Architecture](#2-splunk-architecture)
 3. [Intrusion Detection With Splunk (Real-world Scenario)](#3-intrusion-detection-with-splunk-real-world-scenario)
 4. [Detecting Attacker Behavior With Splunk Based On TTPs](#4-detecting-attacker-behavior-with-splunk-based-on-ttps)
-5. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
-6. [SPL Commands Reference](#4-spl-commands-reference)
-7. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
-8. [Practical Exercises](#6-practical-exercises)
+5. [Detecting Attacker Behavior With Splunk Based On Analytics](#5-detecting-attacker-behavior-with-splunk-based-on-analytics)
+6. [Splunk as a SIEM Solution](#3-splunk-as-a-siem-solution)
+7. [SPL Commands Reference](#4-spl-commands-reference)
+8. [How To Identify The Available Data](#5-how-to-identify-the-available-data)
+9. [Practical Exercises](#6-practical-exercises)
 
 ---
 
@@ -1335,209 +1336,147 @@ index="main" EventCode=3 NOT (DestinationPort=80 OR DestinationPort=443 OR Desti
 
 > 🔴 **COMING SOON**: Practical exercises will be added here after all sections are completed.
 
+---
 
+## 5. Detecting Attacker Behavior With Splunk Based On Analytics
 
+### Introduction
 
+> 📌 **APPROACH 2**: Statistical analysis and anomaly detection to identify abnormal behavior. Profile "normal" behavior and identify deviations from baseline.
 
+**Key Commands**:
+- `streamstats` - Real-time analytics for identifying unusual patterns
+- `eventstats` - Statistical calculations across events
+- `bucket` - Group events into time intervals
+- `transaction` - Group related events
 
+### Example: Anomaly Detection in Network Connections
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Understanding Log Sources & Investigating with Splunk
-Understanding Log Sources & Investigating with Splunk 100%
-
-Section 5 / 6
-Go to Questions
-Detecting Attacker Behavior With Splunk Based On Analytics
-
-As previously mentioned, the second approach leans heavily on statistical analysis and anomaly detection to identify abnormal behavior. By profiling normal behavior and identifying deviations from this baseline, we can uncover suspicious activities that may signify an intrusion. These statistical detection models, although driven by data, are invariably shaped by the broader understanding of attacker techniques, tactics, and procedures (TTPs).
-
-A good example of this approach in Splunk is the use of the streamstats command. This command allows us to perform real-time analytics on the data, which can be useful for identifying unusual patterns or trends.
-
-Consider a scenario where we are monitoring the number of network connections initiated by a process within a certain time frame.
-
-        shellsession
+```splunk
 index="main" sourcetype="WinEventLog:Sysmon" EventCode=3 | bin _time span=1h | stats count as NetworkConnections by _time, Image | streamstats time_window=24h avg(NetworkConnections) as avg stdev(NetworkConnections) as stdev by Image | eval isOutlier=if(NetworkConnections > (avg + (0.5*stdev)), 1, 0) | search isOutlier=1
+```
 
-In this search:
+![Network Anomaly](https://github.com/user-attachments/assets/d2351b38-baa8-4d07-8362-f1aade56a373)
 
-    We start by focusing on network connection events (EventCode=3), and then group these events into hourly intervals (bin can be seen as a bucket alias). For each unique process image (Image), we calculate the number of network connection events per time bucket.
-    We then use the streamstats command to calculate a rolling average and standard deviation of the number of network connections over a 24-hour period for each unique process image. This gives us a dynamic baseline to compare each data point to.
-    The eval command is then used to create a new field, isOutlier, and assigns it a value of 1 for any event where the number of network connections is more than 0.5 standard deviations away from the average. This labels these events as statistically anomalous and potentially indicative of suspicious activity.
-    Lastly, the search command filters our results to only include the outliers, i.e., the events where isOutlier equals 1.
+> 📌 **QUERY BREAKDOWN**:
+> - `bin _time span=1h` - Group into hourly intervals
+> - `streamstats` - Calculate rolling 24h average and standard deviation
+> - `eval isOutlier` - Flag events > 0.5 standard deviations from mean
 
-By monitoring for anomalies in network connections initiated by processes, we can detect potentially malicious activities such as command-and-control communication or data exfiltration attempts. However, as with any anomaly detection method, it's important to remember that it may yield false positives and should be calibrated according to the specifics of your environment.
+> 🔴 **DETECTION**: Identifies processes with unusual network connection counts - potential C2 or exfiltration.
 
-<img width="1423" height="1377" alt="image" src="https://github.com/user-attachments/assets/d2351b38-baa8-4d07-8362-f1aade56a373" />
+---
 
-Search results table showing network connections for various executables, including demon.exe, notepad.exe, and rundll32.exe, with columns for time, image path, network connections count, average, standard deviation, and outlier status.
+#### Example 1: Detection Of Abnormally Long Commands
 
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" Image=*cmd.exe | eval len=len(CommandLine) | table User, len, CommandLine | sort - len
+```
 
+**Filtered version** (remove benign):
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" Image=*cmd.exe ParentImage!="*msiexec.exe" ParentImage!="*explorer.exe" | eval len=len(CommandLine) | table User, len, CommandLine | sort - len
+```
 
+![Long Commands](https://github.com/user-attachments/assets/957dfe61-9ca3-41a9-938a-d408c5729e7c)
 
-Upon closer examination of the results, we observe the presence of numerous suspicious processes that were previously identified, although not all of them are evident.
-Crafting SPL Searches Based On Analytics
+> 🔴 **DETECTION**: Attackers use long commands for complex operations - flag unusually long CommandLines.
 
-Below are some more detection examples that follow this approach.
+---
 
-    Example: Detection Of Abnormally Long Commands
-    Attackers frequently employ excessively long commands as part of their operations to accomplish their objectives.
+#### Example 2: Detection Of Abnormal cmd.exe Activity
 
-            shellsession
-    index="main" sourcetype="WinEventLog:Sysmon" Image=*cmd.exe | eval len=len(CommandLine) | table User, len, CommandLine | sort - len
+```splunk
+index="main" EventCode=1 (CommandLine="*cmd.exe*") | bucket _time span=1h | stats count as cmdCount by _time User CommandLine | eventstats avg(cmdCount) as avg stdev(cmdCount) as stdev | eval isOutlier=if(cmdCount > avg+1.5*stdev, 1, 0) | search isOutlier=1
+```
 
-q    A
-    After reviewing the results, we notice some benign activity that can be filtered out to reduce noise. Let's apply the following modifications to the search.
+![Cmd Activity](https://github.com/user-attachments/assets/4a64c526-8fb1-4a10-857a-24dd70be75c1)
 
-            shellsession
-    index="main" sourcetype="WinEventLog:Sysmon" Image=*cmd.exe ParentImage!="*msiexec.exe" ParentImage!="*explorer.exe" | eval len=len(CommandLine) | table User, len, CommandLine | sort - len
+> 📌 Uses `bucket` + `eventstats` to find statistical outliers in cmd.exe execution.
 
+---
 
-<img width="1933" height="963" alt="image" src="https://github.com/user-attachments/assets/957dfe61-9ca3-41a9-938a-d408c5729e7c" />
+#### Example 3: Detection Of High DLL Loading
 
-    Search results table displaying command line executions with columns for user, command length, and command line details.
+**Basic query**:
+```splunk
+index="main" EventCode=7 | bucket _time span=1h | stats dc(ImageLoaded) as unique_dlls_loaded by _time, Image | where unique_dlls_loaded > 3 | stats count by Image, unique_dlls_loaded
+```
 
-    
-    Once again, we observe the recurrence of malicious activity that we previously identified during our investigation.
-    Example: Detection Of Abnormal cmd.exe Activity
-    The following search identifies unusual cmd.exe activity within a certain time range. It uses the bucket command to group events by hour, calculates the count, average, and standard deviation of cmd.exe executions, and flags outliers.
+**Filtered version**:
+```splunk
+index="main" EventCode=7 NOT (Image="C:\\Windows\\System32*") NOT (Image="C:\\Program Files (x86)*") NOT (Image="C:\\Program Files*") NOT (Image="C:\\ProgramData*") NOT (Image="C:\\Users\\waldo\\AppData*") | bucket _time span=1h | stats dc(ImageLoaded) as unique_dlls_loaded by _time, Image | where unique_dlls_loaded > 3 | stats count by Image, unique_dlls_loaded | sort - unique_dlls_loaded
+```
 
-            shellsession
-    index="main" EventCode=1 (CommandLine="*cmd.exe*") | bucket _time span=1h | stats count as cmdCount by _time User CommandLine | eventstats avg(cmdCount) as avg stdev(cmdCount) as stdev | eval isOutlier=if(cmdCount > avg+1.5*stdev, 1, 0) | search isOutlier=1
+![DLL Loading](https://github.com/user-attachments/assets/899f2c13-f9db-421f-872e-fbc9c08a3036)
 
-<img width="1425" height="1413" alt="image" src="https://github.com/user-attachments/assets/4a64c526-8fb1-4a10-857a-24dd70be75c1" />
+> 📌 **QUERY BREAKDOWN**:
+> - `dc(ImageLoaded)` - Count distinct DLLs loaded
+> - `where unique_dlls_loaded > 3` - Filter for rapid DLL loading
+> - Exclude benign paths (Windows, Program Files, etc.)
 
-    Search results table showing command line executions with columns for time, user, command line, command count, average, outlier status, and standard deviation.
+> 🔴 **DETECTION**: Malware often loads multiple DLLs rapidly.
 
-    
-    Upon closer examination of the results, we observe the presence of suspicious commands that were previously identified, although not all of them are evident.
-    Example: Detection Of Processes Loading A High Number Of DLLs In A Specific Time
-    It is not uncommon for malware to load multiple DLLs in rapid succession. The following SPL can assist in monitoring this behavior.
+---
 
-            shellsession
-    index="main" EventCode=7 | bucket _time span=1h | stats dc(ImageLoaded) as unique_dlls_loaded by _time, Image | where unique_dlls_loaded > 3 | stats count by Image, unique_dlls_loaded
+#### Example 4: Detection Of Repeated Process Creation
 
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | transaction ComputerName, Image | where mvcount(ProcessGuid) > 1 | stats count by Image, ParentImage
+```
 
-    After reviewing the results, we notice some benign activity that can be filtered out to reduce noise. Let's apply the following modifications to the search.
+![Process Transaction](https://github.com/user-attachments/assets/ceee8b58-cc62-45a0-84fb-22451d70ca99)
 
-            shellsession
-    index="main" EventCode=7 NOT (Image="C:\\Windows\\System32*") NOT (Image="C:\\Program Files (x86)*") NOT (Image="C:\\Program Files*") NOT (Image="C:\\ProgramData*") NOT (Image="C:\\Users\\waldo\\AppData*")| bucket _time span=1h | stats dc(ImageLoaded) as unique_dlls_loaded by _time, Image | where unique_dlls_loaded > 3 | stats count by Image, unique_dlls_loaded | sort - unique_dlls_loaded
+> 📌 **QUERY BREAKDOWN**:
+> - `transaction` - Group events by ComputerName + Image
+> - `mvcount(ProcessGuid) > 1` - Filter for repeated process creation
+> - Find parent-child relationships with multiple occurrences
 
-        index="main" EventCode=7 NOT (Image="C:\\Windows\\System32*") NOT (Image="C:\\Program Files (x86)*") NOT (Image="C:\\Program Files*") NOT (Image="C:\\ProgramData*") NOT (Image="C:\\Users\\waldo\\AppData*"): This part of the query is responsible for fetching all the events from the main index where EventCode is 7 (Image loaded events in Sysmon logs). The NOT filters are excluding events from known benign paths (like "Windows\System32", "Program Files", "ProgramData", and a specific user's "AppData" directory).
-        | bucket _time span=1h: This command is used to group the events into time buckets of one hour duration. This is used to analyze the data in hourly intervals.
-        | stats dc(ImageLoaded) as unique_dlls_loaded by _time, Image: The stats command is used to perform statistical operations on the events. Here, dc(ImageLoaded) calculates the distinct count of DLLs loaded (ImageLoaded) for each process image (Image) in each one-hour time bucket.
-        | where unique_dlls_loaded > 3: This filter excludes the results where the number of unique DLLs loaded by a process within an hour is 3 or less. This is based on the assumption that legitimate software usually loads DLLs at a moderate rate, whereas malware might rapidly load many different DLLs.
-        | stats count by Image, unique_dlls_loaded: This command calculates the number of times each process (Image) has loaded more than 3 unique DLLs in an hour.
-        | sort - unique_dlls_loaded: Finally, this command sorts the results in descending order based on the number of unique DLLs loaded (unique_dlls_loaded).
+**Deeper investigation**:
+```splunk
+index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | transaction ComputerName, Image | where mvcount(ProcessGuid) > 1 | search Image="C:\\Windows\\System32\\rundll32.exe" ParentImage="C:\\Windows\\System32\\svchost.exe" | table CommandLine, ParentCommandLine
+```
 
-<img width="1943" height="1343" alt="image" src="https://github.com/user-attachments/assets/899f2c13-f9db-421f-872e-fbc9c08a3036" />
+![Rundll32 Analysis](https://github.com/user-attachments/assets/77e224e6-dbde-4536-963e-f04305cdf896)
 
-    Search results table showing unique DLLs loaded by various executables, with columns for image path, unique DLLs loaded count, and total count.
+---
 
+### Analytics Detection Queries Reference
 
+| Detection Category | SPL Query | Command |
+|-------------------|-----------|---------|
+| Network anomalies | `streamstats time_window=24h avg() as avg stdev() as stdev` | streamstats |
+| Long commands | `eval len=len(CommandLine) \| sort - len` | eval |
+| cmd.exe outliers | `bucket _time span=1h \| eventstats avg() as avg` | eventstats |
+| High DLL loading | `stats dc(ImageLoaded) as unique_dlls_loaded \| where unique_dlls_loaded > 3` | stats |
+| Repeated processes | `transaction ComputerName, Image \| where mvcount(ProcessGuid) > 1` | transaction |
 
-    
-    Upon closer examination of the results, we observe the presence of suspicious processes that were previously identified, although not all of them are evident.
-    It's important to note that this behavior can also be exhibited by legitimate software in numerous cases, so context and additional investigation would be necessary to confirm malicious activity.
-    Example: Detection Of Transactions Where The Same Process Has Been Created More Than Once On The Same Computer
-    We want to correlate events where the same process (Image) is executed on the same computer (ComputerName) since this might indicate abnormalities depending on the nature of the processes involved. As always, context and additional investigation would be necessary to confirm if it's truly malicious or just a benign occurrence. The following SPL can assist in monitoring this behavior.
+---
 
-            shellsession
-    index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | transaction ComputerName, Image | where mvcount(ProcessGuid) > 1 | stats count by Image, ParentImage
+### Summary
 
-        index="main" sourcetype="WinEventLog:Sysmon" EventCode=1: This part of the query fetches all the Sysmon process creation events (EventCode=1) from the main index. Sysmon event code 1 represents a process creation event, which includes details such as the process that was started, its command line arguments, the user that started it, and the process that it was started from.
-        | transaction ComputerName, Image: The transaction command is used to group related events together based on shared field values. In this case, events are being grouped together if they share the same ComputerName and Image values. This can help to link together all the process creation events associated with a specific program on a specific computer.
-        | where mvcount(ProcessGuid) > 1: This command filters the results to only include transactions where more than one unique process GUID (ProcessGuid) is associated with the same program image (Image) on the same computer (ComputerName). This would typically represent instances where the same program was started more than once.
-        | stats count by Image, ParentImage: Finally, this stats command is used to count the number of such instances by the program image (Image) and its parent process image (ParentImage).
+> 📌 **KEY TAKEAWAYS**:
 
+1. **Anomaly detection** uses statistical analysis to find deviations from baseline
+2. **streamstats** - real-time rolling statistics
+3. **eventstats** - statistical calculations across search results
+4. **bucket** - group events into time intervals
+5. **transaction** - group related events for correlation
+6. **Long commands** - attackers use excessively long command lines
+7. **DLL loading** - malware loads many DLLs rapidly
+8. **Process repetition** - repeated process creation indicates abnormality
 
-<img width="1943" height="1365" alt="image" src="https://github.com/user-attachments/assets/ceee8b58-cc62-45a0-84fb-22451d70ca99" />
+> 🔴 **IMPORTANT**: Anomaly detection alone is insufficient - combine with TTP-based detection for comprehensive coverage.
 
-    Search results table showing process images and their parent images with columns for image path, parent image path, and count.
+---
 
+*Module 5/15 - Understanding Log Sources & Investigating with Splunk*
+*Built with research + HTB Academy materials*
 
+---
 
-    
-    Let's dive deeper into the relationship between rundll32.exe and svchost.exe (since this pair has the highest count number).
+### Practical Exercises
 
-            shellsession
-    index="main" sourcetype="WinEventLog:Sysmon" EventCode=1  | transaction ComputerName, Image  | where mvcount(ProcessGuid) > 1 | search Image="C:\\Windows\\System32\\rundll32.exe" ParentImage="C:\\Windows\\System32\\svchost.exe" | table CommandLine, ParentCommandLine
+> 🔴 **COMING SOON**: Practical exercises will be added here after all sections are completed.
 
-<img width="1891" height="1525" alt="image" src="https://github.com/user-attachments/assets/77e224e6-dbde-4536-963e-f04305cdf896" />
-
-    Search results table showing command lines and their parent command lines with columns for command line and parent command line.
-
-    
-    After careful scrutiny of the results, it becomes apparent that we not only identify the presence of previously identified suspicious commands but also new ones.
-
-By establishing a profile of "normal" behavior and utilizing a statistical model to identify deviations from a baseline, we could have detected the compromise of our environment more rapidly, especially with a thorough understanding of attacker tactics, techniques, and procedures (TTPs). However, it is important to acknowledge that relying solely on this approach when crafting queries is inadequate.
-Practical Exercises
-
-Navigate to the bottom of this section and click on Click here to spawn the target system!
-
-Now, navigate to http://[Target IP]:8000, open the Search & Reporting application, and answer the question below.
-Connect to HTB
-Target(s)
-
-Spawn the target system to get IPs and answer questions
-
-
-Skills Assessment
-Scenario
-
-This skills assessment section builds upon the progress made in the Intrusion Detection With Splunk (Real-world Scenario) section. Our objective is to identify any missing components of the attack chain and trace the malicious process responsible for initiating the infection.
-Practical Exercises
-
-Navigate to the bottom of this section and click on Click here to spawn the target system!
-
-Now, navigate to http://[Target IP]:8000, open the Search & Reporting application, and answer the questions below.
-Connect to HTB
-Target(s)
-
-Spawn the target system to get IPs and answer questions
-
-Enable step-by-step solutions
-PRO
-
-    Question 1
-
-    +1
-    Navigate to http://[Target IP]:8000, open the "Search & Reporting" application, and find through SPL searches against all data the process that created remote threads in rundll32.exe. Answer format: _.exe
-    Question 2
-
-    +6
-    Navigate to http://[Target IP]:8000, open the "Search & Reporting" application, and find through SPL searches against all data the process that started the infection. Answer format: _.exe
 
