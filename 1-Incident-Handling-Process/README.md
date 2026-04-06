@@ -78,16 +78,16 @@ graph TB
 
 ```mermaid
 graph LR
-    User_sends_email --> Mouse_click --> Firewall_allows_connection
-    Data_theft --> System_crash --> Unauthorized_access --> Malware_infection
+    A["User sends email"] --> B["Mouse click"] --> C["Firewall allows connection"]
+    D["Data theft"] --> E["System crash"] --> F["Unauthorized access"] --> G["Malware infection"]
     
-    style User_sends_email fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style Mouse_click fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style Firewall_allows_connection fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
-    style Data_theft fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style System_crash fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style Unauthorized_access fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
-    style Malware_infection fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Term | Definition | Example |
@@ -124,10 +124,16 @@ An event with **clear intent to cause harm** performed against a computer system
 
 ```mermaid
 graph TD
-    Incident_Manager --> SOC_Manager
-    Incident_Manager --> Authority
-    Incident_Manager --> Communication_Point
-    Incident_Manager --> Track_Activities
+    A["Incident Manager"] --> B["SOC Manager"]
+    A --> C["Authority"]
+    A --> D["Communication Point"]
+    A --> E["Track Activities"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ---
@@ -185,7 +191,15 @@ graph TD
 
 ```mermaid
 graph LR
-    Recon --> Weaponize --> Delivery --> Exploitation --> Installation --> C2 --> Actions
+    A["Recon"] --> B["Weaponize"] --> C["Delivery"] --> D["Exploitation"] --> E["Installation"] --> F["C2"] --> G["Actions"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Stage Details
@@ -194,12 +208,16 @@ graph LR
 
 ```mermaid
 graph TD
-    Passive_Recon --> Target
-    Active_Recon --> Target
+    A["Passive Recon"] --> C["Target"]
+    B["Active Recon"] --> C
     
-    Passive_Recon[LinkedIn, Job Postings, Documentation, WHOIS]
-    Active_Recon[Port Scanning, Service Enum, Vuln Scanning]
-    Target[Target Organization]
+    A["Passive Recon"]["LinkedIn, Job Postings, Documentation, WHOIS"]
+    B["Active Recon"]["Port Scanning, Service Enum, Vuln Scanning"]
+    C["Target"]["Target Organization"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 **SOC Detection Focus:**
@@ -219,12 +237,19 @@ graph TD
 
 ```mermaid
 graph TD
-    Phishing --> Target
-    Malicious_Website --> Target
-    USB_Devices --> Target
-    Watering_Hole --> Target
-    Social_Engineering --> Target
-    Target[Victim]
+    A["Phishing"] --> D["Target"]
+    B["Malicious Website"] --> D
+    C["USB Devices"] --> D
+    E["Watering Hole"] --> D
+    F["Social Engineering"] --> D
+    D["Target"]["Victim"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 **SOC Detection Focus:**
@@ -247,15 +272,25 @@ graph TD
 
 ```mermaid
 graph LR
-    Droppers --> Persistence
-    Backdoors --> Persistence
-    Rootkits --> Persistence
-    Scheduled_Tasks --> Persistence
-    Registry_Keys --> Persistence
-    Services --> Persistence
+    A["Droppers"] --> G["Persistence"]
+    B["Backdoors"] --> G
+    C["Rootkits"] --> G
+    D["Scheduled Tasks"] --> G
+    E["Registry Keys"] --> G
+    F["Services"] --> G
     
-    Persistence --> Survive_Reboot
-    Persistence --> Deploy_Additional_Tools
+    G --> H["Survive Reboot"]
+    G --> I["Deploy Additional Tools"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 **SOC Detection Focus:**
@@ -268,17 +303,24 @@ graph LR
 
 ```mermaid
 graph LR
-    Victim --> C2
-    C2 --> Victim
+    A["Victim"] --> B["C2"]
+    B --> A
     
-    C2_Server[C2 Server]
-    Beacon[1. Beacon]
-    Instructions[2. Instructions]
-    Additional_Tools[3. Additional Tools]
+    C["C2 Server"]["C2 Server"]
+    D["1. Beacon"]["1. Beacon"]
+    E["2. Instructions"]["2. Instructions"]
+    F["3. Additional Tools"]["3. Additional Tools"]
     
-    Victim --> Beacon
-    C2 --> Instructions
-    C2 --> Additional_Tools
+    A --> D
+    B --> E
+    B --> F
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 **SOC Detection Focus:**
@@ -312,11 +354,18 @@ graph LR
 
 ```mermaid
 graph TD
-    Tactic --> Technique
-    Technique --> SubTech
+    A["Tactic"] --> B["Technique"]
+    B --> C["Sub-Technique"]
     
-    Example1[Initial Access] --> Example2[T1190 - Exploit Public-Facing]
-    Example2 --> Example3[T1190.004 - SQL Injection]
+    D["Initial Access"] --> E["T1190 - Exploit Public-Facing"]
+    E --> F["T1190.004 - SQL Injection"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Enterprise Tactics (14 Tactics)
@@ -342,16 +391,28 @@ graph TD
 
 ```mermaid
 graph TD
-    Phishing[T1566-Phishing] --> Initial_Access
-    Exploit_App[T1190-Exploit] --> Initial_Access
-    Valid_Accounts[T1078-Valid] --> Initial_Access
+    A["T1566-Phishing"] --> G["Initial Access"]
+    B["T1190-Exploit"] --> G
+    C["T1078-Valid Accounts"] --> G
     
-    PowerShell[T1059.001-PowerShell] --> Execution
-    User_Execution[T1204-User Exec] --> Execution
+    D["T1059.001-PowerShell"] --> H["Execution"]
+    E["T1204-User Exec"] --> H
     
-    Registry_Run_Keys[T1547.001] --> Persistence
-    Scheduled_Task[T1053-Sched] --> Persistence
-    Windows_Service[T1543.003] --> Persistence
+    F["T1547.001-Registry Run Keys"] --> I["Persistence"]
+    J["T1053-Sched Task"] --> I
+    K["T1543.003-Windows Service"] --> I
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style K fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Tactic | Technique | ID | Detection Focus |
@@ -376,11 +437,18 @@ graph TD
 
 ```mermaid
 graph TD
-    TTP[TTPs - Hardest to change] --> Tools[Malware, Exploits]
-    Tools --> Network_Artifacts[Registry, Mutex, Filenames]
-    Network_Artifacts --> Domain_Names[C2 domains]
-    Domain_Names --> IP_Addresses[C2 servers]
-    IP_Addresses --> Hash_Values[File hashes]
+    A["TTPs<br/>Hardest to change"] --> B["Malware, Exploits"]
+    B --> C["Registry, Mutex, Filenames"]
+    C --> D["C2 domains"]
+    D --> E["C2 servers"]
+    E --> F["File hashes"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Understanding Each Level
@@ -410,12 +478,17 @@ graph TD
 
 ```mermaid
 graph TD
-    P[Preparation ~40%] --> D[Detection & Analysis ~40%]
-    D --> C[Containment, Eradication & Recovery ~15%]
-    C --> PI[Post-Incident ~5%]
+    A["Preparation<br/>~40%"] --> B["Detection & Analysis<br/>~40%"]
+    B --> C["Containment, Eradication<br/>& Recovery ~15%"]
+    C --> D["Post-Incident<br/>~5%"]
     
-    PI -.->|Feedback| P
-    PI -.->|Improvement| D
+    D -.->|Feedback| A
+    D -.->|Improvement| B
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Key Concept
@@ -446,14 +519,19 @@ graph TD
 
 ```mermaid
 graph TD
-    People --> Capability
-    Policies --> Capability
-    Tools --> Capability
+    A["People"] --> D["Capability"]
+    B["Policies"] --> D
+    C["Tools"] --> D
     
-    People[Skilled IR Team, Trained Workforce]
-    Policies[Clear Policies, Documentation]
-    Tools[Software, Hardware]
-    Capability[Incident Handling Capability]
+    A["People"]["Skilled IR Team, Trained Workforce"]
+    B["Policies"]["Clear Policies, Documentation"]
+    C["Tools"]["Software, Hardware"]
+    D["Capability"]["Incident Handling Capability"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Category | Requirements |
@@ -477,18 +555,31 @@ graph TD
 
 ```mermaid
 graph TD
-    H1[Forensic Laptop] --> Hardware[Hardware]
-    H2[Write Blockers] --> Hardware
-    H3[Hard Drives] --> Hardware
-    H4[Network Cables] --> Hardware
-    H5[USB Drives] --> Hardware
+    A["Forensic Laptop"] --> G["Hardware"]
+    B["Write Blockers"] --> G
+    C["Hard Drives"] --> G
+    D["Network Cables"] --> G
+    E["USB Drives"] --> G
     
-    S1[FTK Imager] --> Software[Software]
-    S2[WinPmem] --> Software
-    S3[Wireshark] --> Software
-    S4[Autopsy] --> Software
-    S5[Volatility] --> Software
-    S6[TheHive] --> Software
+    F["FTK Imager"] --> H["Software"]
+    G["WinPmem"] --> H
+    I["Wireshark"] --> H
+    J["Autopsy"] --> H
+    K["Volatility"] --> H
+    L["TheHive"] --> H
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style K fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style L fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Protective Measures
@@ -513,22 +604,32 @@ graph TD
 
 ```mermaid
 graph TD
-    S1[Employee Reports] --> Detection[Detection]
-    S2[Tool Alerts EDR/IDS/Firewall/SIEM] --> Detection
-    S3[Threat Hunting] --> Detection
-    S4[Third-Party] --> Detection
+    A["Employee Reports"] --> G["Detection"]
+    B["Tool Alerts<br/>EDR/IDS/Firewall/SIEM"] --> G
+    C["Threat Hunting"] --> G
+    D["Third-Party"] --> G
     
-    Detection --> A[Analyze & Triage]
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Detection Layers (Defense in Depth)
 
 ```mermaid
 graph TD
-    Internet[Internet] --> Perimeter[Perimeter]
-    Perimeter --> Internal[Internal Network]
-    Internal --> Endpoint[Endpoint]
-    Endpoint --> Application[Application]
+    A["Internet"] --> B["Perimeter"]
+    B --> C["Internal Network"]
+    C --> D["Endpoint"]
+    D --> E["Application"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Initial Investigation Questions
@@ -546,15 +647,26 @@ graph TD
 
 ```mermaid
 graph LR
-    A[Date] --> B[Time]
-    B --> C[Hostname]
-    C --> D[Event Description]
-    D --> E[Data Source]
+    A["Date"] --> B["Time"]
+    B --> C["Hostname"]
+    C --> D["Event Description"]
+    D --> E["Data Source"]
     
-    F[2025-10-01] --> G[03:12:02]
-    G --> H[manage.insightnexus.com]
-    H --> I[Login with default credentials]
-    I --> J[Web Server Logs]
+    F["2025-10-01"] --> G["03:12:02"]
+    G --> H["manage.insightnexus.com"]
+    H --> I["Login with default credentials"]
+    I --> J["Web Server Logs"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Date | Time (UTC) | Hostname | Event Description | Data Source |
@@ -576,24 +688,41 @@ graph LR
 
 ```mermaid
 graph TD
-    IP[IP Addresses C2 servers] --> OpenIOC
-    Hash[File Hashes MD5 SHA256] --> YARA
-    File[Filenames] --> STIX
-    Domain[Domain Names] --> OpenIOC
-    Reg[Registry Keys] --> YARA
-    User[User Accounts] --> STIX
+    A["IP Addresses<br/>C2 servers"] --> G["OpenIOC"]
+    B["File Hashes<br/>MD5 SHA256"] --> H["YARA"]
+    C["Filenames"] --> I["STIX"]
+    D["Domain Names"] --> G
+    E["Registry Keys"] --> H
+    F["User Accounts"] --> I
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Investigation Cycle
 
 ```mermaid
 graph TD
-    A[Initial Data] --> B[Create IOCs]
-    B --> C[Search IOCs]
-    C --> D[Identify New Leads]
-    D --> E[Collect & Analyze]
-    E --> F[Update Timeline]
+    A["Initial Data"] --> B["Create IOCs"]
+    B --> C["Search IOCs"]
+    C --> D["Identify New Leads"]
+    D --> E["Collect & Analyze"]
+    E --> F["Update Timeline"]
     F -.->|Repeat| B
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### AI in Threat Detection
@@ -614,17 +743,28 @@ graph TD
 
 ```mermaid
 graph TD
-    ST1[Isolate VLAN] --> SP[Preserve Evidence]
-    ST2[Pull Network Cable] --> SP
-    ST3[Sinkhole C2 DNS] --> SP
+    A["Isolate VLAN"] --> G["Preserve Evidence"]
+    B["Pull Network Cable"] --> G
+    C["Sinkhole C2 DNS"] --> G
     
-    LT1[Change Passwords] --> LP[Persistent Changes]
-    LT2[Apply Firewall Rules] --> LP
-    LT3[Deploy HIDS] --> LP
-    LT4[Apply Patches] --> LP
+    D["Change Passwords"] --> H["Persistent Changes"]
+    E["Apply Firewall Rules"] --> H
+    F["Deploy HIDS"] --> H
+    I["Apply Patches"] --> H
     
-    SP --> Containment[Containment Complete]
-    LP --> Containment
+    G --> J["Containment Complete"]
+    H --> J
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### ⚠️ CRITICAL RULE
@@ -653,14 +793,23 @@ graph TD
 
 ```mermaid
 graph LR
-    Restore_Systems --> Verify_Functionality
-    Verify_Functionality --> Gradual_Reintroduction
-    Gradual_Reintroduction --> Heavy_Monitoring
+    A["Restore Systems"] --> B["Verify Functionality"]
+    B --> C["Gradual Reintroduction"]
+    C --> D["Heavy Monitoring"]
     
-    Heavy_Monitoring --> Unusual_Logons
-    Heavy_Monitoring --> Unusual_Processes
-    Heavy_Monitoring --> Registry_Changes
-    Heavy_Monitoring --> C2_Attempts
+    D --> E["Unusual Logons"]
+    D --> F["Unusual Processes"]
+    D --> G["Registry Changes"]
+    D --> H["C2 Attempts"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ---
@@ -727,12 +876,20 @@ graph LR
 
 ```mermaid
 graph TD
-    A[Default Credentials admin/admin] --> B[ManageEngine Access]
-    B --> C[C2 to 103.112.60.117 HTTPS]
-    C --> D[Domain Admin Created]
-    D --> E[RDP to DEV-021 Exposed RDP]
-    E --> F[GPO Deploys MSI java-update.msi]
-    F --> G[Data Exfiltration diagnostics_data.zip]
+    A["Default Credentials<br/>admin/admin"] --> B["ManageEngine Access"]
+    B --> C["C2 to 103.112.60.117<br/>HTTPS"]
+    C --> D["Domain Admin Created"]
+    D --> E["RDP to DEV-021<br/>Exposed RDP"]
+    E --> F["GPO Deploys MSI<br/>java-update.msi"]
+    F --> G["Data Exfiltration<br/>diagnostics_data.zip"]
+    
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Timeline
