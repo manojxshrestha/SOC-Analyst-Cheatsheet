@@ -343,18 +343,11 @@ graph LR
 
 ```mermaid
 graph TD
-    A["Tactic"] --> B["Technique"]
-    B --> C["Sub-Technique"]
-    
-    D["Initial Access"] --> E["T1190 - Exploit Public-Facing"]
-    E --> F["T1190.004 - SQL Injection"]
+    A["Tactic"] --> B["Technique"] --> C["Sub-Technique"]
     
     style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
     style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
-    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
-    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
-    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 ### Enterprise Tactics (14 Tactics)
@@ -399,6 +392,10 @@ graph TD
     style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
     style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
     style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style K fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+```
     style I fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
     style J fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
     style K fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
