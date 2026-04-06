@@ -605,9 +605,9 @@ index=* sourcetype=* | rare limit=10 field1, field2, field3
 
 ![Apps List](https://github.com/user-attachments/assets/c2046f3e-49fb-40ad-b174-20e665bb5d2c)
 
-> 📌 Navigate to: **Apps** → **Manage Apps** → **Install from file**
+![Upload App](https://github.com/user-attachments/assets/7dfc3530-8e07-4070-9310-23436c7768cd)
 
-![Apps List](https://github.com/user-attachments/assets/7dfc3530-8e07-4070-9310-23436c7768cd)
+> 📌 Navigate to: **Apps** → **Manage Apps** → **Install from file**
 
 #### Step 4: Configure the Macro
 
@@ -643,11 +643,11 @@ index="main" sourcetype="WinEventLog:Sysmon"
 
 ![File Creation Overview](https://github.com/user-attachments/assets/189bc9eb-5caf-41f6-98ad-98d32fcd7585)
 
-> ⚠️ If "Top Systems" shows no results, the dashboard needs fixing.
-
 Let's now specify "All time" on the time picker and click "Submit". Results are generated successfully; however, no results are appearing in the "Top Systems" section.
 
 ![No Results](https://github.com/user-attachments/assets/74765fce-ec62-4dc5-a2c8-0b52893ab44f)
+
+> ⚠️ If "Top Systems" shows no results, the dashboard needs fixing.
 
 #### Fixing the Search
 
@@ -697,3 +697,174 @@ Let's now specify "All time" on the time picker and click "Submit". Results are 
 
 *Module 5/15 - Understanding Log Sources & Investigating with Splunk*
 *Built with research + HTB Academy materials*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Understanding Log Sources & Investigating with Splunk
+Understanding Log Sources & Investigating with Splunk 100%
+
+Section 2 / 6
+Go to Questions
+Using Splunk Applications
+Splunk Applications
+
+Splunk applications, or apps, are packages that we add to our Splunk Enterprise or Splunk Cloud deployments to extend capabilities and manage specific types of operational data. Each application is tailored to handle data from specific technologies or use cases, effectively acting as a pre-built knowledge package for that data. Apps can provide capabilities ranging from custom data inputs, custom visualizations, dashboards, alerts, reports, and more.
+
+Splunk Apps enable the coexistence of multiple workspaces on a single Splunk instance, catering to different use cases and user roles. These ready-made apps can be found on Splunkbase.
+
+As an integral part of our cybersecurity operations, the Splunk apps designed for Security Information and Event Management (SIEM) purposes provide a range of capabilities to enhance our ability to detect, investigate, and respond to threats. They are designed to ingest, analyze, and visualize security-related data, enabling us to detect complex threats and perform in-depth investigations.
+
+When using these apps in our Splunk environment, we need to consider factors such as data volume, hardware requirements, and licensing. Many apps can be resource-intensive, so we must ensure our Splunk deployment is sized correctly to handle the additional workload. Further, it's also important to ensure we have the correct licenses for any premium apps, and that we are aware of the potential for increased license usage due to the added data inputs.
+
+In this segment, we'll be leveraging the Sysmon App for Splunk developed by Mike Haag.
+
+To download, add, and use this application, follow the steps delineated below:
+
+    Sign up for a free account at splunkbase
+
+    <img width="2091" height="969" alt="image" src="https://github.com/user-attachments/assets/09c68d8d-e8fb-42a8-a0a7-79e110c1790c" />
+
+    Splunkbase homepage with text 'Get more out of Splunk with applications' and icons for apps like AWS, Cisco, and Zoom. Options to submit an app or log in.
+
+
+
+    
+    Once registered, log into your account
+    Head over to the Sysmon App for Splunk page to download the application. 
+    
+    <img width="2085" height="1339" alt="image" src="https://github.com/user-attachments/assets/67191690-2c77-4461-ade3-a284870d88a8" />
+
+    Splunkbase page for Sysmon App for Splunk, offering insights and visibility into Sysmon deployments. Includes download button, app screenshots, version 2.0.0 details, compatibility with Splunk Enterprise, and a 5-star rating.
+
+    
+    Add the application as follows to your search head. 
+    <img width="2085" height="727" alt="image" src="https://github.com/user-attachments/assets/8837ea63-83c8-402e-9786-12dacc22204e" />
+
+    
+    Splunk Enterprise home page with options for Search & Reporting, Splunk Essentials, Splunk Secure Gateway, and Upgrade Readiness App. Manage Apps gear icon highlighted.
+
+    <img width="2089" height="583" alt="image" src="https://github.com/user-attachments/assets/c2046f3e-49fb-40ad-b174-20e665bb5d2c" />
+
+    Splunk Apps page showing a list of apps like SplunkForwarder and Log Event Alert Action. Options to browse more apps, install from file, and create app. Actions include enabling and editing properties.
+
+    <img width="2087" height="797" alt="image" src="https://github.com/user-attachments/assets/7dfc3530-8e07-4070-9310-23436c7768cd" />
+
+    Splunk interface for uploading an app from a file. File selected: sysmon-app-for-splunk_200.tgz. Option to upgrade app if it exists, with 'Upload' and 'Cancel' buttons.
+
+
+    
+    Adjust the application's macro so that events are loaded as follows. 
+    <img width="2155" height="897" alt="image" src="https://github.com/user-attachments/assets/75f01a1e-d193-4fad-bc10-e9c325f19164" />
+
+    Splunk Enterprise home page with apps like Search & Reporting, Splunk Essentials, and Sysmon App for Splunk. Settings menu open with options including Advanced Search.
+
+    <img width="2159" height="517" alt="image" src="https://github.com/user-attachments/assets/94e40a09-c907-4d43-bbd0-bd7434a339f7" />
+
+    Splunk Advanced Search page with options to create and edit search macros and commands. Includes 'Add new' button for search macros and commands.
+
+    <img width="2157" height="501" alt="image" src="https://github.com/user-attachments/assets/a7407ab0-87ff-4106-a221-fda07f2b25a4" />
+
+    Splunk Enterprise interface showing 'Search macros' with one item: 'sysmon' under 'Sysmon App for Splunk', definition 'sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"'. Options for visibility, owner, and status are displayed
+
+
+    <img width="2159" height="1053" alt="image" src="https://github.com/user-attachments/assets/b6bff189-d74d-4a68-acf8-dcce2caba3a6" />
+
+    Splunk interface for editing 'sysmon' search macro, showing definition field with 'index="main" sourcetype="WinEventLog:Sysmon"', and options for arguments, validation expression, and error message.
+
+
+Let's access the Sysmon App for Splunk by locating it in the "Apps" column on the Splunk home page and head over to the File Activity tab. 
+<img width="2155" height="1257" alt="image" src="https://github.com/user-attachments/assets/189bc9eb-5caf-41f6-98ad-98d32fcd7585" />
+
+Splunk interface showing 'File Creation Overview' with a warning about a missing dashboard version. Dropdown set to 'Last 24 hours' and 'Search is waiting for input' messages displayed.
+
+Let's now specify "All time" on the time picker and click "Submit". Results are generated successfully; however, no results are appearing in the "Top Systems" section.
+
+<img width="2159" height="1743" alt="image" src="https://github.com/user-attachments/assets/74765fce-ec62-4dc5-a2c8-0b52893ab44f" />
+
+Splunk interface showing 'File Creation Overview' with a graph of file creation over time, a list of top files created, and 'Top Systems' section showing 'No results found'. Dropdown set to 'All time' and 'Edit' option visible.
+
+
+
+We can fix that by clicking on "Edit" (upper right hand corner of the screen) and editing the search. 
+
+<img width="2157" height="1663" alt="image" src="https://github.com/user-attachments/assets/5362c2aa-1d80-43ef-a157-8a39c4725a33" />
+
+Splunk interface showing 'File Creation Overview' with a graph of file creation over time, a list of top files created, and 'Top Systems' section showing 'No results found'. Dropdown set to 'All time' and 'Edit search' option visible.
+
+
+The Sysmon Events with ID 11 do not contain a field named Computer, but they do include a field called ComputerName. Let's fix that and click "Apply" 
+
+<img width="2157" height="1477" alt="image" src="https://github.com/user-attachments/assets/9a13cee4-9dd7-46c2-a17d-36400594558c" />
+
+Splunk 'Edit Search' interface with search string 'sysmon EventCode=11 | top ComputerName', options for time range, auto refresh delay, and refresh indicator. Apply and cancel buttons visible.
+
+Results should now be generated successfully in the "Top Systems" section.
+<img width="2161" height="1645" alt="image" src="https://github.com/user-attachments/assets/6ede27b9-5679-4602-8518-1694ad6d8f1c" />
+
+
+Splunk 'File Creation Overview' dashboard with a graph of file creation over time, dropdown set to 'All time', and a list of top files created. Options to edit and save the dashboard are visible.
+
+Feel free to explore and experiment with this Splunk application. An excellent exercise is to modify the searches when no results are generated due to non-existent fields being specified, continuing until the desired results are obtained.
+
+Practical Exercises
+
+Navigate to the bottom of this section and click on Click here to spawn the target system!
+
+Now, navigate to http://[Target IP]:8000, open the Sysmon App for Splunk application, and answer the questions below.
+Connect to HTB
+Target(s)
+
+Spawn the target system to get IPs and answer questions
+
+
+    Question 1
+
+    +1
+    Access the Sysmon App for Splunk and go to the "Reports" tab. Fix the search associated with the "Net - net view" report and provide the complete executed command as your answer. Answer format: net view /Domain:_.local
+    Question 2
+
+    +1
+    Access the Sysmon App for Splunk, go to the "Network Activity" tab, and choose "Network Connections". Fix the search and provide the number of connections that SharpHound.exe has initiated as your answer.
+
+2 / 6 Se
+
+
