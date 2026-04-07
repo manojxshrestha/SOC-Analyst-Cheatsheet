@@ -36,8 +36,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 3. [Kerberoasting](#3-kerberoasting)
 4. [AS-REP Roasting](#4-as-rep-roasting)
 5. [GPP Passwords](#5-gpp-passwords)
-6. [Interview Questions](#6-interview-questions)
-7. [Additional Resources](#7-additional-resources)
+6. [GPO Permissions / GPO Files](#6-gpo-permissions--gpo-files)
+7. [Interview Questions](#7-interview-questions)
+8. [Additional Resources](#8-additional-resources)
 
 ---
 
@@ -856,7 +857,7 @@ if($Logs){
 
 ---
 
-## 6. Interview Questions
+## 7. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1034,7 +1035,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 7. Additional Resources
+## 8. Additional Resources
 
 ### Tools
 
