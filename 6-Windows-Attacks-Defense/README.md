@@ -157,17 +157,25 @@ xfreerdp /u:eagle\\bob /p:Slavi123 /v:TARGET_IP /dynamic-resolution
 
 <img width="1668" height="1304" alt="image" src="https://github.com/user-attachments/assets/0f257d2d-293d-4a37-861b-b1d4f2738aeb" />
 
+File Explorer open on FreeRDP session.
+
+<img width="1027" height="836" alt="image" src="https://github.com/user-attachments/assets/2c0fc210-d038-46ac-9698-f00ccf662724" />
+
 **Connect to Kali via SSH:**
 
 ```bash
 ssh kali@TARGET_IP
 ```
 
+<img width="1323" height="772" alt="image" src="https://github.com/user-attachments/assets/8af5cbcc-fcec-437d-9950-6596bf6b55a2" />
+
 **File Transfer between machines:**
 
 ```bash
 smbclient \\\\TARGET_IP\\Share -U eagle/administrator%Slavi123
 ```
+
+<img width="973" height="805" alt="image" src="https://github.com/user-attachments/assets/7a23cf1e-c11f-4bab-8b30-615b2f58bb63" />
 
 <img width="739" height="218" alt="image" src="https://github.com/user-attachments/assets/030b6547-a4f3-4b43-b78c-00d80f7b2a1d" />
 
@@ -230,9 +238,15 @@ However, high volume makes detection challenging. Focus on:
 
 <img width="1753" height="1142" alt="image" src="https://github.com/user-attachments/assets/bd2abf34-0d8e-4e98-b4f0-cd432ce83520" />
 
+Security log showing two 'Audit Success' events for Kerberos Service Ticket with Event ID 4769.
+
+<img width="1877" height="1263" alt="image" src="https://github.com/user-attachments/assets/0575205b-559b-4832-af69-5034ca7013d0" />
+
 **Honeypot Approach:**
 - Create fake service account with SPN
 - Alert on any TGS request for that account
+
+<img width="1764" height="1142" alt="image" src="https://github.com/user-attachments/assets/6c7e172c-998c-4f6f-845d-3fe95d76f0d0" />
 
 ---
 
@@ -283,9 +297,13 @@ Focus on:
 - RC4 encryption (0x17)
 - Unusual source IPs
 
+<img width="1799" height="872" alt="image" src="https://github.com/user-attachments/assets/0baa0b4c-ccee-4ac3-8a16-ba158fb5271e" />
+
 ### Honeypot
 
 Configure a fake account with no preauthentication. Any login attempt is suspicious.
+
+<img width="1261" height="1148" alt="image" src="https://github.com/user-attachments/assets/51d4d1a9-1a2c-4992-9cc3-2fceea860f33" />
 
 ---
 
@@ -296,6 +314,8 @@ Configure a fake account with no preauthentication. Any login attempt is suspici
 > 📌 **Group Policy Preferences (GPP)** introduced ability to store credentials in XML policy files stored in SYSVOL.
 
 The encryption key was publicly released by Microsoft, making decryption trivial.
+
+<img width="1514" height="634" alt="image" src="https://github.com/user-attachments/assets/40892b16-f722-4853-9c3a-49a53c088883" />
 
 **XML file example:**
 
@@ -322,8 +342,16 @@ PS C:\Users\bob\Downloads> Get-GPPPassword
 - Audit access to XML files in SYSVOL
 - Any unexpected access is suspicious
 
+<img width="1743" height="1138" alt="image" src="https://github.com/user-attachments/assets/bc67d20e-276e-41f1-844c-e8f8a2bce47d" />
+
 **Method 2: Logon Events**
 - Monitor for logon attempts using exposed service accounts
+
+<img width="1521" height="1078" alt="image" src="https://github.com/user-attachments/assets/e3d50f22-0c50-40cd-b0a2-d7a22dbccc25" />
+
+Event 4624: Successful logon
+
+<img width="1634" height="817" alt="image" src="https://github.com/user-attachments/assets/86367eb5-e9c0-4338-b9c7-19cf0e840751" />
 
 | Event ID | Description |
 |----------|-------------|
@@ -342,6 +370,18 @@ Create a decoy service account with old password. Alert on any login attempts.
 | 4625 | Failed logon |
 | 4771 | Failed pre-authentication |
 | 4776 | Failed credential validation |
+
+<img width="1515" height="1117" alt="image" src="https://github.com/user-attachments/assets/b5fc6ca1-48b4-449e-99de-21997d9cb8cd" />
+
+Event 4625: Failed logon
+
+<img width="1660" height="1125" alt="image" src="https://github.com/user-attachments/assets/6f019f62-6ccf-4821-ae59-a0867b6e2bff" />
+
+Event 4771: Failed pre-authentication
+
+<img width="1040" height="478" alt="image" src="https://github.com/user-attachments/assets/e40eaab5-b46a-4b97-aa84-2d3fad83e009" />
+
+Event 4776: Failed credential validation
 
 ---
 
