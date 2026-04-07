@@ -738,14 +738,24 @@ Think of it this way: SIEM is the **tool**, SOC is the **team and process** that
 
 ```mermaid
 graph TD
-    Sources[Data Sources] --> Collectors[Log Collectors/Agents]
+    Sources[Data Sources] --> Collectors[Log Collectors or Agents]
     Collectors --> Normalization[Log Normalization]
-    Normalization --> Index[Index & Store]
+    Normalization --> Index[Index and Store]
     Index --> Correlation[Correlation Engine]
     Correlation --> Detection[Detection Rules]
     Detection --> Alert[Generate Alert]
     Alert --> Analyst[SOC Analyst Review]
-    Analyst --> Response[Response/Remediation]
+    Analyst --> Response[Response or Remediation]
+
+    style Sources fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Collectors fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Normalization fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Index fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Correlation fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Detection fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Alert fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Analyst fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Response fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 1. **Data Sources**: Firewalls, IDS/IPS, endpoints, servers, applications, cloud services
@@ -811,11 +821,18 @@ Alert fatigue occurs when analysts become overwhelmed by too many alerts, leadin
 ```mermaid
 graph LR
     Beats[Beats] --> Elasticsearch[Elasticsearch]
-    Logstash[Logstash/Fleet] --> Elasticsearch
-    Kibana[Kibana/Sentinel] --> Elasticsearch
+    Logstash[Logstash or Fleet] --> Elasticsearch
+    Kibana[Kibana or Sentinel] --> Elasticsearch
     
-    Elasticsearch --> Storage[Index & Search]
-    Kibana --> Visualize[Visualize & Analyze]
+    Elasticsearch --> Storage[Index and Search]
+    Kibana --> Visualize[Visualize and Analyze]
+
+    style Beats fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Logstash fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Kibana fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Elasticsearch fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Storage fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Visualize fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Component | Purpose |
@@ -888,11 +905,19 @@ event.category:authentication AND event.outcome:failure
 graph TD
     Identify[1. Identify Threat] --> Specify[2. Specify Detection]
     Specify --> Develop[3. Develop Rule]
-    Develop --> Test[4. Test & Tune]
+    Develop --> Test[4. Test and Tune]
     Test --> Deploy[5. Deploy to Prod]
-    Deploy --> Monitor[6. Monitor & Optimize]
+    Deploy --> Monitor[6. Monitor and Optimize]
     Monitor --> Review[7. Periodic Review]
     Review --> Identify
+
+    style Identify fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Specify fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Develop fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Test fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Deploy fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Monitor fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Review fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 1. **Identify Threat**: Research threat landscape, MITRE ATT&CK, recent incidents
@@ -1287,14 +1312,24 @@ Think of it this way: SIEM is the **tool**, SOC is the **team and process** that
 
 ```mermaid
 graph TD
-    Sources[Data Sources] --> Collectors[Log Collectors/Agents]
+    Sources[Data Sources] --> Collectors[Log Collectors or Agents]
     Collectors --> Normalization[Log Normalization]
-    Normalization --> Index[Index & Store]
+    Normalization --> Index[Index and Store]
     Index --> Correlation[Correlation Engine]
     Correlation --> Detection[Detection Rules]
     Detection --> Alert[Generate Alert]
     Alert --> Analyst[SOC Analyst Review]
-    Analyst --> Response[Response/Remediation]
+    Analyst --> Response[Response or Remediation]
+
+    style Sources fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Collectors fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Normalization fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Index fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Correlation fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Detection fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Alert fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Analyst fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Response fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 1. **Data Sources**: Firewalls, IDS/IPS, endpoints, servers, applications, cloud services
@@ -1360,11 +1395,18 @@ Alert fatigue occurs when analysts become overwhelmed by too many alerts, leadin
 ```mermaid
 graph LR
     Beats[Beats] --> Elasticsearch[Elasticsearch]
-    Logstash[Logstash/Fleet] --> Elasticsearch
-    Kibana[Kibana/Sentinel] --> Elasticsearch
+    Logstash[Logstash or Fleet] --> Elasticsearch
+    Kibana[Kibana or Sentinel] --> Elasticsearch
     
-    Elasticsearch --> Storage[Index & Search]
-    Kibana --> Visualize[Visualize & Analyze]
+    Elasticsearch --> Storage[Index and Search]
+    Kibana --> Visualize[Visualize and Analyze]
+
+    style Beats fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Logstash fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Kibana fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Elasticsearch fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Storage fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Visualize fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 | Component | Purpose |
@@ -1437,11 +1479,19 @@ event.category:authentication AND event.outcome:failure
 graph TD
     Identify[1. Identify Threat] --> Specify[2. Specify Detection]
     Specify --> Develop[3. Develop Rule]
-    Develop --> Test[4. Test & Tune]
+    Develop --> Test[4. Test and Tune]
     Test --> Deploy[5. Deploy to Prod]
-    Deploy --> Monitor[6. Monitor & Optimize]
+    Deploy --> Monitor[6. Monitor and Optimize]
     Monitor --> Review[7. Periodic Review]
     Review --> Identify
+
+    style Identify fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Specify fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Develop fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Test fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Deploy fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Monitor fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Review fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
 ```
 
 1. **Identify Threat**: Research threat landscape, MITRE ATT&CK, recent incidents
