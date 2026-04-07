@@ -11,14 +11,24 @@ This module covers **Active Directory attacks and defense** - common attack tech
 > 📌 **Key Focus**: Kerberos authentication abuse, credential harvesting, privilege escalation, and AD misconfigurations
 
 ### Key Takeaways
-
-| Concept | Description |
-|---------|-------------|
-| **Kerberoasting** | Obtaining TGS tickets and cracking offline |
-| **AS-REP Roasting** | Obtaining hashes for accounts with no preauth |
-| **GPP Passwords** | Decrypting cached credentials in SYSVOL |
-| **DCSync** | Mimicking domain controller for credential replication |
-| **Golden Ticket** | Forging Kerberos TGT with KRBTGT hash |
+ 
+| Technique | Description | Detection Event |
+|-----------|-------------|----------------|
+| **Kerberoasting** | Obtain TGS tickets and crack offline | 4769 |
+| **AS-REP Roasting** | Obtain hashes for accounts with no preauth | 4768 |
+| **GPP Passwords** | Decrypt cached credentials in SYSVOL | 4663 |
+| **GPO Permissions** | Abuse misconfigured Group Policy | 5136 |
+| **Credentials in Shares** | Find credentials in network shares | 4624 |
+| **Object Properties** | Hunt credentials in user attributes | 4768 |
+| **DCSync** | Mimic domain controller for replication | 4662 |
+| **Golden Ticket** | Forge Kerberos TGT with KRBTGT hash | 4768 |
+| **Silver Ticket** | Forge TGS with service account hash | 4769 |
+| **Constrained Delegation** | Abuse Kerberos delegation settings | 4769 |
+| **Print Spooler** | Coerce authentication from DC | 4624 |
+| **Coercing Attacks** | Force machines to authenticate | 4624 |
+| **Object ACLs** | Abuse Access Control Lists | 4738 |
+| **PKI ESC1** | Certificate template misconfiguration | 4886/4887 |
+| **PKI ESC8** | NTLM relay to ADCS | 4886/4887 |
 
 ### Prerequisites
 
@@ -32,23 +42,22 @@ This module covers **Active Directory attacks and defense** - common attack tech
 ## Table of Contents
 
 1. [Introduction and Terminology](#1-introduction-and-terminology)
-2. [Overview and Lab Environment](#2-overview-and-lab-environment)
-3. [Kerberoasting](#3-kerberoasting)
-4. [AS-REP Roasting](#4-as-rep-roasting)
-5. [GPP Passwords](#5-gpp-passwords)
-6. [GPO Permissions / GPO Files](#6-gpo-permissions--gpo-files)
-7. [Credentials in Shares](#7-credentials-in-shares)
-8. [Credentials in Object Properties](#8-credentials-in-object-properties)
-9. [DCSync](#9-dcsync)
-10. [Golden Ticket](#10-golden-ticket)
-11. [Kerberos Constrained Delegation](#11-kerberos-constrained-delegation)
-12. [Print Spooler & NTLM Relaying](#12-print-spooler--ntlm-relaying)
-13. [Coercing Attacks & Unconstrained Delegation](#13-coercing-attacks--unconstrained-delegation)
-14. [Object ACLs](#14-object-acls)
-15. [PKI - ESC1](#15-pki---esc1)
-16. [PKI - ESC8 (Skills Assessment)](#16-pki---esc8-skills-assessment)
-17. [Interview Questions](#17-interview-questions)
-18. [Additional Resources](#18-additional-resources)
+2. [Kerberoasting](#3-kerberoasting)
+3. [AS-REP Roasting](#4-as-rep-roasting)
+4. [GPP Passwords](#5-gpp-passwords)
+5. [GPO Permissions / GPO Files](#6-gpo-permissions--gpo-files)
+6. [Credentials in Shares](#7-credentials-in-shares)
+7. [Credentials in Object Properties](#8-credentials-in-object-properties)
+8. [DCSync](#9-dcsync)
+9. [Golden Ticket](#10-golden-ticket)
+10. [Kerberos Constrained Delegation](#11-kerberos-constrained-delegation)
+11. [Print Spooler & NTLM Relaying](#12-print-spooler--ntlm-relaying)
+12. [Coercing Attacks & Unconstrained Delegation](#13-coercing-attacks--unconstrained-delegation)
+13. [Object ACLs](#14-object-acls)
+14. [PKI - ESC1](#15-pki---esc1)
+15. [PKI - ESC8 (Skills Assessment)](#16-pki---esc8-skills-assessment)
+16. [Interview Questions](#17-interview-questions)
+17. [Additional Resources](#18-additional-resources)
 
 ---
 
@@ -2422,11 +2431,13 @@ Event 4624: Successful login for user from IP 172.16.18.25 (not DC's IP).
 - Success depends on password strength
 - Can force downgrade to RC4 for faster cracking
 
+**Detection Event:** Event ID 4769
+
 ---
 
 ### Q2: What is the difference between Kerberoasting and AS-REP Roasting?
 
-**Answer:**
+**Answer:** 
 
 | Aspect | Kerberoasting | AS-REP Roasting |
 |--------|--------------|-----------------|
@@ -2434,6 +2445,7 @@ Event 4624: Successful login for user from IP 172.16.18.25 (not DC's IP).
 | **Ticket Type** | TGS (Service Ticket) | TGT (Ticket Granting Ticket) |
 | **Event ID** | 4769 | 4768 |
 | **Attack Requirement** | Need valid AD user credentials | No credentials needed |
+| **Encryption** | Service account hash | User password hash |
 
 ---
 
@@ -2464,33 +2476,11 @@ sequenceDiagram
 
 ---
 
-### Q4: How do you detect Kerberoasting attacks?
+### Q4: What is GPP (Group Policy Preferences) and why is it dangerous?
 
-**Answer:**
+**Answer:** GPP allowed administrators to store credentials in XML policy files deployed via Group Policy. The credentials were encrypted with a known AES key that Microsoft published in 2014. Anyone with domain user access can decrypt these credentials.
 
-**Primary Detection - Event ID 4769:**
-- High volume of TGS requests from single user/machine
-- RC4 encryption type (unusual for AES-enabled environments)
-- Requests for unusual service accounts
-
-**Detection Queries:**
-
-```powershell
-# Detect high volume of 4769 events
-Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} | 
-    Group-Object -Property IpAddress | 
-    Where-Object {$_.Count -gt 10}
-
-# Detect RC4 encryption
-Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} | 
-    Where-Object {$_.Properties[6].Value -eq '0x17'}
-```
-
----
-
-### Q5: What is GPP (Group Policy Preferences) and why is it dangerous?
-
-**Answer:** GPP allowed administrators to store credentials in XML policy files deployed via Group Policy. The credentials were encrypted with a known AES key that Microsoft published. Anyone with domain user access can decrypt these credentials.
+**AES Key:** `4e 99 06 e8 fc b6 6c c9 fa f4 93 10 62 0f fe e8 f4 96 e8 06 cc 05 79 90 20 9b 09 a4 33 b6 6c 1b`
 
 **Vulnerable Locations:**
 - \\<DOMAIN>\SYSVOL\<DOMAIN>\Policies\*
@@ -2501,15 +2491,20 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 - Remove legacy GPP XML files
 - Never store passwords in GPP
 
+**Detection:** Event ID 4663 (File accessed)
+
 ---
 
-### Q6: What is DCSync attack?
+### Q5: What is DCSync attack?
 
 **Answer:** DCSync simulates a domain controller behavior to request password hash replication from other domain controllers. It uses the GetNCChanges RPC call to sync password hashes.
 
 **Requirements:**
 - Domain Admin privileges OR
 - Replicating Directory Changes privileges
+- Replicating Directory Changes All privileges
+
+**Tool:** Mimikatz `lsadump::dcsync`
 
 **Detection:**
 - Event ID 4662 (Directory Services access)
@@ -2518,23 +2513,27 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-### Q7: What is a Golden Ticket attack?
+### Q6: What is a Golden Ticket attack?
 
 **Answer:** A Golden Ticket forges a Kerberos TGT using the KRBTGT account's password hash. Since KRBTGT password is randomly generated and auto-rotated, attackers with Domain Admin access can extract it and create persistent access.
 
 **Characteristics:**
 - Valid for up to 10 years (or any duration)
 - Ignores password changes (uses hash)
-- Works for any user including Administrator
+- Works for any user including non-existent users
+- Provides complete domain persistence
+
+**Tool:** Mimikatz `kerberos::golden`
 
 **Detection:**
 - Event ID 4768 with unusual encryption type
 - TGT valid for extended periods
 - GoldenPassTicket advanced detection rules
+- Monitor for TGS without prior TGT request
 
 ---
 
-### Q8: What is NTLM Relay attack?
+### Q7: What is NTLM Relay attack?
 
 **Answer:** NTLM Relay attacks capture authentication credentials and relay them to a different service/machine. The attacker positions themselves between the client and server to intercept and relay credentials.
 
@@ -2542,11 +2541,41 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 - LDAP (Domain Controller)
 - SMB (File shares, Remote execution)
 - HTTP (Web applications)
+- AD Certificate Services (ESC8)
+
+**Attack Flow:**
+1. Attacker intercepts NTLM authentication
+2. Relays to target service
+3. Authenticates as victim user
 
 **Mitigation:**
 - Enable SMB signing
 - Disable NTLM authentication
 - Enable LDAP channel binding
+- Enforce HTTPS on ADCS
+
+---
+
+### Q8: What is the Print Spooler attack (PrinterBug)?
+
+**Answer:** The Print Spooler service (enabled by default on Windows) can be abused to force a machine to authenticate back to an attacker. This is used for credential coercion and privilege escalation.
+
+**Attack Vectors:**
+- Relay to DCSync (if SMB Signing disabled)
+- Relay to AD Certificate Services (ESC8)
+- Capture TGT on Unconstrained Delegation systems
+- Configure Resource-Based Kerberos Delegation
+
+**Tools:** Coercer, dementor.py, PrintSpooler exploit
+
+**Mitigation:**
+- Disable Print Spooler on non-print servers
+- Disable on Domain Controllers entirely
+- Set RegisterSpoolerRemoteRpcEndPoint = 2
+
+**Detection:**
+- Event 4624 shows DC authenticating from unexpected IP
+- Monitor outbound connections from DCs
 
 ---
 
@@ -2559,17 +2588,120 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 | **Scope** | Specific services only | Any service |
 | **Attack** | Impersonate user to delegated service | Capture TGT of delegated user |
 | **Detection** | Event ID 4769 for delegation | Event ID 4624 with LogonType 9 |
+| **Security** | More secure | High risk |
+
+**Resource-Based Delegation:** Modern approach where the backend service decides who can delegate
 
 ---
 
-### Q10: How do you secure Active Directory against these attacks?
+### Q10: What are PKI ESC1 and ESC8 attacks?
+
+**Answer:**
+
+**ESC1 (Certificate Template Misconfiguration):**
+- Template allows enrollee to supply subject (SAN)
+- No issuance requirements
+- Allows Client Authentication
+- Any domain user can enroll
+
+**Tool:** Certify, Certipy
+
+**ESC8 (NTLM Relay to ADCS):**
+- Relay to AD CS HTTP endpoint
+- Use PrinterBug to coerce machine
+- Obtain certificate for that machine
+- Use certificate for authentication
+
+**Tool:** impacket-ntlmrelayx, dementor.py
+
+**Detection (Both):**
+- Event ID 4886 (Certificate request)
+- Event ID 4887 (Certificate issued)
+- Event ID 4768 (TGT with certificate)
+
+---
+
+### Q11: How do you detect Active Directory attacks?
+
+**Answer:**
+
+**Key Event IDs:**
+| Event ID | Description |
+|----------|-------------|
+| 4624 | Successful logon |
+| 4625 | Failed logon |
+| 4663 | File/Object accessed |
+| 4768 | TGT requested |
+| 4769 | TGS requested |
+| 5136 | Directory changed |
+| 4662 | Directory object accessed |
+
+**Detection Strategies:**
+- Baseline normal behavior
+- Alert on anomalies
+- Correlate multiple events
+- Use honeypot accounts
+
+---
+
+### Q12: What is ACL abuse in Active Directory?
+
+**Answer:** Object ACLs (Access Control Lists) define who can access AD objects and what they can do. Misconfigurations allow privilege escalation.
+
+**Common Attacks:**
+- GenericAll on users → Password reset
+- GenericAll on computers → LAPS password read
+- WriteDACL → ACL modification
+- Self -> Member addition
+
+**Tools:** BloodHound, SharpHound, ADACLScanner
+
+**Detection:**
+- Event ID 4738 (User changed)
+- Event ID 4742 (Computer changed)
+- Monitor for sensitive group membership changes
+
+---
+
+### Q13: What is the Silver Ticket attack?
+
+**Answer:** Silver Ticket forges a TGS (service ticket) using the service account's password hash, not the KRBTGT hash. Unlike Golden Ticket, it provides access to specific services only.
+
+**Characteristics:**
+- Limited to single service
+- Cannot access KDC
+- Less detectable
+- Requires service account hash
+
+**Tool:** Mimikatz `kerberos::golden /tgs`
+
+---
+
+### Q14: What credentials are left on Windows logon types?
+
+**Answer:**
+
+| Logon Type | Description | Leaves Credentials |
+|------------|-------------|-------------------|
+| 2 | Interactive | ✅ Yes |
+| 3 | Network | ❌ No |
+| 4 | Batch | ✅ Yes |
+| 5 | Service | ✅ Yes |
+| 7 | Unlock | ✅ Yes |
+| 8 | NetworkClearText | ✅ Yes |
+| 9 | NewCredentials | ✅ Yes |
+| 10 | RemoteInteractive (RDP) | ✅ Yes |
+
+---
+
+### Q15: How do you secure Active Directory against these attacks?
 
 **Answer:**
 
 **Password Policies:**
 - Use 100+ character passwords for service accounts
 - Use Group Managed Service Accounts (GMSA)
-- Regular password rotation
+- Regular password rotation (especially krbtgt)
 
 **Kerberos Hardening:**
 - Enable AES encryption only
@@ -2577,55 +2709,179 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 - Use Protected Users security group
 
 **Monitoring:**
-- Deploy honeypot accounts
+- Deploy honeypot accounts (Kerberoasting, AS-REP)
 - Monitor for unusual ticket requests
 - Alert on sensitive group changes
+- Log PowerShell executions
 
-**Patching:**
+**Technical Controls:**
 - Apply KB2962486 for GPP
-- Regular AD security patches
-- Keep domain controllers updated
+- Disable Print Spooler on DCs
+- Enable SMB signing
+- Enforce LDAP over SSL
+- Restrict admin access with PAW
+
+**Incident Response:**
+- Reset ALL passwords if compromised
+- Reset krbtgt TWICE with 10+ hour gap
+- Revoke certificates
+- Rebuild compromised systems
 
 ---
 
-## 17. Additional Resources
+### Q16: What tools would you use to audit AD security?
 
-### Tools
+**Answer:**
 
 | Tool | Purpose |
 |------|---------|
-| **Rubeus** | Kerberos attack tool (Kerberoasting, AS-REP roasting) |
-| **Impacket** | Python tools for AD attacks (secretsdump, ntfsrelay) |
 | **BloodHound** | AD attack path analysis |
-| **Mimikatz** | Credential dumping and golden ticket creation |
-| **Get-GPPPassword** | PowerSploit module for GPP credential extraction |
-| **CrackMapExec** | AD exploitation and credential spraying |
-| **Hashcat** | Password cracking |
-| **John the Ripper** | Password cracking |
-
-### References
-
-- [MITRE ATT&CK - T1558: Steal or Forge Kerberos Tickets](https://attack.mitre.org/techniques/T1558/)
-- [Harmj0y's Kerberoasting Blog](https://www.harmj0y.com/blog/)
-- [SpecterOps AD Security](https://specterops.io/)
-- [Microsoft AD Security](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices)
-- [Kerberos Protocol Extension (RFC 4120)](https://datatracker.ietf.org/doc/html/rfc4120)
-
-### Books
-
-- "Active Directory Attack and Defense" - Various authors
-- "The Red Team Handbook" - SOC/Blue Team
-- "Windows Internals" - Mark Russinovich
-
-### Communities
-
-- r/activedirectory (Reddit)
-- r/kerberos (Reddit)
-- BloodHound Slack
-- Purple Slack
+| **SharpHound** | Data collection for BloodHound |
+| **Rubeus** | Kerberos attacks (kerberoasting, AS-REP) |
+| **Certify** | Find certificate template vulns |
+| **Invoke-ShareFinder** | Find open shares |
+| **Get-GPPPassword** | Find GPP stored passwords |
+| ** Mimikatz** | Credential dumping, golden tickets |
+| **Impacket** | Python AD attack tools |
+| **CrackMapExec** | AD exploitation |
+| **Coercer** | Print Spooler coercion |
+| **certipy** | Certificate attacks |
 
 ---
 
+### Q17: What is the difference between Pass-the-Hash and Pass-the-Ticket?
+
+**Answer:**
+
+**Pass-the-Hash (PtH):**
+- Uses NTLM hash directly
+- Authenticates without knowing password
+- Works over network
+- Doesn't trigger logon events properly
+
+**Pass-the-Ticket (PtT):**
+- Uses Kerberos tickets (TGT/TGS)
+- Injects ticket into memory
+- More modern detection
+- More common in recent attacks
+
+**Detection:** Event 4624 shows actual logon type and source IP
+
+---
+
+### Q18: What is Credential Guard and how does it help?
+
+**Answer:** Credential Guard is a Windows security feature that uses virtualization to isolate credential information, preventing credential theft attacks like Mimikatz.
+
+**Protects Against:**
+- Pass-the-Hash
+- Pass-the-Ticket
+- Credential dumping from LSASS
+
+**Requirements:**
+- Windows 10/11 Enterprise
+- UEFI secure boot
+- TPM 2.0 (recommended)
+
+---
+
+### Q19: How would you investigate a suspected AD compromise?
+
+**Answer:**
+
+**Step 1: Identify Indicators**
+- Unusual logon events (Event 4624)
+- Sensitive group membership changes
+- New service accounts with SPN
+- Password reset for privileged accounts
+
+**Step 2: Contain**
+- Isolate affected systems
+- Disable compromised accounts
+- Block attacker C2 IPs
+
+**Step 3: Eradicate**
+- Remove attacker tools
+- Reset compromised passwords
+- Reset krbtgt twice
+- Rebuild critical systems
+
+**Step 4: Recovery**
+- Restore from clean backups
+- Verify no persistence
+- Monitor closely
+
+**Step 5: Lessons Learned**
+- Document timeline
+- Identify root cause
+- Improve detection
+
+---
+
+### Q20: What is the MITRE ATT&CK framework related to AD attacks?
+
+**answer:** Key MITRE ATT&CK techniques for AD:
+
+| Technique ID | Name | Description |
+|--------------|------|-------------|
+| T1558 | Steal or Forge Kerberos Tickets | Golden Ticket, Silver Ticket |
+| T1557 | Man-in-the-Middle | NTLM Relay |
+| T1547 | Boot or Logon Autostart | GPO startup scripts |
+| T1003 | OS Credential Dumping | DCSync, Mimikatz |
+| T1078 | Valid Accounts | Stolen credentials |
+| T1486 | Data Encrypted for Impact | Ransomware |
+
+---
+
+## 18. Additional Resources
+
+### Essential AD Security Tools
+
+| Tool | Category | Purpose |
+|------|----------|---------|
+| **Rubeus** | Kerberos | Kerberoasting, AS-REP roasting, ticket operations |
+| **Mimikatz** | Credential | DCSync, Golden Ticket, credential dumping |
+| **BloodHound** | Enumeration | AD attack path analysis, privilege escalation paths |
+| **SharpHound** | Enumeration | Data collection for BloodHound |
+| **Impacket** | Exploitation | ntlmrelayx, secretsdump, smbexec |
+| **Certify** | PKI | Find certificate template vulnerabilities |
+| **Certipy** | PKI | ESC1, ESC8 attacks, certificate abuse |
+| **Coercer** | Coercion | Print Spooler coercion attacks |
+| **dementor.py** | Coercion | PrinterBug exploit for authentication coercion |
+| **PowerView** | Enumeration | AD user, group, share enumeration |
+| **Invoke-ShareFinder** | Enumeration | Find open network shares |
+| **Get-GPPPassword** | Credential | Find GPP stored passwords |
+| **CrackMapExec** | Exploitation | AD exploitation, credential spraying |
+| **Hashcat** | Cracking | Password cracking (mode 13100, 18200) |
+| **John the Ripper** | Cracking | Password cracking |
+| **ADACLScanner** | Audit | ACL configuration auditing |
+| **LAPS** | Management | Local Administrator Password Solution |
+
+### Important References
+
+- [MITRE ATT&CK - T1558: Steal or Forge Kerberos Tickets](https://attack.mitre.org/techniques/T1558/)
+- [MITRE ATT&CK - T1003: OS Credential Dumping](https://attack.mitre.org/techniques/T1003/)
+- [Harmj0y's Kerberoasting Blog](https://www.harmj0y.com/blog/)
+- [SpecterOps AD Security Research](https://specterops.io/)
+- [Microsoft AD Security Best Practices](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices)
+- [Kerberos Protocol Extension (RFC 4120)](https://datatracker.ietf.org/doc/html/rfc4120)
+- [AD CS Attack Paths (Certified Pre-Owned)](https://posts.specterops.io/certified-pre-owned-d4021c017401)
+- [HackTricks - Active Directory](https://book.hacktricks.xyz/windows/active-directory-methodology)
+
+### Recommended Books
+
+- "Windows Internals" - Mark Russinovich
+- "The Red Team Handbook" - SOC/Blue Team
+- "Active Directory Attack and Defense" - Various authors
+
+### Active Security Communities
+
+- r/activedirectory (Reddit)
+- r/kerberos (Reddit)  
+- BloodHound Slack (BloodHound@getbloodhound.io)
+- SpecterOps Slack
+
+---
 
 *Module 6/15 - Windows Attacks & Defense*
 *Built with research + HTB Academy materials*
