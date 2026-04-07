@@ -1801,7 +1801,8 @@ DC2$
   Flags                 :  name_canonicalize, pre_authent, initial, renewable, forwardable
 ```
 
-<img width="2705" height="755" alt="image" src="https://github.com/user-attachments/assets/d81f7b23-94fe-4594-bbde-37133895a2df" />
+<img width="1356" height="951" alt="image" src="https://github.com/user-attachments/assets/8da28536-2bb0-4209-8cc4-44c47be2e1f5" />
+
 
 **Step 3: Execute Coercer to coerce DC1:**
 
