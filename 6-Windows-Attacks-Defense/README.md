@@ -44,8 +44,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 11. [Kerberos Constrained Delegation](#11-kerberos-constrained-delegation)
 12. [Print Spooler & NTLM Relaying](#12-print-spooler--ntlm-relaying)
 13. [Coercing Attacks & Unconstrained Delegation](#13-coercing-attacks--unconstrained-delegation)
-14. [Interview Questions](#14-interview-questions)
-15. [Additional Resources](#15-additional-resources)
+14. [Object ACLs](#14-object-acls)
+15. [Interview Questions](#15-interview-questions)
+16. [Additional Resources](#16-additional-resources)
 
 ---
 
@@ -1871,7 +1872,126 @@ klist
 
 ---
 
-## 14. Interview Questions
+## 14. Object ACLs
+
+### Description
+
+> 📌 **Object ACLs (Access Control Lists)** - define who has access to AD objects and what they can do.
+
+```mermaid
+graph LR
+    ACL[ACL - Access Control List] --> ACE[ACE - Access Control Entry]
+    ACE --> Trustee[User/Group/Computer]
+    Trustee -->|Has| Rights[Read/Write/Full Control]
+    
+    Rights -->|Example| Reset[Password Reset]
+    Rights -->|Example| Modify[Modify Group Membership]
+    Rights -->|Example| Delete[Delete Objects]
+    
+    style ACL fill:#ffcccc,stroke:#333
+    style ACE fill:#ffe5cc,stroke:#333
+```
+
+**Common Misconfigurations:**
+- All Domain users as Administrators to all Servers
+- Everyone can modify all objects
+- Domain users have access to LAPS passwords
+- GenericAll permissions on users/computers
+
+### Attack
+
+**Step 1: Enumerate ACLs with SharpHound:**
+
+```powershell
+.\SharpHound.exe -c All
+```
+
+**Output:**
+
+```
+[*] This version of SharpHound is compatible with 4.2 Release
+[*] Resolved Collection Methods: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
+[*] Initializing SharpHound at 14.16 on 19/12/2022
+[*] Beginning LDAP search for eagle.local
+[*] Enumeration finished in 00:00:48.8638030
+[*] SharpHound Enumeration Completed! Happy Graphing!
+```
+
+<img width="2280" height="744" alt="image" src="https://github.com/user-attachments/assets/582f46f9-e9cb-40b9-bc09-3d0a7d9dd917" />
+
+**Step 2: Analyze with BloodHound:**
+
+> 💡 Find escalation paths from compromised user (Bob)
+
+**Bob's access:**
+
+<img width="1281" height="706" alt="image" src="https://github.com/user-attachments/assets/1475bd7c-54c6-4bca-9a37-c923f890e3ce" />
+
+**Attack Scenarios:**
+
+**Case 1: GenericAll on User (Anni)**
+- Add SPN → Kerberoast
+- Reset password → Impersonate user
+- If Anni is Domain Admin → Full domain access
+
+**Case 2: GenericAll on Computer (Server01)**
+- Read LAPS passwords
+- Abuse Resource-Based Kerberos Delegation
+- If Server01 has Unconstrained Delegation → DC compromise
+
+**Tool: ADACLScanner**
+- Create DACL/SACL reports
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Continuous Assessment** | Regular ACL audits |
+| **User Education** | Train admins about delegated rights |
+| **Automation** | Automate access management |
+| **Naming Conventions** | Use admin prefixes for privileged users |
+
+### Detection
+
+**Event IDs:**
+
+| Event ID | Description |
+|----------|-------------|
+| 4738 | User account changed |
+| 4742 | Computer account changed |
+| 4724 | Password reset attempt |
+
+> 📌 Events don't show exactly what changed - just that modification occurred!
+
+**Event 4738 - User modified (no SPN detail):**
+
+<img width="1040" height="1046" alt="image" src="https://github.com/user-attachments/assets/02a7977f-12fe-456e-ba1b-ce307860e4a1" />
+
+**Event 4742 - Computer modified:**
+
+<img width="1321" height="1119" alt="image" src="https://github.com/user-attachments/assets/e4b5bd79-60a6-4b9d-8af7-bac8127beb3c" />
+
+**Detection Strategy:**
+- Alert on non-privileged users modifying other users
+- Monitor privileged user naming conventions
+- Any change to honeypot accounts
+
+### Honeypot Approach
+
+**Method 1:** Assign high ACLs to honeypot user with fake creds in Description
+
+**Method 2:** Create user that everyone can modify
+- Any changes = suspicious
+- Event 4738 triggers alert
+- Disable attacker account immediately
+
+**Honeypot detection:**
+
+<img width="1040" height="1046" alt="image" src="https://github.com/user-attachments/assets/80e2b0ca-0f4a-46d4-b972-699f9a2d7ec0" />
+
+---
+
+## 15. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -2049,7 +2169,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 15. Additional Resources
+## 16. Additional Resources
 
 ### Tools
 
