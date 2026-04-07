@@ -999,24 +999,10 @@ graph TD
 
 - [MITRE ATT&CK](https://attack.mitre.org)
 - [ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/)
-
----
-
-*Module 2 Complete - Security Monitoring & SIEM Fundamentals*
-
-
-	
-	
-	
-	
-	
-	
-	
 ---
 
 ## 7. Additional Resources
-	
-
+   
 
 
 
@@ -1127,7 +1113,6 @@ When this alert triggers:
 
 ---
 
-*Module 2 Complete - Security Monitoring & SIEM Fundamentals*
 
 
 
@@ -1572,4 +1557,3 @@ graph TD
 
 ---
 
-*Module 2 Complete - Security Monitoring & SIEM Fundamentals*
