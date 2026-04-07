@@ -14,7 +14,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 | **4** | [Introduction to Threat Hunting & Hunting With Elastic](./4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/) ✅ | Proactive threat detection | Hypothesis-based hunting, Elastic/KQL queries, MITRE ATT&CK mapping |
 | **5** | [Understanding Log Sources & Investigating with Splunk](./5-Understanding-Log-Sources-Investigating-with-Splunk/) ✅ | Splunk for SOC analysts | SPL queries, authentication monitoring, network logs, search optimization |
 | **6** | [Windows Attacks & Defense](./6-Windows-Attacks-Defense/) ✅ | Common Windows attack techniques | Kerberoasting, AS-REP Roasting, GPP, DCSync, Golden Ticket, Kerberos Delegation, Print Spooler, Coercing, ACLs, PKI ESC1/ESC8 |
-| **7** | [Intro to Network Traffic Analysis](./7-Intro-to-Network-Traffic-Analysis/) | Network fundamentals | Wireshark basics, TCP/IP, packet analysis, protocol analysis |
+| **7** | [Intro to Network Traffic Analysis](./7-Intro-to-Network-Traffic-Analysis/) ✅ | Network fundamentals | Wireshark, tcpdump, BPF filters, TCP/IP, packet analysis |
 | **8** | Intermediate Network Traffic Analysis | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
 | **8** | Intermediate Network Traffic Analysis | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
 | **9** | Working with IDS/IPS | Intrusion detection systems | Snort/Suricata rules, alert analysis, signature development |
@@ -124,7 +124,7 @@ SOC-Analyst-Cheatsheet/
 ├── 4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/   ✅ Complete
 ├── 5-Understanding-Log-Sources-Investigating-with-Splunk/      ✅ Complete
 ├── 6-Windows-Attacks-Defense/                ✅ Complete (16 sections)
-├── 7-Intro-to-Network-Traffic-Analysis/      Coming Soon
+├── 7-Intro-to-Network-Traffic-Analysis/      ✅ Complete
 ├── 8-Intermediate-Network-Traffic-Analysis/   Coming Soon
 ├── 9-Working-with-IDS-IPS/                   Coming Soon
 ├── 10-Introduction-to-Malware-Analysis/       Coming Soon
