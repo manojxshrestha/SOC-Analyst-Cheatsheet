@@ -437,6 +437,20 @@ hashcat -m 13100 -a 0 spn.txt passwords.txt --outfile="cracked.txt"
 john spn.txt --format=krb5tgs --wordlist=passwords.txt
 ```
 
+**Alternative: Crack with John The Ripper:**
+
+```bash
+sudo john spn.txt --fork=4 --format=krb5tgs --wordlist=passwords.txt --pot=results.pot
+
+# Output:
+# Using default input encoding: UTF-8
+# Loaded 3 password hashes with 3 different salts (krb5tgs, Kerberos 5 TGS etype 23 [MD4 HMAC-MD5 RC4])
+# Node numbers 1-4 of 4 (fork)
+# Slavi123         (?)
+```
+
+> ⚠️ **Be Careful!** Don't implement every honeypot detection - it makes traps obvious to threat actors. Choose the ones that work best for your environment.
+
 ### Prevention
 
 | Mitigation | Description |
@@ -471,9 +485,20 @@ john spn.txt --format=krb5tgs --wordlist=passwords.txt
 - Alert on ANY TGS request for that account
 - Use old IIS/SQL service account names
 
+**Honeypot Best Practices:**
+
+1. Account must be relatively old (bogus account) - attackers avoid new accounts
+2. Password should be 2+ years old, ideally 5+ years
+3. Account must have some privileges - otherwise not interesting to attackers
+4. Account must have a legit-sounding SPN (IIS, SQL accounts are good)
+
+> 📌 Any activity with honeypot account (successful or failed logons) should be alerted!
+
 **Honeypot triggered example:**
 
 <img width="1764" height="1142" alt="image" src="https://github.com/user-attachments/assets/6c7e172c-998c-4f6f-845d-3fe95d76f0d0" />
+
+> ⚠️ **Be Careful!** Don't implement every honeypot detection - it makes traps obvious to threat actors. Choose the ones that work best for your environment.
 
 ---
 
@@ -653,6 +678,8 @@ Get-GPPPassword
 | **SYSVOL ACLs** | Restrict access to authenticated users |
 
 > 🔴 Patch does NOT remove existing cached credentials - must be manually cleaned.
+
+> 📌 **Important**: If AD was built before 2014, credentials may still be cached! Continuously assess and review environments.
 
 ### Detection
 
