@@ -2145,6 +2145,10 @@ dir \\dc1\c$
 
 > 📌 **ESC8** - relaying to ADCS to obtain a certificate, utilizing PrinterBug to coerce machines to connect to attacker.
 
+Following up on the PKI-related attack scenario from the previous section, another attack we can abuse is relaying to ADCS to obtain a certificate, a technique known as ESC8.
+
+Previously, we used PrinterBug and Coercer to make (or force) computers to connect to any other computer. In this scenario, we will utilize the PrinterBug, and with the received reverse connection, we will relay to ADCS to obtain a certificate for the machine we coerced.
+
 ```mermaid
 graph LR
     Attacker[Attacker] -->|PrinterBug| DC[Domain Controller]
@@ -2359,6 +2363,12 @@ Mimikatz command executed for DCsync on Administrator; NTLM hash obtained succes
 
 > 🔴 Attack possible because ADCS web enrollment doesn't enforce HTTPS!
 
+The above attack was possible because:
+- We managed to coerce DC2 successfully
+- ADCS web enrollment does not enforce HTTPS (otherwise, relaying would fail, and we won't request a certificate)
+
+Because there are many different PKI-related escalation techniques, it is highly advised to regularly scan the environment with Certify or other similar tools to find potential issues.
+
 ### Detection
 
 **Event IDs:**
@@ -2382,7 +2392,7 @@ Event 4886: Certificate request by EAGLE\user using DomainController template.
 
 Event 4887: Certificate request approved for EAGLE\user using DomainController template.
 
-> 📌 Template name in request flags relayed attacks (not from DC itself)
+What stands out is that the template name is mentioned as part of the request; however, it isn't if requested by the Domain Controller itself (not relaying). There may be some exceptions to this in an environment; thus, it is best to check if it could be used as an indicator of flagging, coercing/relaying attacks to ADCS.
 
 **Event 4768 - TGT with certificate:**
 
@@ -2390,7 +2400,7 @@ Event 4887: Certificate request approved for EAGLE\user using DomainController t
 
 Event 4768: TGT requested for user from IP 172.16.18.25 using certificate.
 
-> 📌 Note: IP address is not the Domain Controller's!
+It stands out that the certificate-based authentication is coming from an unexpected IP address, not the Domain Controller's.
 
 **Event 4624 - Successful logon:**
 
