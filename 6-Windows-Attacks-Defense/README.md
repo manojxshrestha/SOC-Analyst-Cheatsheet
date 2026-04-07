@@ -897,6 +897,14 @@ Invoke-ShareFinder -domain eagle.local -ExcludeStandard -CheckShareAccess
 
 <img width="1917" height="303" alt="image" src="https://github.com/user-attachments/assets/bc87579e-91e5-4787-ae6d-40ab4307c5b6" />
 
+**Hidden share ($) - Explorer shows empty:**
+
+<img width="1678" height="419" alt="image" src="https://github.com/user-attachments/assets/0992b0f0-0bfc-421c-822e-f3c3949725cc" />
+
+**But UNC path shows content:**
+
+<img width="1641" height="421" alt="image" src="https://github.com/user-attachments/assets/8057f51a-982d-4a9e-a8e5-9768cbf58125" />
+
 **Step 2: Search for credentials using findstr:**
 
 ```powershell
@@ -913,6 +921,14 @@ findstr /m /s /i "eagle" *.ps1
 **Results:**
 
 <img width="1951" height="272" alt="image" src="https://github.com/user-attachments/assets/504b4353-d73a-41a6-adc9-45fc2fd7ceea" />
+
+**Search for 'pw':**
+
+<img width="1932" height="135" alt="image" src="https://github.com/user-attachments/assets/1bcd9d99-5784-4b39-8d49-e5345ce047b0" />
+
+**Search for domain name 'eagle':**
+
+<img width="1929" height="161" alt="image" src="https://github.com/user-attachments/assets/f352cae1-86e9-4197-b7c8-f5bd1bbba0d6" />
 
 **Exposed credentials example:**
 
