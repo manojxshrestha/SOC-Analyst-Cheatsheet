@@ -12,7 +12,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 | **2** | [Security Monitoring & SIEM Fundamentals](./2-Security-Monitoring-SIEM-Fundamentals/) ✅ | SIEM concepts and log management | Elastic Stack (Beats, Logstash, ES, Kibana), KQL queries, SOC tiers, MITRE ATT&CK mapping, Use Case Development lifecycle |
 | **3** | [Windows Event Logs & Finding Evil](./3-Windows-Event-Logs-Finding-Evil/) ✅ | Windows security event analysis | Event IDs (4624, 4625, 4688, etc.), Sysmon, detecting malicious activity |
 | **4** | [Introduction to Threat Hunting & Hunting With Elastic](./4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/) 🔄 | Proactive threat detection | Hypothesis-based hunting, Elastic/KQL queries, MITRE ATT&CK mapping |
-| **5** | Understanding Log Sources & Investigating with Splunk | Splunk for SOC analysts | SPL queries, authentication monitoring, network logs, search optimization |
+| **5** | [Understanding Log Sources & Investigating with Splunk](./5-Understanding-Log-Sources-Investigating-with-Splunk/) ✅ | Splunk for SOC analysts | SPL queries, authentication monitoring, network logs, search optimization |
 | **6** | Windows Attacks & Defense | Common Windows attack techniques | Lateral movement, privilege escalation, persistence mechanisms |
 | **7** | Intro to Network Traffic Analysis | Network fundamentals | Wireshark basics, TCP/IP, packet analysis, protocol analysis |
 | **8** | Intermediate Network Traffic Analysis | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
@@ -109,7 +109,7 @@ SOC-Analyst-Cheatsheet/
 ├── 2-Security-Monitoring-SIEM-Fundamentals/   ✅ Complete
 ├── 3-Windows-Event-Logs-Finding-Evil/        ✅ Complete
 ├── 4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/   🔄 In Progress
-├── 5-Understanding-Log-Sources-Splunk/      Coming Soon
+├── 5-Understanding-Log-Sources-Investigating-with-Splunk/      ✅ Complete
 ├── 6-Windows-Attacks-Defense/                Coming Soon
 ├── 7-Intro-to-Network-Traffic-Analysis/      Coming Soon
 ├── 8-Intermediate-Network-Traffic-Analysis/   Coming Soon
