@@ -13,8 +13,9 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 | **3** | [Windows Event Logs & Finding Evil](./3-Windows-Event-Logs-Finding-Evil/) ✅ | Windows security event analysis | Event IDs (4624, 4625, 4688, etc.), Sysmon, detecting malicious activity |
 | **4** | [Introduction to Threat Hunting & Hunting With Elastic](./4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/) ✅ | Proactive threat detection | Hypothesis-based hunting, Elastic/KQL queries, MITRE ATT&CK mapping |
 | **5** | [Understanding Log Sources & Investigating with Splunk](./5-Understanding-Log-Sources-Investigating-with-Splunk/) ✅ | Splunk for SOC analysts | SPL queries, authentication monitoring, network logs, search optimization |
-| **6** | Windows Attacks & Defense | Common Windows attack techniques | Lateral movement, privilege escalation, persistence mechanisms |
-| **7** | Intro to Network Traffic Analysis | Network fundamentals | Wireshark basics, TCP/IP, packet analysis, protocol analysis |
+| **6** | [Windows Attacks & Defense](./6-Windows-Attacks-Defense/) ✅ | Common Windows attack techniques | Kerberoasting, AS-REP Roasting, GPP, DCSync, Golden Ticket, Kerberos Delegation, Print Spooler, Coercing, ACLs, PKI ESC1/ESC8 |
+| **7** | [Intro to Network Traffic Analysis](./7-Intro-to-Network-Traffic-Analysis/) | Network fundamentals | Wireshark basics, TCP/IP, packet analysis, protocol analysis |
+| **8** | Intermediate Network Traffic Analysis | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
 | **8** | Intermediate Network Traffic Analysis | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
 | **9** | Working with IDS/IPS | Intrusion detection systems | Snort/Suricata rules, alert analysis, signature development |
 | **10** | Introduction to Malware Analysis | Malware triage basics | Static analysis, strings, hashing, PE analysis, sandboxing |
@@ -39,6 +40,8 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 - Malware triage
 - Network traffic analysis
 - SIEM query development
+- Active Directory attack detection
+- Certificate Services abuse detection
 
 ### Tier 3 SOC / Threat Hunting Skills
 - Proactive threat hunting
@@ -61,17 +64,27 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 - **tcpdump** - Command-line packet capture
 - **NetworkMiner** - PCAP artifact extraction
 - **Snort/Suricata** - IDS/IPS
+- **ntlmrelayx** - NTLM relay attacks
+- **Coercer** - Print Spooler coercion
+- **dementor.py** - PrinterBug exploit
 
 ### Endpoint Security
 - **Windows Event Logs** - Security, System, Application
 - **Sysmon** - Advanced endpoint telemetry
 - **EDR** - Endpoint Detection & Response
+- **Rubeus** - Kerberos attacks
+- **Mimikatz** - Credential dumping
+- **BloodHound** - AD attack path analysis
+- **Get-GPPPassword** - GPP credential extraction
 
 ### Forensics & Malware
 - **FTK Imager** - Forensic imaging
 - **Autopsy** - Disk analysis
 - **Volatility** - Memory forensics
 - **YARA** - Malware detection rules
+- **Certify** - Certificate template vulnerabilities
+- **Certipy** - PKI attacks
+- **Impacket** - Python AD exploitation
 
 ### Case Management
 - **TheHive** - Incident case management
@@ -110,7 +123,7 @@ SOC-Analyst-Cheatsheet/
 ├── 3-Windows-Event-Logs-Finding-Evil/        ✅ Complete
 ├── 4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/   ✅ Complete
 ├── 5-Understanding-Log-Sources-Investigating-with-Splunk/      ✅ Complete
-├── 6-Windows-Attacks-Defense/                Coming Soon
+├── 6-Windows-Attacks-Defense/                ✅ Complete (16 sections)
 ├── 7-Intro-to-Network-Traffic-Analysis/      Coming Soon
 ├── 8-Intermediate-Network-Traffic-Analysis/   Coming Soon
 ├── 9-Working-with-IDS-IPS/                   Coming Soon
