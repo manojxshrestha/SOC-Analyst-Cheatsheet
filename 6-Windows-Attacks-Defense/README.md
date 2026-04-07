@@ -37,8 +37,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 4. [AS-REP Roasting](#4-as-rep-roasting)
 5. [GPP Passwords](#5-gpp-passwords)
 6. [GPO Permissions / GPO Files](#6-gpo-permissions--gpo-files)
-7. [Interview Questions](#7-interview-questions)
-8. [Additional Resources](#8-additional-resources)
+7. [Credentials in Shares](#7-credentials-in-shares)
+8. [Interview Questions](#8-interview-questions)
+9. [Additional Resources](#9-additional-resources)
 
 ---
 
@@ -857,7 +858,126 @@ if($Logs){
 
 ---
 
-## 7. Interview Questions
+## 7. Credentials in Shares
+
+### Description
+
+> 📌 **Credentials in network shares** are among the most common AD misconfigurations. Found in scripts (.ps1, .bat, .cmd), config files (.conf, .ini, .config), and documents.
+
+```mermaid
+graph LR
+    Shares[Network Shares] --> Scripts[Scripts]
+    Shares --> Config[Config Files]
+    Shares --> Docs[Documents]
+    
+    Scripts --> Risk1[High Risk - Domain Users Access]
+    Config --> Risk2[High Risk - Plain Text Creds]
+    Docs --> Risk3[Medium Risk]
+    
+    style Shares fill:#ffcccc,stroke:#333
+    style Risk1 fill:#ff9999,stroke:#333
+    style Risk2 fill:#ff9999,stroke:#333
+```
+
+**Why shares are exposed:**
+1. Admin opens share to "Everyone" or "Users" (contains all Domain Users)
+2. Admin unaware folder is shared (tests scripts in shared folder)
+3. Purposefully creates open share, forgets to close it
+4. Hidden shares ($) - misconception that they're secure
+
+### Attack
+
+**Step 1: Find shares with PowerView:**
+
+```powershell
+Invoke-ShareFinder -domain eagle.local -ExcludeStandard -CheckShareAccess
+```
+
+**Output:**
+
+<img width="1917" height="303" alt="image" src="https://github.com/user-attachments/assets/bc87579e-91e5-4787-ae6d-40ab4307c5b6" />
+
+**Step 2: Search for credentials using findstr:**
+
+```powershell
+# Search for 'pass' in different file types
+findstr /m /s /i "pass" *.bat *.cmd *.ini *.config *.ps1
+
+# Search for 'pw'
+findstr /m /s /i "pw" *.config
+
+# Search for domain name
+findstr /m /s /i "eagle" *.ps1
+```
+
+**Results:**
+
+<img width="1951" height="272" alt="image" src="https://github.com/user-attachments/assets/504b4353-d73a-41a6-adc9-45fc2fd7ceea" />
+
+**Exposed credentials example:**
+
+```
+net use E: \\DC1\sharedScripts /user:eagle\Administrator Slavi123
+```
+
+> ⚠️ **Note**: findstr is detected by Windows Defender as suspicious!
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Lock Down Shares** | No open permissions to Everyone/Users |
+| **Regular Scans** | Weekly scans for open shares and credentials |
+| **Avoid Creds in Scripts** | Use tokens/environment variables |
+| **Hide Share Audit** | Monitor hidden shares ($) access |
+
+### Detection
+
+**Event IDs to monitor:**
+
+| Event ID | Description |
+|----------|-------------|
+| 4624 | Successful logon |
+| 4625 | Failed logon |
+| 4768 | Kerberos TGT requested |
+
+**Alert on:**
+- Privileged users logging in from unexpected machines
+- Privileged users not from PAW (Privileged Access Workstation)
+- Unusual authentication sources
+
+**Event 4624 - Successful logon (Admin from unusual IP):**
+
+<img width="1370" height="1063" alt="image" src="https://github.com/user-attachments/assets/f1e6ec40-84e3-4016-809b-0885452a52f0" />
+
+**Event 4768 - Kerberos TGT request:**
+
+<img width="1269" height="1219" alt="image" src="https://github.com/user-attachments/assets/a0bd22bd-2f42-4354-b8f2-4acaa36a944b" />
+
+### Honeypot Approach
+
+**Setup:**
+- Create service account with old password (2+ years)
+- Place fake credential file in share
+- Ensure file last modified > password change date
+
+**Honeypot triggered events:**
+
+**Event 4625 - Failed logon:**
+
+<img width="1515" height="1117" alt="image" src="https://github.com/user-attachments/assets/b14f335f-1f31-4861-a0de-81b22d2bcfef" />
+
+**Event 4771 - Failed pre-authentication:**
+
+<img width="1660" height="1125" alt="image" src="https://github.com/user-attachments/assets/b76e63a1-852b-40ef-9b13-6be3d9a8bec3" />
+
+**Event 4776 - Failed credential validation:**
+
+<img width="1040" height="478" alt="image" src="https://github.com/user-attachments/assets/2adb18cd-41f7-4e0b-af8c-b6f577040ee5" />
+
+---
+
+## 8. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1035,7 +1155,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 8. Additional Resources
+## 9. Additional Resources
 
 ### Tools
 
