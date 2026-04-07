@@ -966,6 +966,109 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
+## 6. GPO Permissions / GPO Files
+
+### Description
+
+> 📌 **GPO (Group Policy Object)** is a virtual collection of policy settings used for configuration management in Active Directory.
+
+```mermaid
+graph LR
+    GPO[GPO] -->|Linked to| OU[Organizational Unit]
+    GPO -->|Contains| PS[Policy Settings]
+    GPO -->|Applies to| Objects[AD Objects]
+    
+    PS --> Scripts[Startup Scripts]
+    PS --> Tasks[Scheduled Tasks]
+    PS --> Software[Software Installation]
+    
+    style GPO fill:#ffcccc,stroke:#333
+    style OU fill:#ffe5cc,stroke:#333
+    style PS fill:#cce5ff,stroke:#333
+```
+
+**Attack Vectors:**
+- Modify GPO to add malicious startup scripts
+- Replace files in network shares deployed via GPO
+- Exploit misconfigured NTFS permissions
+
+> 🔴 **Risk**: If less privileged users can edit GPOs, attackers can compromise all computers in the linked OUs!
+
+### Attack
+
+No attack walkthrough - simple GPO edit or file replacement:
+
+1. Find GPOs with weak permissions
+2. Modify GPO to add malicious scheduled task
+3. Execute code on all linked computers
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **Lock Down GPO** | Only specific group/users can modify GPOs |
+| **Restrict Permissions** | Don't give Domain Admins to everyone |
+| **No Network Shares** | Don't deploy files from writable shares |
+| **Regular Audit** | Review GPO permissions regularly |
+| **Automate Monitoring** | Alert on permission deviations |
+
+### Detection
+
+> 📌 **Event ID 5136** - Directory Service Changes (when GPO is modified)
+
+**Detection Query:**
+
+```powershell
+Get-WinEvent -FilterHashtable @{LogName='Security';ID=5136} | 
+    Where-Object {$_.Properties[8].Value -match "CN=.*POLICIES"}
+```
+
+**Event 5136 Example:**
+
+<img width="1952" height="1622" alt="image" src="https://github.com/user-attachments/assets/59007074-7142-496f-a94d-05ba97914a64" />
+
+> 🔴 Alert if unexpected users modify GPOs!
+
+### Honeypot Approach
+
+**Setup Honeypot GPO:**
+- Link to non-critical servers only
+- Monitor modifications continuously
+- Auto-disable user if GPO is modified
+- Auto-unlink GPO if modification detected
+
+**Automated Detection Script:**
+
+```powershell
+# Define filter for the last 15 minutes
+$TimeSpan = (Get-Date) - (New-TimeSpan -Minutes 15)
+
+# Search for event ID 5136 (GPO modified) in the past 15 minutes
+$Logs = Get-WinEvent -FilterHashtable @{LogName='Security';id=5136;StartTime=$TimeSpan} -ErrorAction SilentlyContinue | `
+Where-Object {$_.Properties[8].Value -match "CN={GPO-GUID},CN=POLICIES,CN=SYSTEM,DC=DOMAIN,DC=LOCAL"}
+
+if($Logs){
+    $emailBody = "Honeypot GPO was modified`r`n"
+    $disabledUsers = @()
+    ForEach($log in $Logs){
+        If(((Get-ADUser -Identity $log.Properties[3].Value).Enabled -eq $true) -and ($log.Properties[3].Value -notin $disabledUsers)){
+            Disable-ADAccount -Identity $log.Properties[3].Value
+            $emailBody = $emailBody + "Disabled user " + $log.Properties[3].Value + "`r`n"
+            $disabledUsers += $log.Properties[3].Value
+        }
+    }
+    $emailBody
+}
+```
+
+**Honeypot Triggered - Event 4725:**
+
+<img width="1365" height="692" alt="image" src="https://github.com/user-attachments/assets/a08e6d41-985b-47b4-902f-6684f171b144" />
+
+> ⚠️ **Caution**: Only implement honeypot if organization is mature enough to respond in real-time!
+
+---
+
 *Module 6/15 - Windows Attacks & Defense*
 *Built with research + HTB Academy materials*
 *For learning and SOC career preparation*
