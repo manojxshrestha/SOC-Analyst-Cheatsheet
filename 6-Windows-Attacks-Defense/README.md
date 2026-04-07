@@ -181,6 +181,65 @@ sequenceDiagram
 - **TGS** - Created for each service the client wants to access
 - **KRBTGT** - Account storing secrets for TGT validation - AD auto-rotates this password
 
+### Privileged Groups in AD
+
+```mermaid
+graph TD
+    Forest[Forest] --> Domain[Domain]
+    Domain --> DA[Domain Admins]
+    Domain --> Admins[Administrators]
+    Domain --> AO[Account Operators]
+    Forest --> EA[Enterprise Admins]
+    
+    DA -->|Add to| Win[All domain-joined machines]
+    EA -->|Permissions over| All[All domains in forest]
+    
+    style Forest fill:#ffcccc,stroke:#333
+    style Domain fill:#ffe5cc,stroke:#333
+    style DA fill:#ff9999,stroke:#333
+    style EA fill:#ff9999,stroke:#333
+    style AO fill:#ff9999,stroke:#333
+```
+
+| Group | Description |
+|-------|-------------|
+| **Domain Admins** | Added to Administrators on all domain-joined machines |
+| **Enterprise Admins** | Permissions over all domains in the forest |
+| **Account Operators** | Can reset user passwords - privilege escalation risk |
+| **Administrators** | Can manage any AD object |
+
+> ⚠️ **Account Operators Risk**: Can modify MSOL_ users (Azure AD Connect) to escalate to Domain Admin!
+
+### Windows Logon Types
+
+| Logon Type | Description | Leaves Credentials |
+|------------|-------------|-------------------|
+| 2 | Interactive | ✅ Yes |
+| 3 | Network | ❌ No |
+| 4 | Batch | ✅ Yes |
+| 5 | Service | ✅ Yes |
+| 7 | Unlock | ✅ Yes |
+| 8 | NetworkClearText | ✅ Yes |
+| 9 | NewCredentials | ✅ Yes |
+| 10 | RemoteInteractive (RDP) | ✅ Yes |
+
+### LDAP and RSAT Tools
+
+```mermaid
+graph LR
+    LDAP[LDAP Protocol] --> RSAT[RSAT Tools]
+    RSAT --> ADUC[Active Directory Users<br/>and Computers]
+    RSAT --> GPM[Group Policy<br/>Management]
+    
+    style LDAP fill:#ffcccc,stroke:#333
+    style RSAT fill:#ffe5cc,stroke:#333
+```
+
+- **LDAP** - Protocol used to communicate with AD Domain Controllers
+- **RSAT** - Remote Server Administration Tools for AD management
+  - **ADUC** - View/edit/create AD objects (users, groups, computers)
+  - **GPM** - Create and modify Group Policies
+
 ### Important Network Ports
 
 | Port | Service |
@@ -201,11 +260,28 @@ sequenceDiagram
 
 > 🔴 **Legacy** - NetBIOS and LLMNR broadcast credentials on the wire
 
----
+### Real-World View - AD Service Classification
 
-## 2. Overview and Lab Environment
+```mermaid
+graph TD
+    Org[Organization Systems] --> Critical[Critical Assets]
+    Org --> Important[Important Services]
+    Org --> Standard[Standard Services]
+    
+    Critical --> DC[Domain Controllers]
+    Critical --> AD[Active Directory]
+    Important --> DNS[DNS]
+    Important --> PKI[PKI]
+    Important --> ECM[Endpoint Config Manager]
+    
+    style Critical fill:#ff9999,stroke:#333
+    style DC fill:#ffcccc,stroke:#333
+    style AD fill:#ffcccc,stroke:#333
+```
 
-### Attacks Covered
+> 📌 **Key Point**: Any service that can escalate to Domain Controller should be treated as DC-level security!
+
+### AD Limitations and Attack Surface
 
 | # | Attack | Description |
 |---|--------|-------------|
@@ -587,6 +663,10 @@ Get-GPPPassword
 Monitor access to SYSVOL\Policies\*\*.xml files.
 
 <img width="1743" height="1138" alt="image" src="https://github.com/user-attachments/assets/bc67d20e-276e-41f1-844c-e8f8a2bce47d" />
+
+**Event 4663 - File accessed (SYSVOL XML):**
+
+<img width="1634" height="817" alt="image" src="https://github.com/user-attachments/assets/86367eb5-e9c0-4338-b9c7-19cf0e840751" />
 
 **Method 2: Logon Event Correlation**
 
