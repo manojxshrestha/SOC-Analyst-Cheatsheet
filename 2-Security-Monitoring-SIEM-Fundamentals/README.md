@@ -1164,7 +1164,6 @@ When this alert triggers:
 
 
 Security Monitoring & SIEM Fundamentals
-Security Monitoring & SIEM Fundamentals 100%
 
 ---
 
