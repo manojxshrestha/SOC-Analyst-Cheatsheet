@@ -1802,25 +1802,43 @@ To detect WMI execution (through wmiexec) over the network, focus on:
 ### IDS/IPS Fundamentals
 
 1. **What is the difference between IDS and IPS?**
+   > 📌 **IDS (Intrusion Detection System)** - Passive monitoring, generates alerts but doesn't block traffic. **IPS (Intrusion Prevention System)** - Active prevention, sits inline and can drop/block traffic.
+
 2. **Explain signature-based vs anomaly-based detection.**
+   > 📌 **Signature-Based** - Uses known patterns (malware signatures, attack patterns). Limited to known threats. **Anomaly-Based** - Establishes baseline of normal behavior, alerts on deviations. Can detect zero-day attacks but has higher false positives.
+
 3. **What are the four operation modes of Suricata?**
+   > 📌 **IDS Mode** - Passive monitoring, alerts only. **IPS Mode** - Inline blocking. **IDPS Mode** - Hybrid (passive + RST packets). **NSM Mode** - Pure logging.
 
 ### Suricata
 
 4. **How do you configure Suricata in IPS mode?**
+   > 📌 Use AF_PACKET or NFQ mode: `sudo suricata -i <interface>` (AF_PACKET) or set up iptables with NFQUEUE: `sudo iptables -I FORWARD -j NFQUEUE` then `sudo suricata -q 0`
+
 5. **What is the EVE JSON output format?**
+   > 📌 **EVE (Every Oddities and Various Events)** - JSON-formatted log that records alerts, HTTP, DNS, TLS metadata, flow data, and more. Recommended output format for SIEM integration.
+
 6. **How do you extract files using Suricata?**
+   > 📌 Enable file extraction in suricata.yaml under `file-store`, then use rule: `alert http any any -> any any (msg:"FILE store all"; filestore; sid:2; rev:1;)`
+
 7. **What is live rule reloading in Suricata?**
+   > 📌 Allows updating rules without restarting: Enable `detect-engine: reload: true` in config, then run `sudo kill -usr2 $(pidof suricata)` to reload rules.
 
 ### Snort
 
 8. **How does Snort differ from Suricata?**
+   > 📌 Both are IDS/IPS but Suricata is multi-threaded (faster), has more modern features, and uses Lua scripting. Snort has larger rule community but is older architecture.
+
 9. **What are the Snort rule components?**
+   > 📌 Rule Header (action, protocol, IPs, ports, direction) + Rule Options (msg, content, flow, dsize, pcre, sid, rev, etc.)
 
 ### Zeek
 
 10. **What is Zeek and how does it differ from IDS/IPS?**
+    > 📌 **Zeek** - Network traffic analyzer that generates comprehensive logs. Unlike IDS/IPS which focuses on signatures, Zeek provides deep protocol analysis and logging for investigation.
+
 11. **How do you detect malicious activity using Zeek logs?**
+    > 📌 Analyze conn.log for beaconing (regular intervals), dns.log for tunneling (unusual subdomains), smb_files.log for PsExec (ADMIN$ share access), ssl.log for suspicious certificates.
 
 ---
 

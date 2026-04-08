@@ -1988,37 +1988,72 @@ icmp or ip.src == x.x.x.x              # ICMP from specific source
 ### Link Layer Attacks
 
 1. **What is ARP spoofing and how do you detect it in network traffic?**
+   > 📌 **ARP Spoofing** - Attack where attacker sends forged ARP messages to link their MAC address with a legitimate IP address. Detection: Look for duplicate IP addresses with different MACs, gratuitous ARP replies, and ARP requests for non-existent hosts.
+
 2. **How does a rogue access point differ from an evil twin?**
+   > 📌 **Rogue AP** - Unauthorized access point installed on legitimate network. **Evil Twin** - Fake AP mimicking a legitimate one to steal credentials/launch MITM attacks.
+
 3. **What are the indicators of a WiFi deauthentication attack?**
+   > 📌 High volume of deauth frames (type 0x12 subtype 0x00), many disassociation frames, attacker MAC sending frames to broadcast address (FF:FF:FF:FF:FF:FF).
+
 4. **How can you detect ARP scanning in Wireshark?**
+   > 📌 Filter: `arp` shows all ARP traffic. Look for rapid ARP requests to different IPs: `arp.dst.hw_mac == 00:00:00:00:00:00 && arp.opcode == 1`
 
 ### Network Layer Attacks
 
 5. **What is IP spoofing and when is it commonly used?**
+   > 📌 **IP Spoofing** - Attacker forges source IP address to impersonate another system. Used in DDoS attacks, Man-in-the-Middle attacks, and bypassing IP-based authentication.
+
 6. **Explain the difference between IP TTL manipulation and IP identification attacks.**
+   > 📌 **TTL Manipulation** - Alters TTL value to evade firewall filtering or fingerprint OS. **IP Identification** - Uses ID field to probe OS or perform OS fingerprinting (e.g., nmap).
+
 7. **What is a LAND attack and how does it work?**
+   > 📌 **LAND Attack** - Spoofed TCP SYN packet with source IP = destination IP, causing victim to reply to itself endlessly. Mitigation: Block packets where sourceIP = destIP.
+
 8. **How do you detect fragmentation attacks in PCAP?**
+   > 📌 Look for overlapping fragments (Teardrop), fragments with offset pointing to same position, or fragmented packets with unusual size/offset values.
 
 ### Transport Layer Attacks
 
 9. **What is TCP handshake abnormality and how do you identify it?**
+   > 📌 Abnormalities include SYN flood (many SYN without SYN-ACK), SYN-ACK flood (without prior SYN), or invalid TCP flags. Filter: `tcp.flags.syn == 1 and tcp.flags.ack == 0`
+
 10. **Explain TCP reset attack and when would an attacker use it?**
+    > 📌 **TCP RST Attack** - Attacker sends forged RST packet to forcefully terminate connection. Used to disrupt connections, MiTM attacks, or bypass authentication.
+
 11. **What is TCP hijacking and what are the prerequisites?**
+    > 📌 **TCP Hijacking** - Attacker takes over TCP session by predicting sequence numbers. Prerequisites: Attacker must be on same network (MiTM) or have sniffing capabilities.
+
 12. **How can you detect SYN flood attacks?**
+    > 📌 High volume of SYN packets without corresponding SYN-ACK, many half-open connections. Filter: `tcp.flags.syn == 1 and tcp.flags.ack == 0`
 
 ### Application Layer Attacks
 
 13. **What indicators suggest directory fuzzing in HTTP traffic?**
+    > 📌 Rapid-fire HTTP requests with 404 responses to various file/directory names, unusual user-agent, scanning patterns. Filter: `http.response.code == 404`
+
 14. **Explain HTTP request smuggling (CRLF injection) and how to detect it.**
+    > 📌 **CRLF Injection** - Injecting \r\n sequences to manipulate HTTP requests. Detection: Look for HTTP 400 Bad Request with encoded payloads, unusual header patterns.
+
 15. **What is DNS tunneling and how does data exfiltration work via DNS?**
+    > 📌 **DNS Tunneling** - Encodes data in DNS queries (TXT records, subdomains) to bypass firewalls. Attacker registers domain, victim's queries encode data in subdomain.
+
 16. **How do you detect XSS attacks in network traffic?**
+    > 📌 Look for `<script>` tags, JavaScript code, or cookie/tokens sent to unexpected external IPs. Filter: `http.request.method == POST` and examine body.
+
 17. **What is SSL renegotiation attack and why is it dangerous?**
+    > 📌 **SSL Renegotiation** - Attacker triggers repeated TLS handshakes to force weaker encryption or cause DoS (resource exhaustion on server).
 
 ### General Analysis
 
 18. **What Wireshark filters do you use for detecting anomalous network traffic?**
+    > 📌 `ip.addr == <suspected_ip>`, `tcp.flags.syn == 1`, `http.request`, `dns`, `tls`, `tcp.analysis.retransmission`
+
 19. **How do you differentiate between legitimate high traffic and DDoS?**
+   > 📌 **Legitimate Traffic** - Varied source IPs, normal access patterns, expected destinations, organic growth patterns. **DDoS** - Single source or many sources sending identical request patterns, targeting same destination, sudden traffic spikes from multiple sources with no legitimate purpose.
+
 20. **What PCAP files would you analyze to investigate a potential data exfiltration?**
+    > 📌 dns.log, http.log, conn.log, ssl.log - Look for large outbound data transfers, unusual domains/IPs, DNS queries with encoded data.
 
 ---
 
