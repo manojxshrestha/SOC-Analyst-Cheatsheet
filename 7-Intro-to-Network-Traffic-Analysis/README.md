@@ -37,8 +37,9 @@ Network Traffic Analysis helps security specialists:
 1. [Introduction & Networking Primer - Layers 1-4](#1-introduction--networking-primer-layers-1-4)
 2. [Networking Primer - Layers 5-7](#2-networking-primer---layers-5-7)
 3. [The Analysis Process](#3-the-analysis-process)
-4. [Tcpdump](#4-tcpdump)
-5. [Wireshark](#5-wireshark)
+4. [Analysis in Practice](#4-analysis-in-practice)
+5. [Tcpdump](#5-tcpdump)
+6. [Wireshark](#6-wireshark)
 
 ---
 
@@ -463,7 +464,124 @@ Network packet capture showing SMB and TCP traffic.
 
 ---
 
-## 4. Tcpdump
+## 4. Analysis in Practice (Section 5)
+
+### The Analysis Workflow
+
+This is not an exact science - it's a dynamic process influenced by:
+- What we are looking for (network errors vs. malicious actions)
+- Where we have visibility in our network
+
+### 1. Descriptive Analysis
+
+> 📌 **Descriptive Analysis** - Describes a data set based on individual characteristics. Helps detect errors and outliers.
+
+**Questions to Answer:**
+- What is the issue? (Suspected breach? Networking issue?)
+- Define scope and goal (what are we looking for? which time period?)
+- Define targets (network/host/protocol)
+
+**Example:**
+```
+Issue: Suspected breach
+Target: multiple hosts downloading malicious file from bad.example.com
+When: last 48 hours + 2 hours from now
+Filenames: 'superbad.exe', 'new-crypto-miner.exe'
+Scope: 192.168.100.0/24, protocols: HTTP and FTP
+```
+
+### 2. Diagnostic Analysis
+
+> 📌 **Diagnostic Analysis** - Clarifies causes, effects, and interactions. Backward-looking to find reasons for events.
+
+**Steps:**
+1. **Capture network traffic** - Plug into link with access to target network
+2. **Filter** - Remove noise, keep relevant traffic (HTTP/FTP, GET requests for suspicious files)
+3. **Understand** - Filter on `ftp-data` to reconstruct files, `http.request.method == "GET"`
+
+### 3. Predictive Analysis
+
+> 📌 **Predictive Analysis** - Creates predictive model for future probabilities based on historical/current data.
+
+**Note-taking is crucial:**
+- Timeframes of captured traffic
+- Suspicious hosts
+- Conversations containing files (timestamps, packet numbers)
+
+**Summary:** Explain relevant details so superiors can decide to quarantine or perform incident response.
+
+### 4. Prescriptive Analysis
+
+> 📌 **Prescriptive Analysis** - Narrows down what actions to eliminate or prevent future problems.
+
+**Actions:**
+- Make decisions to solve the problem
+- Prevent recurrence
+- Document lessons learned
+- Improve processes
+
+### Complete Analysis Workflow Template
+
+```
+1. What is the issue?
+   - Suspected breach? Networking issue?
+2. Define scope and goal
+   - Target: host(s) downloading malicious file
+   - When: timeframe
+   - Supporting info: filenames
+3. Define targets (net/host/protocol)
+   - Scope: network range, protocols
+4. Capture network traffic
+   - Live capture + historical from SIEM
+5. Filter traffic
+   - Remove baseline noise
+   - Keep HTTP/GET requests for suspicious files
+6. Understand captured traffic
+   - ftp-data for file transfers
+   - http.request.method == "GET"
+7. Note-taking
+   - Timestamps, packet numbers, suspicious hosts
+8. Summary
+   - Clear explanation for decision makers
+```
+
+> 🔴 This process is cyclic - may need to reanalyze PCAP to build bigger picture!
+
+### Key Components of Effective Analysis
+
+| Component | Description |
+|-----------|-------------|
+| **1. Know Your Environment** | Keep asset inventories and network maps. Know which hosts belong on network. |
+| **2. Placement is Key** | Closest to source of issue is ideal. Inbound links for internet traffic, same segment for internal issues. |
+| **3. Persistence** | Issue may not be frequent (C2 may call once/day). Don't lose drive to find the problem. |
+
+### Analysis Approach - Easy Wins
+
+**1. Start with standard protocols**
+- HTTP/S, FTP, Email, TCP/UDP from internet
+- Then check SSH, RDP, Telnet between networks
+
+**2. Look for patterns**
+- Same host checking in at same time daily = C2 profile
+
+**3. Check host-to-host traffic**
+- User hosts rarely talk to each other
+- Suspicious if they do!
+
+**4. Look for unique events**
+- Host changing pattern
+- Different User-Agent string
+- Random port binding
+- Anything sticking out in large environments
+
+**5. Ask for help**
+- Second set of eyes can spot things missed
+
+> 💡 **Summary:** Keep learning, understand your environment, use tools (tcpdump, Wireshark, Snort, SIEMs). Don't rely solely on tools - human eye is best resource!
+
+---
+
+## 5. Tcpdump
 
 | Tool | Description |
 |------|-------------|
