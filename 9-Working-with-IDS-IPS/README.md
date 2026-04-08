@@ -1266,7 +1266,130 @@ snort --list-plugins | grep logger
 
 ## 6. Snort Rule Development
 
-*Coming soon...*
+> 📌 **Snort Rule Development** - Crafting rules to identify and flag potential malicious activity in network traffic.
+
+### Overview
+
+Snort rules resemble Suricata rules. They are composed of a rule header and rule options. For Snort rule writing, refer to:
+- [Snort Documentation](https://docs.snort.org/)
+- [Differences from Snort](https://docs.suricata.io/en/latest/rules/differences-from-snort.html)
+
+---
+
+### Rule Development Examples
+
+#### Example 1: Detecting Ursnif (Inefficient)
+
+```bash
+alert tcp any any -> any any (msg:"Possible Ursnif C2 Activity"; flow:established,to_server; content:"/images/", depth 12; content:"_2F"; content:"_2B"; content:"User-Agent|3a 20|Mozilla/4.0 (compatible|3b| MSIE 8.0|3b| Windows NT"; content:!"Accept"; content:!"Cookie|3a|"; content:!"Referer|3a|"; sid:1000002; rev:1;)
+```
+
+**Testing:**
+```bash
+sudo snort -c /root/snorty/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -R /home/htb-student/local.rules -r /home/htb-student/pcaps/ursnif.pcap -A cmg
+```
+
+**Detection Logic:**
+| Component | Description |
+|-----------|-------------|
+| `flow:established,to_server` | Matches established TCP connections to server |
+| `content:"/images/", depth 12` | Look for /images/ in first 12 bytes |
+| `content:"_2F"; content:"_2B"` | Search for URL-encoded characters |
+| `content:"User-Agent..."` | Match specific User-Agent string |
+| `content:!"Accept"; content:!"Cookie"` | Negative matches - absence of headers |
+
+> 🔴 **Note:** This rule is inefficient as it misses HTTP sticky buffers.
+
+---
+
+#### Example 2: Detecting Cerber
+
+```bash
+alert udp $HOME_NET any -> $EXTERNAL_NET any (msg:"Possible Cerber Check-in"; dsize:9; content:"hi", depth 2, fast_pattern; pcre:"/^[af0-9]{7}$/R"; detection_filter:track by_src, count 1, seconds 60; sid:2816763; rev:4;)
+```
+
+**Testing:**
+```bash
+sudo snort -c /root/snorty/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -R /home/htb-student/local.rules -r /home/htb-student/pcaps/cerber.pcap -A cmg
+```
+
+**Detection Logic:**
+| Component | Description |
+|-----------|-------------|
+| `$HOME_NET any -> $EXTERNAL_NET any` | UDP from home to external |
+| `dsize:9` | Payload size exactly 9 bytes |
+| `content:"hi", depth 2, fast_pattern` | Match "hi" in first 2 bytes |
+| `pcre:"/^[af0-9]{7}$/R"` | 7 hex characters after "hi" |
+| `detection_filter:track by_src, count 1, seconds 60` | Alert after 1 match within 60 seconds |
+
+---
+
+#### Example 3: Detecting Patchwork (HTTP)
+
+```bash
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"OISF TROJAN Targeted AutoIt FileStealer/Downloader CnC Beacon"; flow:established,to_server; http_method; content:"POST"; http_uri; content:".php?profile="; http_client_body; content:"ddager=", depth 7; http_client_body; content:"&r1=", distance 0; http_header; content:!"Accept"; http_header; content:!"Referer|3a|"; sid:10000006; rev:1;)
+```
+
+**Testing:**
+```bash
+sudo snort -c /root/snorty/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -R /home/htb-student/local.rules -r /home/htb-student/pcaps/patchwork.pcap -A cmg
+```
+
+**Detection Logic:**
+| Component | Description |
+|-----------|-------------|
+| `flow:established,to_server` | Established connection to server |
+| `http_method; content:"POST"` | HTTP POST method |
+| `http_uri; content:".php?profile="` | Match URI with profile parameter |
+| `http_client_body; content:"ddager="` | Match in request body |
+| `http_client_body; content:"&r1="` | Match additional parameter |
+| `http_header; content:!"Accept"` | Absence of Accept header |
+
+> 📌 **HTTP Sticky Buffers:** This rule uses HTTP-specific buffers (http_method, http_uri, http_client_body) for efficient matching.
+
+---
+
+#### Example 4: Detecting Patchwork (SSL)
+
+```bash
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Patchwork SSL Cert Detected"; flow:established,from_server; content:"|55 04 03|"; content:"|08|toigetgf", distance 1, within 9; classtype:trojan-activity; sid:10000008; rev:1;)
+```
+
+**Testing:**
+```bash
+sudo snort -c /root/snorty/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -R /home/htb-student/local.rules -r /home/htb-student/pcaps/patchwork.pcap -A cmg
+```
+
+**Detection Logic:**
+| Component | Description |
+|-----------|-------------|
+| `flow:established,from_server` | Traffic from server to client |
+| `content:"\|55 04 03\|"` | ASN.1 tag for CommonName in X.509 |
+| `content:"\|08\|toigetgf", distance 1, within 9` | Match domain "toigetgf" after CN field |
+
+---
+
+### Downloading PCAP Files
+
+```bash
+scp htb-student@[TARGET IP]:/home/htb-student/pcaps/ursnif.pcap .
+scp htb-student@[TARGET IP]:/home/htb-student/pcaps/cerber.pcap .
+scp htb-student@[TARGET IP]:/home/htb-student/pcaps/patchwork.pcap .
+```
+
+---
+
+### Snort vs Suricata Rule Keywords
+
+| Snort | Suricata | Description |
+|-------|----------|-------------|
+| `dsize` | `dsize` | Match payload size |
+| `fast_pattern` | `fast_pattern` | Priority pattern matching |
+| `http_method` | `http_method` | HTTP method buffer |
+| `http_uri` | `http_uri` | HTTP URI buffer |
+| `http_client_body` | `http_client_body` | HTTP request body |
+| `http_header` | `http_header` | HTTP headers |
+| `detection_filter` | `detection_filter` | Threshold-based filtering |
 
 ---
 
