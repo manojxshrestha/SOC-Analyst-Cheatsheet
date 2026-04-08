@@ -211,7 +211,64 @@ TCP + ARP packets showing suspicious activity.
 
 ### ARP Scanning & Denial-of-Service
 
-*Coming soon...*
+> 📌 Attackers use ARP scanning for information gathering before DoS/MITM attacks.
+
+#### ARP Scanning Signs
+
+**Red Flags:**
+- Broadcast ARP requests sent to sequential IP addresses (.1, .2, .3...)
+- Broadcast ARP requests sent to non-existent hosts
+- Unusual volume of ARP traffic from single host
+
+#### Finding ARP Scanning
+
+**Open PCAP:**
+```bash
+wireshark ARP_Scan.pcapng
+```
+
+**Filter ARP:**
+```
+arp.opcode
+```
+
+<img width="927" height="345" alt="image" src="https://github.com/user-attachments/assets/77d736c3-7290-4b89-b12e-c01b2b08c0bc" />
+
+> 🔴 **Detection:** Single host sending ARP requests to sequential IP addresses = ARP scanning (like Nmap)
+
+#### Identifying Denial-of-Service
+
+**Related PCAP:** ARP_Poison.pcapng
+
+**Attack Pattern:**
+1. Attacker compiles list of live hosts via ARP scanning
+2. Shifts to DoS by contaminating entire subnet
+3. Manipulates as many ARP caches as possible
+
+<img width="1206" height="463" alt="image" src="https://github.com/user-attachments/assets/dfc8c97f-507f-4f0f-858c-e623f3936df3" />
+
+**Attack Indicators:**
+- ARP traffic declaring new physical addresses for all live IPs
+- Intent: Corrupt router's ARP cache
+- Duplicate allocation of gateway IP to client devices
+
+<img width="1042" height="256" alt="image" src="https://github.com/user-attachments/assets/574ea528-b510-4fb1-a30c-a10dcfa646b7" />
+
+**Red Flags:**
+- Duplicate IP 192.168.10.1 assigned to multiple MACs
+- Attacker attempting to corrupt victim ARP caches
+- Intent: Obstruct traffic in both directions
+
+#### Responding To ARP Attacks
+
+**Response Options:**
+
+| Action | Description |
+|--------|-------------|
+| **Tracing & Identification** | Locate attacker's physical machine. May find it's already compromised. |
+| **Containment** | Disconnect/isolate affected segment at switch/router level to stop DoS/MITM |
+
+> 💡 **Note:** Link layer attacks often fly under the radar but detection is crucial for preventing data exfiltration from higher OSI layers.
 
 ---
 
