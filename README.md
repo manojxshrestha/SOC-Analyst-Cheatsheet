@@ -15,8 +15,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 | **5** | [Understanding Log Sources & Investigating with Splunk](./5-Understanding-Log-Sources-Investigating-with-Splunk/) ✅ | Splunk for SOC analysts | SPL queries, authentication monitoring, network logs, search optimization |
 | **6** | [Windows Attacks & Defense](./6-Windows-Attacks-Defense/) ✅ | Common Windows attack techniques | Kerberoasting, AS-REP Roasting, GPP, DCSync, Golden Ticket, Kerberos Delegation, Print Spooler, Coercing, ACLs, PKI ESC1/ESC8 |
 | **7** | [Intro to Network Traffic Analysis](./7-Intro-to-Network-Traffic-Analysis/) ✅ | Network fundamentals | Wireshark, tcpdump, BPF filters, TCP/IP, packet analysis |
-| **8** | Intermediate Network Traffic Analysis | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
-| **8** | Intermediate Network Traffic Analysis | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
+| **8** | [Intermediate Network Traffic Analysis](./8-Intermediate-Network-Traffic-Analysis/) | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
 | **9** | Working with IDS/IPS | Intrusion detection systems | Snort/Suricata rules, alert analysis, signature development |
 | **10** | Introduction to Malware Analysis | Malware triage basics | Static analysis, strings, hashing, PE analysis, sandboxing |
 | **11** | JavaScript Deobfuscation | Malicious script analysis | Deobfuscation techniques, analyzing obfuscated JavaScript |
