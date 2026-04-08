@@ -1942,12 +1942,12 @@ This PCAP contains ICMP traffic that may show anomalous patterns. Look for:
 
 ### Lab Questions
 
-**Question 1 (2 points):**
+**Question 1:**
 Inspect the `funky_dns.pcap` file and identify the attack type.
 
 > 📝 Answer format: "DNS Flooding", "DNS Amplification", "DNS Tunneling"
 
-**Question 2 (3 points):**
+**Question 2:**
 Inspect the `funky_icmp.pcap` file and identify the attack type.
 
 > 📝 Answer format: "ICMP Flooding", "ICMP Tunneling", "ICMP SMURF Attack"
