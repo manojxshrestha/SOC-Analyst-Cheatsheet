@@ -1540,7 +1540,178 @@ zgrep "192.168.1.1" conn.log.*.gz
 
 ## 8. Intrusion Detection With Zeek
 
-*Coming soon...*
+> 📌 **Intrusion Detection With Zeek** - Using Zeek to detect beaconing, data exfiltration, and lateral movement.
+
+### Overview
+
+Zeek's flexibility and extensibility make it a cornerstone of advanced network-based intrusion detection. With its rich logs and scripting capabilities, we can customize detection for specific requirements.
+
+---
+
+### Example 1: Detecting Beaconing Malware
+
+> 📌 **Beaconing** - Malware communicates with C2 server at consistent intervals to receive instructions or exfiltrate data.
+
+#### Running Zeek Analysis
+
+```bash
+/usr/local/zeek/bin/zeek -C -r /home/htb-student/pcaps/psempire.pcap
+```
+
+#### Viewing Connection Logs
+
+```bash
+cat conn.log
+```
+
+**Key Fields in conn.log:**
+| Field | Description |
+|-------|-------------|
+| ts | Timestamp |
+| id.orig_h | Originating host IP |
+| id.resp_h | Responding host IP |
+| orig_bytes | Bytes sent by originator |
+| conn_state | Connection state |
+
+**Detection Sign:**
+- Connections to same destination (~51.15.197.127:80) every ~5 seconds
+- Consistent timing interval = beaconing pattern
+
+> 🔴 **Indicator:** PowerShell Empire beacons every 5 seconds by default.
+
+---
+
+### Example 2: Detecting DNS Exfiltration
+
+> 📌 **DNS Exfiltration** - Data encoded in DNS queries sent to suspicious domains.
+
+#### Running Zeek Analysis
+
+```bash
+/usr/local/zeek/bin/zeek -C -r /home/htb-student/pcaps/dnsexfil.pcapng
+```
+
+#### Viewing DNS Logs
+
+```bash
+cat dns.log
+```
+
+#### Extracting Query Domains
+
+```bash
+cat dns.log | /usr/local/zeek/bin/zeek-cut query | cut -d . -f1-7
+```
+
+**Detection Signs:**
+- Many subdomains from `letsgohunt.online`
+- Patterns like `cdn.0600553f0.456c54f2.blue.letsgohunt.online`
+- Large number of DNS queries to unusual domains
+
+> 🔴 **Indicator:** Hundreds of subdomains from single domain = possible DNS tunneling/exfiltration.
+
+---
+
+### Example 3: Detecting TLS Exfiltration
+
+> 📌 **TLS Exfiltration** - Large amounts of data sent over encrypted connections to suspicious destinations.
+
+#### Running Zeek Analysis
+
+```bash
+/usr/local/zeek/bin/zeek -C -r /home/htb-student/pcaps/tlsexfil.pcap
+```
+
+#### Analyzing Data Transfer
+
+```bash
+cat conn.log | /usr/local/zeek/bin/zeek-cut id.orig_h id.resp_h orig_bytes | sort | grep -v -e '^$' | grep -v '-' | datamash -g 1,2 sum 3 | sort -k 3 -rn | head -10
+```
+
+**Command Breakdown:**
+| Command | Description |
+|---------|-------------|
+| `zeek-cut id.orig_h id.resp_h orig_bytes` | Extract source, dest, bytes |
+| `sort` | Sort output |
+| `grep -v -e '^$'` | Remove empty lines |
+| `grep -v '-'` | Remove undefined fields |
+| `datamash -g 1,2 sum 3` | Group by IPs, sum bytes |
+| `sort -k 3 -rn` | Sort by bytes descending |
+| `head -10` | Show top 10 |
+
+**Detection Sign:**
+- ~270 MB sent to 192.168.151.181
+- Unusual data transfer volume to internal IP
+
+---
+
+### Example 4: Detecting PsExec Lateral Movement
+
+> 📌 **PsExec** - Used for remote code execution in Active Directory. Attackers use SMB to transfer and execute binaries.
+
+#### Running Zeek Analysis
+
+```bash
+/usr/local/zeek/bin/zeek -C -r /home/htb-student/pcaps/psexec_add_user.pcap
+```
+
+#### Checking SMB Files Log
+
+```bash
+cat smb_files.log
+```
+
+**Indicators:**
+- File transfer to `\\dc1\ADMIN$\PSEXESVC.exe`
+- File size: 145568 bytes
+
+#### Checking DCE/RPC Log
+
+```bash
+cat dce_rpc.log
+```
+
+**Indicators:**
+- Named pipe: `\pipe\ntsvcs`
+- Service operations: `OpenSCManagerW`, `CreateServiceWOW64W`, `StartServiceW`, `DeleteService`
+
+#### Checking SMB Mapping Log
+
+```bash
+cat smb_mapping.log
+```
+
+**Indicators:**
+- `\\dc1\ADMIN$` - Disk share
+- `\\dc1\IPC$` - IPC pipe
+
+> 🔴 **PsExec Detection Sequence:**
+1. SMB connection to ADMIN$ share
+2. PSEXESVC.exe file transfer
+3. IPC$ connection for service creation
+4. Service manipulation (CreateService, StartService)
+
+---
+
+### Downloading PCAP Files
+
+```bash
+scp htb-student@[TARGET IP]:/home/htb-student/pcaps/psempire.pcap .
+scp htb-student@[TARGET IP]:/home/htb-student/pcaps/dnsexfil.pcapng .
+scp htb-student@[TARGET IP]:/home/htb-student/pcaps/tlsexfil.pcap .
+scp htb-student@[TARGET IP]:/home/htb-student/pcaps/psexec_add_user.pcap .
+```
+
+---
+
+### Zeek Detection Summary
+
+| Attack Type | Log Files | Detection Method |
+|-------------|-----------|------------------|
+| **Beaconing** | conn.log | Regular intervals to same destination |
+| **DNS Exfiltration** | dns.log | Many subdomains, unusual patterns |
+| **TLS Exfiltration** | conn.log | Large bytes to unusual destination |
+| **PsExec** | smb_files.log, dce_rpc.log, smb_mapping.log | ADMIN$ share, service creation |
 
 ---
 
