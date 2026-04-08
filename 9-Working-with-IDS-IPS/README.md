@@ -1715,9 +1715,85 @@ scp htb-student@[TARGET IP]:/home/htb-student/pcaps/psexec_add_user.pcap .
 
 ---
 
-## 9. Skills Assessment
+## 9. Skills Assessment - Suricata
 
-*Coming soon...*
+### WMI Execution Detection (Through WMIExec)
+
+> 📌 **WMI (Windows Management Instrumentation)** - A powerful Windows feature for management tasks. Attackers use it for remote code execution.
+
+#### Attack Overview
+
+Attackers use WMI for remote execution by:
+1. Creating Win32_ProcessStartup instance
+2. Setting process environment properties
+3. Calling Create method to start cmd.exe or powershell.exe
+
+#### Detection Approach
+
+To detect WMI execution (through wmiexec) over the network, focus on:
+- **SMB Protocol** - File transfers
+- **DCOM Protocol** - Remote WMI execution
+
+#### PCAP Source
+
+- Source: https://github.com/elcabezzonn/Pcaps
+- Reference: https://labs.withsecure.com/publications/attack-detection-fundamentals-discovery-and-lateral-movement-lab-5
+
+---
+
+## 10. Skills Assessment - Snort
+
+### Overpass-the-Hash Detection
+
+> 📌 **Overpass-the-Hash (OPtH)** - Attack where adversary uses stolen NTLM hash to create Kerberos TGT without cracking password.
+
+#### Attack Overview
+
+1. Attacker obtains NTLM hash of user's password
+2. Uses hash to craft AS-REQ (Authentication Service Request) to KDC
+3. Includes PRE-AUTH field with encrypted timestamp
+4. Bypasses normal Kerberos authentication
+
+#### Detection Key
+
+| Normal Client | Overpass-the-Hash |
+|---------------|-------------------|
+| AES256-CTS-HMAC-SHA1-96 | RC4-HMAC |
+| Modern encryption | Older encryption type |
+
+> 🔴 **Indicator:** RC4-HMAC encryption type in AS-REQ = potential Overpass-the-Hash attack
+
+#### PCAP Source
+
+- Source: https://github.com/elcabezzonn/Pcaps
+- Reference: http://www.labofapenetrationtester.com/2017/08/week-of-evading-microsoft-ata-day2.html
+
+---
+
+## 11. Skills Assessment - Zeek
+
+### Detecting Gootkit's SSL Certificate
+
+> 📌 **Gootkit** - A potent banking trojan that uses SSL/TLS for encrypted communication.
+
+#### Attack Overview
+
+- Neutrino exploit kit delivers Gootkit
+- Gootkit communicates over network using SSL/TLS
+- Uses self-signed certificates with generic/bogus details
+
+#### Detection Key
+
+**Suspicious SSL Certificate:**
+- Common Name (CN): "My Company Ltd."
+- Non-trusted CA issued
+- Generic details typical of malware
+
+> 🔴 **Indicator:** SSL certificate CN = "My Company Ltd." = possible Gootkit infection
+
+#### PCAP Source
+
+- Source: https://www.malware-traffic-analysis.net/2016/07/08/index.html
 
 ---
 
