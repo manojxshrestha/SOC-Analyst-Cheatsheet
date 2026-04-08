@@ -1906,7 +1906,78 @@ udp
 
 ## 5. Skills Assessment
 
-*Coming soon...*
+> 📌 **Skills Assessment** - Apply your network traffic analysis skills to identify attacks in PCAP files.
+
+### Scenario
+
+As a SOC analyst, you have been provided with two PCAP files to analyze:
+- `funky_dns.pcap`
+- `funky_icmp.pcap`
+
+Your task is to inspect these captures and identify patterns/behaviors that deviate from normal network traffic.
+
+---
+
+### PCAP Files Analysis
+
+#### funky_dns.pcap
+
+This PCAP contains DNS traffic that may show anomalous patterns. Look for:
+- Excessive DNS queries
+- Unusual DNS record types
+- Data patterns in DNS queries
+- TXT records with encoded data
+
+#### funky_icmp.pcap
+
+This PCAP contains ICMP traffic that may show anomalous patterns. Look for:
+- Large ICMP packets
+- ICMP from unusual sources
+- Data in ICMP packets
+- Excessive ICMP traffic
+
+---
+
+### Lab Questions
+
+**Question 1 (2 points):**
+Inspect the `funky_dns.pcap` file and identify the attack type.
+
+> 📝 Answer format: "DNS Flooding", "DNS Amplification", "DNS Tunneling"
+
+**Question 2 (3 points):**
+Inspect the `funky_icmp.pcap` file and identify the attack type.
+
+> 📝 Answer format: "ICMP Flooding", "ICMP Tunneling", "ICMP SMURF Attack"
+
+---
+
+### Hints for Analysis
+
+| PCAP | What to Look For |
+|------|------------------|
+| **funky_dns.pcap** | Unusual DNS queries, TXT records, encoded data in queries |
+| **funky_icmp.pcap** | Large ICMP packets, ICMP with data payload, source address patterns |
+
+---
+
+### Wireshark Filters for Analysis
+
+```bash
+# DNS Analysis
+dns                                    # All DNS traffic
+dns.qry.type == 16                     # TXT queries
+dns.txt                                # DNS TXT records
+
+# ICMP Analysis
+icmp                                   # All ICMP traffic
+icmp[icmp[icmptype] == 8]              # ICMP Echo Request
+icmp or ip.src == x.x.x.x              # ICMP from specific source
+```
+
+---
+
+> 💡 **Tip:** Use "Follow UDP Stream" for DNS and "Follow ICMP Stream" for ICMP to inspect payload data.
 
 ---
 
