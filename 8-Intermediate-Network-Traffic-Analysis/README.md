@@ -420,7 +420,106 @@ Authentication and association response frames.
 
 ### Rogue Access Point & Evil-Twin
 
-*Coming soon...*
+> 📌 **Rogue AP** - Unauthorized access point connected to network
+> 📌 **Evil-Twin** - Standalone fake AP for harvesting credentials
+
+#### Overview
+
+<img width="588" height="354" alt="image" src="https://github.com/user-attachments/assets/5aef5080-951c-489f-a62d-c633a03306cb" />
+
+**Rogue Access Point:**
+- Directly connected to legitimate network
+- Bypasses segmentation controls
+- Used to sidestep perimeter security
+- Can infiltrate air-gapped networks
+
+**Evil-Twin:**
+
+<img width="710" height="464" alt="image" src="https://github.com/user-attachments/assets/f4e5eb69-12d0-451f-984f-e184c4a29bcc" />
+
+- Not connected to network
+- Standalone access point
+- Often mimics legitimate AP SSID
+- Used for:
+  - Harvesting wireless/domain passwords
+  - Hostile portal attacks
+  - Man-in-the-middle
+
+#### Airodump-ng Detection
+
+**Detect by ESSID:**
+```bash
+sudo airodump-ng -c 4 --essid HTB-Wireless wlan0 -w raw
+```
+
+**Output:**
+```
+BSSID              PWR  ENC  ESSID
+F8:14:FE:4D:E6:F2  -7   OPN  HTB-Wireless   # Attacker's open AP
+F8:14:FE:4D:E6:F1  -5   WPA2 HTB-Wireless   # Legitimate AP
+```
+
+> 🔴 **Red Flag:** Open AP with same ESSID = potential Evil-Twin!
+
+#### Finding Evil-Twin in PCAP
+
+**Open PCAP:**
+```bash
+wireshark rogueap.cap
+```
+
+**Filter beacon frames:**
+```
+(wlan.fc.type == 00) and (wlan.fc.type_subtype == 8)
+```
+
+<img width="1138" height="125" alt="image" src="https://github.com/user-attachments/assets/48e0fc06-e346-4a9e-8c4d-6d64cbcc831f" />
+
+Beacon frames from both legitimate and fake AP.
+
+#### RSN Analysis
+
+**Legitimate AP (WPA2):**
+
+<img width="731" height="425" alt="image" src="https://github.com/user-attachments/assets/6defca5c-21e9-4e45-98af-6070e4047bb4" />
+
+- Supports AES and TKIP
+- PSK authentication
+- RSN Information present
+
+**Evil-Twin (Open):**
+
+<img width="622" height="211" alt="image" src="https://github.com/user-attachments/assets/f3225688-3edb-4b0b-8b80-8771a947aac6" />
+
+- RSN Information **MISSING**
+- No encryption
+
+> 🔴 **Detection:** Missing RSN = typical Evil-Twin indicator!
+
+#### Finding Compromised User
+
+**Filter by suspicious BSSID:**
+```
+(wlan.bssid == F8:14:FE:4D:E6:F2)
+```
+
+<img width="1157" height="224" alt="image" src="https://github.com/user-attachments/assets/3ed975f8-8e94-4364-bd9e-9d6118b2f7ef" />
+
+**Detection:**
+- Look for ARP requests from client device
+- If client connected to suspicious network = compromise indicator
+
+**Record for Incident Response:**
+- Client MAC address
+- Client hostname
+- Password resets needed
+
+#### Finding Rogue Access Points
+
+**Detection Methods:**
+- Check network device lists
+- Look for unknown wireless networks with strong signal
+- Unencrypted networks near perimeter = potential rogue
 
 ---
 
