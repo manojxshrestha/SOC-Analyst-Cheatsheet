@@ -80,15 +80,15 @@ In network security monitoring (NSM) operations, the use of Intrusion Detection 
 ```mermaid
 flowchart LR
     A[Internet] --> B[Firewall]
-    B --> C[IPS<br/>(inline)]
-    C --> D[Internal<br/>Network]
-    D --> E[IDS<br/>(passive)]
+    B --> C[IPS inline]
+    C --> D[Internal Network]
+    D --> E[IDS passive]
 
-    style A fill:#ffcccc,color:#000
-    style B fill:#ffe5cc,color:#000
-    style C fill:#ffcccc,color:#000
-    style D fill:#cce5ff,color:#000
-    style E fill:#e6ccff,color:#000
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
 ```
 
 #### Placement Rationale
