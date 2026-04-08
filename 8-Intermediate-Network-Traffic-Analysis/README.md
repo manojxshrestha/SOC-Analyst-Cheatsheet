@@ -742,7 +742,52 @@ TCP SYN from 192.168.10.1 to 192.168.10.1 port 80 = LAND attack!
 
 ### IP TTL Attacks
 
-*Coming soon...*
+> 📌 **TTL Attacks** - Attacker sets low TTL to evade firewalls/IDS/IPS by causing packets to expire before reaching security controls.
+
+#### How TTL Attacks Work
+
+<img width="700" height="365" alt="image" src="https://github.com/user-attachments/assets/013c562f-699e-4765-87a3-617f8a3e6585" />
+
+**Attack Process:**
+1. Attacker crafts packet with intentionally low TTL (1, 2, 3...)
+2. Each router decrements TTL by 1
+3. When TTL reaches 0, packet is discarded
+4. Packet expires BEFORE reaching firewall/IDS
+5. Router sends ICMP "Time Exceeded" back to source
+
+**Purpose:** Evade security controls that only inspect packets reaching destination
+
+#### Finding TTL Irregularities
+
+**Open PCAP:**
+```bash
+wireshark ip_ttl.pcapng
+```
+
+**Detection:**
+
+<img width="872" height="258" alt="image" src="https://github.com/user-attachments/assets/65599273-c2bb-46b7-b40d-8a7577c0f091" />
+
+TCP SYN packets to target port 80.
+
+**Evasion Success Indicator:**
+
+<img width="1027" height="460" alt="image" src="https://github.com/user-attachments/assets/2b5962aa-1739-45fe-ab09-4bb3fd16600a" />
+
+If attacker receives SYN-ACK response = **firewall successfully evaded!**
+
+**Check TTL in Packet:**
+
+<img width="500" height="255" alt="image" src="https://github.com/user-attachments/assets/664bd308-a780-4858-bf3c-473d8712b155" />
+
+Open packet → IPv4 tab → Look for **very low TTL** (e.g., TTL = 3)
+
+#### Prevention
+
+- Filter or discard packets with TTL below threshold
+- Ensure security controls reassemble and inspect before expiration
+
+---
 
 ### TCP Handshake Abnormalities
 
