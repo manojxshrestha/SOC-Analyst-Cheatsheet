@@ -1426,7 +1426,108 @@ Executes `whoami` command on the server
 
 ### SSL Renegotiation
 
-*Coming soon...*
+> 📌 **SSL Renegotiation Attack** - Attack where an attacker triggers repeated TLS/SSL handshakes to force weaker encryption or cause DoS.
+
+#### What is SSL Renegotiation?
+
+**SSL/TLS Overview:**
+Unlike HTTP (stateless), HTTPS uses encryption to secure communications:
+- **Transport Layer Security (TLS)** - Modern encryption protocol
+- **Secure Sockets Layer (SSL)** - Legacy encryption protocol
+
+**HTTPS Connection Process:**
+
+| Phase | Description |
+|-------|-------------|
+| **Handshake** | Client & server agree on encryption algorithms, exchange certificates |
+| **Encryption** | Data is encrypted using agreed algorithm |
+| **Data Exchange** | Encrypted web pages, images, resources |
+| **Decryption** | Data decrypted using private/public keys |
+
+#### Related PCAP
+
+- `SSL_renegotiation_edited.pcapng`
+
+#### TLS/SSL Handshake Process
+
+![TLS Handshake](https://github.com/user-attachments/assets/8bb9c74c-f747-4749-b595-ca332f0995f8)
+
+*Diagram of a TCP and TLS handshake between client and server, showing SYN, SYN ACK, ACK, ClientHello, ServerHello, Certificate, and key exchange steps.*
+
+##### Handshake Steps
+
+| Step | Description |
+|------|-------------|
+| **Client Hello** | Client sends supported TLS versions, cipher suites, random nonce |
+| **Server Hello** | Server selects TLS version, cipher suite, sends own nonce |
+| **Certificate Exchange** | Server sends digital certificate with public key |
+| **Key Exchange** | Client generates premaster secret, encrypts with server's public key |
+| **Session Key Derivation** | Both parties derive session keys from nonces + premaster secret |
+| **Finished Messages** | Both parties verify handshake with hash of all messages |
+| **Secure Data Exchange** | Encrypted communication begins |
+
+##### Handshake Algorithm
+
+```
+Client Hello:    ClientHello = {ClientVersion, ClientRandom, Ciphersuites, CompressionMethods}
+Server Hello:    ServerHello = {ServerVersion, ServerRandom, Ciphersuite, CompressionMethod}
+Certificate:     ServerCertificate = {ServerPublicCertificate}
+Key Exchange:    ClientDHPublicKey, ServerDHPublicKey exchanged
+Premaster Secret: DH_KeyAgreement(ServerDHPublicKey, ClientDHPrivateKey)
+Session Key:     MasterSecret = PRF(PremasterSecret, "master secret", ClientNonce + ServerNonce)
+Finished:        FinishedMessage = PRF(MasterSecret, "finished", Hash(ClientHello + ServerHello))
+```
+
+#### Detecting SSL Renegotiation Attacks
+
+**Wireshark Filter:** Show only TLS handshake messages
+```
+ssl.record.content_type == 22
+```
+
+*Content type 22 = Handshake messages*
+
+![TLS Handshake Capture](https://github.com/user-attachments/assets/4bec6d95-40c2-4446-8bfe-4513eee74f29)
+
+*Wireshark capture showing TLS handshake with Client Hello and key exchange between 192.168.10.56 and 192.168.10.23.*
+
+##### Signs of SSL Renegotiation Attack
+
+| Indicator | Description |
+|-----------|-------------|
+| **Multiple Client Hellos** | Multiple client hello messages from same client in short period |
+| **Out of Order Messages** | Client Hello appearing after handshake completion |
+| **Repeated Handshakes** | Unusual number of renegotiation attempts |
+
+#### Why Attackers Use SSL Renegotiation
+
+| Reason | Description |
+|--------|-------------|
+| **Denial of Service** | SSL renegotiation consumes heavy server resources, can overwhelm server |
+| **Cipher Suite Exploitation** | Force weaker encryption algorithms |
+| **Cryptanalysis** | Analyze SSL/TLS patterns for vulnerability discovery |
+
+#### Other HTTPS Vulnerabilities
+
+##### Heartbleed Vulnerability (CVE-2014-0160)
+
+- Buffer overread bug in OpenSSL
+- Allows reading server memory contents
+- Exploits TLS heartbeat extension
+- Exposes private keys, session data
+
+#### Prevention & Mitigation
+
+| Method | Description |
+|--------|-------------|
+| **Disable SSL Renegotiation** | If not needed, disable on server |
+| **Update OpenSSL** | Patch Heartbleed and other vulnerabilities |
+| **Strong Cipher Suites** | Use only strong, modern ciphers |
+| **Rate Limiting** | Limit handshake requests per IP |
+| **Monitor Handshakes** | Alert on excessive renegotiation attempts |
+| **Certificate Management** | Regular certificate rotation |
+
+> 💡 **Key Indicator:** Multiple Client Hello messages from same source → potential SSL renegotiation attack!
 
 ### Peculiar DNS Traffic
 
