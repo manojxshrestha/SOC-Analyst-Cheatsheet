@@ -1186,7 +1186,133 @@ Attackers may attempt to evade detection by:
 
 ### Strange HTTP Headers
 
-*Coming soon...*
+> 📌 **Strange HTTP Headers** - Attackers manipulate HTTP headers (Host, User-Agent, verbs) to bypass restrictions or perform request smuggling attacks.
+
+#### What is HTTP Header Manipulation?
+
+When analyzing HTTP traffic, attackers may not use obvious fuzzing techniques. Instead, they manipulate HTTP headers to:
+- Bypass virtual host restrictions
+- Perform HTTP request smuggling (CRLF injection)
+- Gain unauthorized access to internal resources
+
+#### Related PCAP
+
+- `CRLF_and_host_header_manipulation.pcapng`
+
+#### Detecting Strange Host Headers
+
+**Wireshark Filter:** Show all HTTP traffic
+```
+http
+```
+
+![HTTP Traffic Overview](https://github.com/user-attachments/assets/10a67364-f212-4892-88f1-0f1ca6eb1bb6)
+
+*Wireshark capture showing HTTP requests between 192.168.10.5 and 192.168.10.7, including file and login page accesses.*
+
+**Filter:** Find irregular Host headers (exclude legitimate server IP)
+```
+http.request and (!(http.host == "192.168.10.7"))
+```
+
+![Strange Host Headers](https://github.com/user-attachments/assets/f321272d-5c4c-418e-919b-43e2d80a576d)
+
+*Wireshark capture showing repeated HTTP requests from 192.168.10.5 to 192.168.10.7 for login.php with file parameter.*
+
+##### Common Suspicious Host Headers
+
+Attackers may attempt to use:
+- `127.0.0.1` - Localhost bypass
+- `admin` - Admin page access
+- Internal IP addresses - Internal resource access
+- Arbitrary domains
+
+**Example 1:** Using 127.0.0.1
+![Host 127.0.0.1](https://github.com/user-attachments/assets/9f1ddf48-229e-4e84-8ab6-badd1b553e7f)
+
+*HTTP GET request for login.php with file parameter, showing headers and response details.*
+
+**Example 2:** Using admin
+![Host admin](https://github.com/user-attachments/assets/4767959b-5fa3-47f5-8511-422ee81edcb2)
+
+*HTTP GET request for login.php with file parameter, showing headers and response details.*
+
+#### HTTP Request Smuggling (CRLF Injection)
+
+> 📌 **HTTP Request Smuggling** - Attack that exploits how servers parse ambiguous HTTP requests, allowing attackers to inject extra requests.
+
+##### How It Works
+
+Attackers send specially crafted requests with CRLF (`\r\n`) characters to:
+1. Bypass input validation
+2. Inject additional HTTP requests
+3. Access restricted resources
+
+##### Detecting Request Smuggling
+
+**Wireshark Filter:** Find HTTP 400 Bad Request responses
+```
+http.response.code == 400
+```
+
+![HTTP 400 Responses](https://github.com/user-attachments/assets/3184ce34-2d77-4f37-8b84-c732454b8c2b)
+
+*Wireshark capture showing HTTP 400 Bad Request responses between 192.168.10.7 and 192.168.10.5.*
+
+**Following HTTP Stream:** Right-click → Follow → HTTP Stream
+
+![HTTP Stream Details](https://github.com/user-attachments/assets/4eae12e6-3af4-4bb5-9687-56f3782aa6cc)
+
+*HTTP GET request for login.php with encoded parameters, showing headers.*
+
+##### Encoded Attack Payload Example
+
+```
+GET%20%2flogin.php%3fid%3d1%20HTTP%2f1.1%0d%0aHost%3a%20192.168.10.5%0d%0a%0d%0aGET%20%2fuploads%2fcmd2.php%20HTTP%2f1.1%0d%0aHost%3a%20127.0.0.1%3a8080%0d%0a%0d%0a%20HTTP%2f1.1 Host: 192.168.10.5
+```
+
+**Decoded by server:**
+```
+GET /login.php?id=1 HTTP/1.1
+Host: 192.168.10.5
+
+GET /uploads/cmd2.php HTTP/1.1
+Host: 127.0.0.1:8080
+
+ HTTP/1.1
+Host: 192.168.10.5
+```
+
+##### Vulnerable Apache Configuration (CVE-2023-25690)
+
+```apache
+<VirtualHost *:80>
+    RewriteEngine on
+    RewriteRule "^/categories/(.*)" "http://192.168.10.100:8080/categories.php?id=$1" [P]
+    ProxyPassReverse "/categories/" "http://192.168.10.100:8080/"
+</VirtualHost>
+```
+
+#### Indicators of Compromise
+
+| Indicator | Description |
+|-----------|-------------|
+| HTTP 400 responses | Bad requests indicating smuggling attempts |
+| Multiple Host headers | Unusual header values |
+| URL-encoded requests | Attempting to hide malicious payloads |
+| Internal IP references | 127.0.0.1, internal addresses in Host header |
+
+#### Prevention
+
+| Method | Description |
+|--------|-------------|
+| **Update Web Server** | Patch CVE-2023-25690 |
+| **Configure VirtualHosts** | Prevent header-based bypass |
+| **Validate Headers** | Reject unusual Host headers |
+| **Use WAF** | Filter malicious requests |
+| **Disable Proxying** | If not needed, disable reverse proxy features |
+
+> 💡 **Key Indicator:** HTTP 400 responses with encoded URLs → potential CRLF injection!
 
 ### XSS & Code Injection
 
