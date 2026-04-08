@@ -34,49 +34,38 @@ Network Traffic Analysis helps security specialists:
 
 ## Table of Contents
 
-1. [Introduction](#1-introduction)
+1. [Introduction & Networking Primer](#1-introduction--networking-primer-layers-1-4)
 2. [The Analysis Process](#2-the-analysis-process)
 3. [Tcpdump](#3-tcpdump)
 4. [Wireshark](#4-wireshark)
 
 ---
 
-## 1. Introduction
+## 1. Introduction & Networking Primer - Layers 1-4
 
 ### Required Skills and Knowledge
 
-To perform Network Traffic Analysis effectively, you need:
-
-```mermaid
-graph TB
-    Skills[Required Skills] --> TCP[TCP/IP Stack & OSI Model]
-    Skills --> Basic[Basic Network Concepts]
-    Skills --> Ports[Common Ports & Protocols]
-    Skills --> IP[Concepts of IP Packets]
-    Skills --> Encaps[Protocol Transport Encapsulation]
-    
-    TCP --> Layer1[L1-L4 Understanding]
-    Basic --> Switch[Switching & Routing]
-    Ports --> Identify[Quick Identification]
-    IP --> TCP_UDP[TCP vs UDP]
-    Encaps --> Read[Dissect Headers]
-```
-
 ### TCP/IP Stack & OSI Model
+
+### OSI vs TCP-IP Models
 
 | OSI Layer | TCP/IP Layer | Example |
 |-----------|-------------|---------|
-| Application | Application | HTTP, FTP |
-| Presentation | Application | SSL/TLS |
-| Session | Application | RPC |
-| Transport | Transport | TCP, UDP |
-| Network | Internet | IP, ICMP |
-| Data Link | Network Access | Ethernet |
-| Physical | Network Access | Cabling |
+| 7. Application | Application | HTTP, FTP |
+| 6. Presentation | Application | SSL/TLS |
+| 5. Session | Application | RPC |
+| 4. Transport | Transport | TCP, UDP |
+| 3. Network | Internet | IP, ICMP |
+| 2. Data Link | Network Access | Ethernet |
+| 1. Physical | Network Access | Cabling |
+
+<img width="2576" height="1533" alt="image" src="https://github.com/user-attachments/assets/9a9a817d-5e54-401b-aa46-4f0567dce47f" />
+
+Comparison of OSI and TCP/IP models: OSI has 7 layers including Application, Presentation, Session, Transport, Network, Data-Link, and Physical. TCP/IP has 4 layers: Application, Transport, Internet, and Link.
 
 ```mermaid
 graph TB
-    OSI[OSI Model] --> L7[Application]
+    OSI[OSI Model 7 Layers] --> L7[Application]
     OSI --> L6[Presentation]
     OSI --> L5[Session]
     OSI --> L4[Transport]
@@ -84,11 +73,201 @@ graph TB
     OSI --> L2[Data Link]
     OSI --> L1[Physical]
     
-    L7 --> HTTPP[HTTP, DNS]
-    L4 --> TCPP[TCP, UDP]
-    L3 --> IPP[IP, ICMP]
-    L2 --> ETH[Ethernet]
+    TCP[TCP/IP Model 4 Layers] --> T4[Application]
+    TCP --> T3[Transport]
+    TCP --> T2[Internet]
+    TCP --> T1[Network Access]
+    
+    L7 --> T4
+    L4 --> T3
+    L3 --> T2
+    L2 --> T1
 ```
+
+| Trait | OSI | TCP-IP |
+|-------|-----|--------|
+| Layers | Seven | Four |
+| Flexibility | Strict | Loose |
+| Dependency | Protocol independent | Based on common protocols |
+
+### PDU (Protocol Data Units)
+
+| Layer | PDU Type | Description |
+|-------|----------|-------------|
+| Application | Data | End user data |
+| Transport | Segment/Datagram | TCP/UDP |
+| Network | Packet | IP |
+| Data Link | Frame | Ethernet |
+| Physical | Bit | Binary |
+
+<img width="2576" height="1533" alt="image" src="https://github.com/user-attachments/assets/571d8230-0d45-4724-afbd-32884e280c3e" />
+
+Comparison of OSI and TCP/IP models: OSI has 7 layers including Application, Presentation, Session, Transport, Network, Data-Link, and Physical. TCP/IP has 4 layers: Application, Transport, Internet, and Link. PDU types are Data, Segment/Datagram, Packet, Frame, and Bit.
+
+```mermaid
+graph LR
+    Data[Data] --> Seg[Segment/Datagram]
+    Seg --> Pack[Packet]
+    Pack --> Frame[Frame]
+    Frame --> Bit[Bit]
+```
+
+**Encapsulation:** As data moves down the protocol stack, each layer wraps the previous layer's data. This bubble adds necessary information including:
+- Operational flags
+- Options for negotiation
+- Source/destination IP addresses
+- Ports
+- Transport and application layer protocols
+
+<img width="2064" height="1096" alt="image" src="https://github.com/user-attachments/assets/8a51d4d0-285c-4206-803e-defc1604789b" />
+
+PDU Packet Breakdown - Diagram showing PDU types: Data, Segment/Datagram, Packet, Frame, Bit. Network packet details include Ethernet II, IPv4, and UDP headers with source and destination addresses.
+
+### MAC Addressing
+
+- **MAC Address:** 48-bit (6 octets) address in hexadecimal format
+- **Layer:** OSI Layer 2 (Data Link)
+- **Purpose:** Host-to-host communication within broadcast domain
+- **Example:** `00:0c:29:4f:8e:35`
+
+<img width="1030" height="209" alt="image" src="https://github.com/user-attachments/assets/cdd50c4d-9436-47c8-9fdc-9a9847cde558" />
+
+Mac-Address - Network interface configuration for en0: flags, MAC address, IPv6 and IPv4 addresses, netmask, and status details.
+
+When layer 2 traffic needs to cross a layer 3 interface, the PDU is sent to the layer 3 egress interface and routed to the correct network.
+
+### IP Addressing
+
+**IPv4:**
+- 32-bit address (4 octets)
+- Range: 0-255 per octet
+- Example: `192.168.86.243`
+- Layer: OSI Layer 3
+
+**IPv6:**
+- 128-bit address (16 octets)
+- Hexadecimal format
+- Example: `2001:0db8:85a3:0000:0000:8a2e:0370:7334`
+- Types: Unicast, Anycast, Multicast (no Broadcast)
+
+<img width="1030" height="209" alt="image" src="https://github.com/user-attachments/assets/4ffdf789-aea8-4949-aebc-cea7671b1cf2" />
+
+IP Address - Network interface configuration for en0: flags, MAC address, IPv6 and IPv4 addresses, netmask, and status details.
+
+| IPv6 Type | Description |
+|-----------|-------------|
+| Unicast | Single interface |
+| Anycast | Multiple interfaces, only one receives |
+| Multicast | All interfaces receive same packet |
+| Broadcast | Not used - replaced by multicast |
+
+<img width="1030" height="209" alt="image" src="https://github.com/user-attachments/assets/5bb63238-cb3a-4ca1-b48c-c6188a6403a9" />
+
+IPv6 Address - Network interface configuration for en0: flags, MAC address, IPv6 and IPv4 addresses, netmask, and status details.
+
+Along with a much larger address space, IPv6 provides:
+- Better support for Multicasting
+- Global addressing per device
+- Security within the protocol (IPSec)
+- Simplified Packet headers
+
+<img width="972" height="633" alt="image" src="https://github.com/user-attachments/assets/f16c07fe-e77f-4d7b-a9ce-e36d968286ae" />
+
+World map showing IPv6 adoption: Darker green indicates higher deployment.
+
+### TCP vs UDP
+
+| Characteristic | TCP | UDP |
+|----------------|-----|-----|
+| **Transmission** | Connection-oriented | Connectionless |
+| **Connection** | Three-way handshake | Fire and forget |
+| **Data Delivery** | Stream-based | Packet by packet |
+| **Receipt** | Sequence & ACK numbers | No acknowledgment |
+| **Speed** | Slower (more overhead) | Fast but unreliable |
+| **Use Cases** | SSH, HTTP, Email | DNS, Video, VoIP |
+
+**When to use TCP:** When you need completeness over speed (e.g., SSH, file transfers)
+
+**When to use UDP:** When you need speed over completeness (e.g., DNS, streaming video)
+
+### TCP Three-way Handshake
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    
+    Note over Client: SYN (seq=x)
+    Client->>Server: SYN Flag set
+    Note over Server: SYN-ACK (seq=y, ack=x+1)
+    Server->>Client: SYN + ACK Flags set
+    Note over Client: ACK (ack=y+1)
+    Client->>Server: ACK Flag set
+    
+    Note over Client,Server: Connection Established
+```
+
+**Process:**
+1. **Client → Server:** SYN packet (synchronization)
+   - Proposes sequence number
+   - Negotiates window size, MSS, selective ACKs
+   
+2. **Server → Client:** SYN-ACK packet
+   - Acknowledges SYN
+   - Proposes server's sequence number
+   
+3. **Client → Server:** ACK packet
+   - Acknowledges server's SYN
+   - Connection established
+
+<img width="2416" height="888" alt="image" src="https://github.com/user-attachments/assets/f7366bf7-4a0e-43ab-b0a9-06ae9158ab6c" />
+
+TCP Three-way Handshake - Network packet capture showing TCP connections between IPs 192.168.1.140 and 174.143.213.184.
+
+**Analysis:**
+- **Line 1:** Initial SYN flag set (red box)
+- **Ports:** 57678 (client random high port) and 80 (server HTTP)
+- **Line 2:** Server responds with SYN/ACK
+- **Line 3:** Client acknowledges, establishing connection
+
+### TCP Session Teardown
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    
+    Note over Client,Server: Data Transfer Complete
+    
+    Client->>Server: FIN, ACK
+    Server->>Client: ACK
+    Server->>Server: Process complete
+    Server->>Client: FIN, ACK
+    Client->>Server: ACK
+    Note over Client,Server: Connection Closed
+```
+
+**Graceful Shutdown Sequence:**
+1. FIN, ACK (client)
+2. ACK (server)
+3. FIN, ACK (server)
+4. ACK (client)
+
+<img width="1972" height="886" alt="image" src="https://github.com/user-attachments/assets/5066584a-ca52-4d4d-a20c-96610e3a17ff" />
+
+TCP Session Teardown - Network packet capture showing TCP connections with SYN, ACK, and FIN flags.
+
+> 📌 An adequately terminated connection shows pattern: FIN, ACK → FIN, ACK → ACK
+
+**TCP Flags:**
+| Flag | Description |
+|------|-------------|
+| SYN | Synchronize (start connection) |
+| ACK | Acknowledgment |
+| FIN | Finish (end connection) |
+| RST | Reset (abort connection) |
+| PSH | Push (send immediately) |
+| URG | Urgent |
 
 ### Common Ports and Protocols
 
