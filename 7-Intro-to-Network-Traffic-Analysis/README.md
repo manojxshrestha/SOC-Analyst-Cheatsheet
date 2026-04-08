@@ -613,6 +613,164 @@ tcp and (port 80 or port 443)
 not arp and not icmp
 ```
 
+---
+
+## 5. Tcpdump Fundamentals (Section 6)
+
+### What is Tcpdump?
+
+> 📌 **Tcpdump** - Command-line packet sniffer for Unix-like OS. Uses libpcap to capture packets from network interface in promiscuous mode.
+
+**Key Features:**
+- Captures packets from file or network interface
+- No GUI required - works via terminal/SSH
+- Requires root/admin privileges
+- Available on AIX, BSD, Linux, Solaris
+- Windows alternative: WinDump (discontinued)
+
+### Locate Tcpdump
+
+```bash
+# Check if tcpdump exists
+which tcpdump
+
+# Install if needed
+sudo apt install tcpdump
+
+# Check version
+sudo tcpdump --version
+
+# Output:
+# tcpdump version 4.9.3
+# libpcap version 1.9.1 (with TPACKET_V3)
+# OpenSSL 1.1.1f  31 Mar 2020
+```
+
+### Basic Capture Options
+
+| Switch | Description |
+|--------|-------------|
+| `-D` | Display available interfaces |
+| `-i` | Select interface (e.g., `-i eth0`) |
+| `-n` | Don't convert addresses to names |
+| `-e` | Grab ethernet header |
+| `-X` | Show packets in hex and ASCII |
+| `-XX` | Same as X + ethernet headers |
+| `-v`, `-vv`, `-vvv` | Increase verbosity |
+| `-c` | Grab specific number of packets |
+| `-s` | Define snapshot length |
+| `-S` | Show absolute sequence numbers |
+| `-q` | Print less protocol info |
+| `-r` | Read from file |
+| `-w` | Write to file |
+
+### Basic Commands
+
+**List Available Interfaces:**
+```bash
+sudo tcpdump -D
+
+# Output:
+# 1.eth0 [Up, Running, Connected]
+# 2.any (Pseudo-device that captures on all interfaces)
+# 3.lo [Up, Running, Loopback]
+```
+
+**Capture on Interface:**
+```bash
+sudo tcpdump -i eth0
+
+# Output shows: timestamp, IP, port, flags, seq, ack, length
+```
+
+**Disable Name Resolution:**
+```bash
+sudo tcpdump -i eth0 -nn
+
+# Shows: IP.port instead of hostname/service
+```
+
+**Display Ethernet Header:**
+```bash
+sudo tcpdump -i eth0 -e
+
+# Now shows: source MAC > dest MAC, ethertype
+```
+
+**Include ASCII and Hex:**
+```bash
+sudo tcpdump -i eth0 -X
+
+# Shows hex on left, ASCII on right
+```
+
+**Combined Options:**
+```bash
+sudo tcpdump -i eth0 -nnvXX
+
+# Full verbose output with hex and ASCII
+```
+
+### Tcpdump Output Breakdown
+
+> 📌 Understanding the output fields:
+
+| Field | Color | Description |
+|-------|-------|-------------|
+| **Timestamp** | Yellow | Time/date (configurable) |
+| **Protocol** | Orange | Upper-layer header (IP, TCP, etc.) |
+| **Source & Dest** | Orange | IP:Port format |
+| **Flags** | Green | TCP flags (SYN, ACK, FIN, etc.) |
+| **Seq/Ack Numbers** | Red | Sequence and acknowledgment |
+| **Protocol Options** | Blue | Negotiated TCP values |
+| **Notes** | White | Dissector notes (e.g., FTP) |
+
+<img width="1261" height="629" alt="image" src="https://github.com/user-attachments/assets/1c8bdb0b-ed9a-4f70-a249-132cda8920d0" />
+
+Tcpdump Shell Breakdown - Network packet capture showing FTP communication between IPs 172.16.146.2 and 172.16.146.1, including welcome message and password request.
+
+**Example Output:**
+```
+10:58:33.719241 IP 172.16.146.2.55260 > 172.67.1.1.https: Flags [P.], seq 1953742992:1953743073, ack 2034210498, win 501, length 81
+```
+
+### File I/O with Tcpdump
+
+**Save to File:**
+```bash
+sudo tcpdump -i eth0 -w ~/output.pcap
+
+# Output:
+# tcpdump: listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+# 10 packets captured
+# 131 packets received by filter
+# 0 packets dropped by kernel
+```
+
+> 🔴 Watch disk space - PCAPs can get large quickly!
+
+**Read from File:**
+```bash
+sudo tcpdump -r ~/output.pcap
+```
+
+**Read with Options:**
+```bash
+sudo tcpdump -r ~/output.pcap -nnvXX
+```
+
+### Man Page
+
+```bash
+man tcpdump
+```
+
+> 💡 **Tip:** Tcpdump can be used to create a simple IDS by scripting pattern analysis!
+
+---
+
+## 6. Tcpdump - Packet Filtering
+
 ### NTA Workflow
 
 ```mermaid
