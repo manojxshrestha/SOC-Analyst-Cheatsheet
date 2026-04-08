@@ -608,7 +608,137 @@ Edit → Preferences → Protocols → IPv4 → Reassemble fragmented datagrams
 
 ### IP Spoofing
 
-*Coming soon...*
+> 📌 **IP Spoofing** - Attack where attacker forges source/destination IP addresses to evade controls or launch attacks.
+
+#### How IP Spoofing Works
+
+IP spoofing involves modifying the source IP address in packet headers to:
+- Hide attacker's identity
+- Bypass firewall/IDS controls
+- Impersonate trusted hosts
+- Launch denial-of-service attacks
+
+#### Key Indicators
+
+| Indicator | Description |
+|-----------|-------------|
+| **Incoming traffic** | Source IP from outside subnet = suspicious |
+| **Outgoing traffic** | Source IP not from local subnet = malicious |
+
+#### Types of IP Spoofing Attacks
+
+**1. Decoy Scanning**
+- Attacker changes source IP to enumerate target network
+- Bypasses firewall by appearing as internal host
+- **Indicator:** Mixed fragmentation from fake + legitimate IPs
+
+**2. Random Source Attack (DDoS)**
+- Attacker sends traffic with randomized source IPs
+- Targets same port on victim to exhaust resources
+- **Indicator:** Many random IPs hitting single port
+
+**3. LAND Attacks**
+- Source IP = Destination IP (same host)
+- Creates infinite loop, exhausts resources
+- Causes crashes on target host
+- **Indicator:** SYN packets where src = dst IP
+
+**4. SMURF Attacks**
+- Attacker sends ICMP to broadcast with spoofed victim IP
+- All hosts respond to victim, causing DoS
+- **Indicator:** Excessive ICMP replies to single host
+
+**5. Initialization Vector Generation (WEP)**
+- Old wireless attack
+- Craft packets to generate IVs for decryption
+- **Indicator:** Excessive repeated packets between hosts
+
+#### Finding Decoy Scanning
+
+**Open PCAP:**
+```bash
+wireshark decoy_scanning_nmap.pcapng
+```
+
+**Detection Indicators:**
+- Initial fragmentation from fake address
+- Some TCP traffic from legitimate source address
+
+<img width="1144" height="445" alt="image" src="https://github.com/user-attachments/assets/11a9be47-d45a-40fd-b035-c49607ec325c" />
+
+- Responses with RST flags directed to attacker
+
+<img width="1142" height="374" alt="image" src="https://github.com/user-attachments/assets/57ab07b5-17eb-4eae-a663-c50c47afa7f8" />
+
+TCP traffic with RST packets.
+
+<img width="1137" height="172" alt="image" src="https://github.com/user-attachments/assets/938c682d-28dc-44b8-8516-bb6150b97687" />
+
+**Prevention:**
+- IDS/IPS reconstructs packets to detect malicious activity
+- Watch for connections taken over by another host
+
+#### Finding Random Source Attacks
+
+**PCAP Files:**
+- ICMP_rand_source.pcapng
+- ICMP_rand_source_larg_data.pcapng
+- TCP_rand_source_attacks.pcapng
+
+**Detection:**
+
+<img width="990" height="239" alt="image" src="https://github.com/user-attachments/assets/9ec034e9-8197-4c78-85b4-d6fc37b13928" />
+
+ICMP echo replies to many random destinations.
+
+**Fragmented random hosts:**
+
+<img width="1179" height="361" alt="image" src="https://github.com/user-attachments/assets/8caf369d-47a0-45fd-896f-410f4a6a770b" />
+
+Fragmented ICMP traffic.
+
+**LAND Attack Indicator:**
+
+<img width="872" height="310" alt="image" src="https://github.com/user-attachments/assets/e8a1d875-cb33-44cb-b1dd-9ac59eb1de8b" />
+
+- Single port (e.g., 80) from random hosts
+- Incremental base port without randomization
+- Identical length fields
+
+**Detection:**
+- Many different hosts pinging single host
+- Represents SMURF attack
+
+<img width="1107" height="462" alt="image" src="https://github.com/user-attachments/assets/2fc4dd59-d924-41a9-8af7-47f3e90afdc9" />
+
+ICMP echo requests/replies - SMURF attack pattern.
+
+#### Finding LAND Attacks
+
+**PCAP:** LAND-DoS.pcapng
+
+**How LAND Works:**
+- Source IP = Destination IP (same host)
+- Sends SYN to same host's port 80
+- Creates infinite loop
+- Exhausts all base ports
+
+<img width="875" height="328" alt="image" src="https://github.com/user-attachments/assets/45d0b440-4c6f-4b8a-ac2c-a26c26ca4bae" />
+
+TCP SYN from 192.168.10.1 to 192.168.10.1 port 80 = LAND attack!
+
+**How SMURF Works:**
+1. Attacker sends ICMP request to broadcast with spoofed victim IP
+2. All live hosts respond to victim
+3. Victim experiences resource exhaustion
+
+**Detection:**
+- Excessive ICMP replies from single host to victim
+- May include fragmentation for larger traffic volume
+
+<img width="1171" height="360" alt="image" src="https://github.com/user-attachments/assets/d254aa29-b077-4b8c-9642-336c62c9191e" />
+
+---
 
 ### IP TTL Attacks
 
