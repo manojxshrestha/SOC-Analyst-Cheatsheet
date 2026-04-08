@@ -1981,5 +1981,111 @@ icmp or ip.src == x.x.x.x              # ICMP from specific source
 
 ---
 
+## Interview Questions
+
+### Link Layer Attacks
+
+1. **What is ARP spoofing and how do you detect it in network traffic?**
+2. **How does a rogue access point differ from an evil twin?**
+3. **What are the indicators of a WiFi deauthentication attack?**
+4. **How can you detect ARP scanning in Wireshark?**
+
+### Network Layer Attacks
+
+5. **What is IP spoofing and when is it commonly used?**
+6. **Explain the difference between IP TTL manipulation and IP identification attacks.**
+7. **What is a LAND attack and how does it work?**
+8. **How do you detect fragmentation attacks in PCAP?**
+
+### Transport Layer Attacks
+
+9. **What is TCP handshake abnormality and how do you identify it?**
+10. **Explain TCP reset attack and when would an attacker use it?**
+11. **What is TCP hijacking and what are the prerequisites?**
+12. **How can you detect SYN flood attacks?**
+
+### Application Layer Attacks
+
+13. **What indicators suggest directory fuzzing in HTTP traffic?**
+14. **Explain HTTP request smuggling (CRLF injection) and how to detect it.**
+15. **What is DNS tunneling and how does data exfiltration work via DNS?**
+16. **How do you detect XSS attacks in network traffic?**
+17. **What is SSL renegotiation attack and why is it dangerous?**
+
+### General Analysis
+
+18. **What Wireshark filters do you use for detecting anomalous network traffic?**
+19. **How do you differentiate between legitimate high traffic and DDoS?**
+20. **What PCAP files would you analyze to investigate a potential data exfiltration?**
+
+---
+
+## Additional Resources
+
+### Tools for Network Traffic Analysis
+
+| Tool | Description |
+|------|-------------|
+| **Wireshark** | GUI packet analyzer |
+| **Tshark** | CLI Wireshark |
+| **tcpdump** | CLI packet capture |
+| **NetworkMiner** | Extract artifacts from PCAP |
+| **Zeek** | Network security monitor |
+| **Snort/Suricata** | IDS/IPS |
+
+### Key RFCs
+
+| Protocol | RFC | Description |
+|----------|-----|-------------|
+| ARP | RFC 826 | Address Resolution Protocol |
+| IP | RFC 791 | Internet Protocol |
+| TCP | RFC 793 | Transmission Control Protocol |
+| DNS | RFC 1035 | Domain Names - Implementation |
+| ICMP | RFC 792 | Internet Control Message Protocol |
+| SSL/TLS | RFC 5246 | TLS Protocol |
+
+### Recommended Learning Path
+
+1. Master link layer protocols (ARP, 802.11)
+2. Understand IP and ICMP anomalies
+3. Learn TCP handshake analysis
+4. Study HTTP/HTTPS traffic patterns
+5. Practice DNS traffic analysis
+6. Learn about tunneling techniques (ICMP, DNS, Telnet)
+7. Practice with various PCAP files
+
+---
+
+### PCAP Files Reference
+
+All PCAP files are available in `Resources/pcap_files.zip`:
+
+| PCAP File | Attack Type |
+|-----------|-------------|
+| ARP_Poison.pcapng | ARP Poisoning |
+| ARP_Scan.pcapng | ARP Scanning |
+| ARP_Spoof.pcapng | ARP Spoofing |
+| basic_fuzzing.pcapng | HTTP Fuzzing |
+| CRLF_and_host_header_manipulation.pcapng | HTTP Header Injection |
+| deauthandbadauth.cap | WiFi Deauth |
+| decoy_scanning_nmap.pcapng | Nmap Decoy Scan |
+| dns_enum_detection.pcapng | DNS Enumeration |
+| dns_tunneling.pcapng | DNS Tunneling |
+| icmp_tunneling.pcapng | ICMP Tunneling |
+| ICMP_smurf.pcapng | SMURF Attack |
+| ip_ttl.pcapng | IP TTL Attack |
+| LAND-DoS.pcapng | LAND Attack |
+| rogueap.cap | Rogue Access Point |
+| RST_Attack.pcapng | TCP RST Attack |
+| TCP-hijacking.pcap | TCP Hijacking |
+| telnet_tunneling_*.pcapng | Telnet Tunneling |
+| XSS_Simple.pcapng | XSS Attack |
+| SSL_renegotiation_edited.pcapng | SSL Renegotiation |
+| udp_tunneling.pcapng | UDP Tunneling |
+| funky_dns.pcap | DNS Analysis Lab |
+| funky_icmp.pcap | ICMP Analysis Lab |
+
+---
+
 *Module 8/15 - Intermediate Network Traffic Analysis*
 *For learning and SOC career preparation*
