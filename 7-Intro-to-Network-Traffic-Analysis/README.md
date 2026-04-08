@@ -1182,9 +1182,108 @@ Format: .pcap (or pcapng)
 
 ---
 
-## 8. Wireshark
+## 12. Wireshark Advanced Usage (Section 12)
 
-### NTA Workflow
+### Plugins and Advanced Features
+
+Wireshark includes many advanced capabilities:
+- Track TCP conversations
+- Crack wireless credentials
+- Extract files from captures
+- Protocol analysis plugins
+
+### Statistics Tab
+
+<img width="1891" height="1059" alt="image" src="https://github.com/user-attachments/assets/c99be9d5-fc24-48cd-9274-4c79c86fbfe1" />
+
+Statistics tab provides: Address statistics, Protocol hierarchy, Conversation details, Top talkers.
+
+### Analyze Tab
+
+<img width="595" height="568" alt="image" src="https://github.com/user-attachments/assets/df828c87-d73e-4268-9db8-dcbb534dbe7f" />
+
+Analyze tab provides: Display filters, Apply filters, Enabled protocols, Expert information.
+
+### Following TCP Streams
+
+Wireshark can stitch TCP packets back together to recreate the entire stream.
+
+**GUI Method:**
+1. Right-click on a packet from the stream
+2. Select **Follow → TCP**
+3. Opens new window with stitched stream
+
+**Filter Method:**
+```wireshark
+tcp.stream eq #
+```
+
+**Follow A Stream Via GUI:**
+
+<img width="3810" height="1935" alt="image" src="https://github.com/user-attachments/assets/6237ce9c-8654-49df-b41c-bf314aef78e1" />
+
+**Filter For Specific TCP Stream:**
+
+<img width="3839" height="770" alt="image" src="https://github.com/user-attachments/assets/9941fa20-78e9-43a7-ba67-0c35e7995436" />
+
+Wireshark capture showing TCP and Telnet packets with full handshake and data transfer.
+
+### Extracting Data and Files From Capture
+
+> 📌 Requires entire conversation captured - otherwise extraction fails!
+
+**Extract Files GUI:**
+1. Stop capture
+2. File → Export → Select protocol format (DICOM, HTTP, SMB, etc.)
+
+**Extract Files:**
+
+<img width="3810" height="1935" alt="image" src="https://github.com/user-attachments/assets/6d1333fc-23a8-4e80-b5d3-6a5a39e8a196" />
+
+### FTP Analysis
+
+FTP uses TCP ports:
+- Port 20: Data transfer
+- Port 21: Control commands
+
+**FTP Display Filters:**
+
+| Filter | Description |
+|--------|-------------|
+| `ftp` | Display anything about FTP protocol |
+| `ftp.request.command` | Commands sent over port 21 (usernames, passwords, filenames) |
+| `ftp-data` | Data transferred over port 20 |
+
+**FTP Dissector:**
+
+<img width="1215" height="874" alt="image" src="https://github.com/user-attachments/assets/7ad1fc93-8223-429f-a200-df6b4e360f7a" />
+
+FTP requests showing anonymous login and directory changes.
+
+**FTP Request Command Filter:**
+
+<img width="1291" height="869" alt="image" src="https://github.com/user-attachments/assets/ebb90acb-cf1b-4329-82c5-abc84a67f225" />
+
+FTP requests showing commands sent.
+
+**FTP Data Filter:**
+
+<img width="1083" height="818" alt="image" src="https://github.com/user-attachments/assets/8bb8f11f-d408-45f2-9ddf-6e9531688ebe" />
+
+FTP data transfer showing file retrieval (secrets.txt, Shield-prototype-plans).
+
+### Steps to Extract FTP Data
+
+1. Identify FTP traffic: `ftp`
+2. Check commands: `ftp.request.command`
+3. Find file transfer, filter: `ftp-data`
+4. Follow TCP stream
+5. Save as "Raw" with original filename
+6. Validate file type
+
+---
+
+## 11. Wireshark
 
 ```mermaid
 graph LR
