@@ -903,7 +903,65 @@ Open packet → IPv4 tab → Look for **very low TTL** (e.g., TTL = 3)
 
 ### TCP Connection Resets & Hijacking
 
-*Coming soon...*
+> 📌 **TCP RST Attack** - Forges RST packets to terminate connections
+> 📌 **TCP Hijacking** - Takes over existing connection through sequence prediction
+
+#### TCP Connection Termination (RST Attack)
+
+**Related PCAP:** RST_Attack.pcapng
+
+**How RST Attack Works:**
+
+1. Attacker spoofs source IP to match victim's IP
+2. Crafts TCP packet with **RST flag** set
+3. Specifies same destination port as victim connection
+4. Sends to target → Connection terminated!
+
+**Detection:**
+
+<img width="875" height="344" alt="image" src="https://github.com/user-attachments/assets/38ce1637-3d1f-4e7a-bd6f-a0c2276029f7" />
+
+Excessive RST packets to single port.
+
+**Verify Attack:**
+- Check MAC address of RST sender
+- If MAC doesn't match registered IP owner = attack!
+
+<img width="1031" height="89" alt="image" src="https://github.com/user-attachments/assets/8c967e20-7a3a-4756-a41d-c61652024b0e" />
+
+**Indicator:** Different MAC sending packets for same IP
+
+> 🔴 Attacker may also spoof MAC - watch for retransmissions (like ARP poisoning)
+
+---
+
+#### TCP Connection Hijacking
+
+**Related PCAP:** TCP-hijacking.pcap
+
+**How TCP Hijacking Works:**
+
+1. Attacker monitors target connection
+2. Conducts **sequence number prediction**
+3. Injects malicious packets in correct sequence
+4. Spoofs source IP to match victim's IP
+5. Blocks/delays ACKs from reaching victim
+6. Takes over the connection!
+
+> 🔴 **Commonly paired with ARP poisoning** to block ACK packets
+
+**Detection:**
+
+<img width="300" height="50" alt="image" src="https://github.com/user-attachments/assets/28549b33-79a0-45eb-8225-4295c321bdb8" />
+
+TCP retransmission packets with PSH, ACK flags (port 23 = Telnet)
+
+**Indicators:**
+- Unusual TCP retransmissions
+- Sequence number anomalies
+- Connection continues when should have ended
+
+---
 
 ### ICMP Tunneling
 
