@@ -36,10 +36,16 @@ Network Traffic Analysis helps security specialists:
 
 1. [Introduction & Networking Primer - Layers 1-4](#1-introduction--networking-primer-layers-1-4)
 2. [Networking Primer - Layers 5-7](#2-networking-primer---layers-5-7)
-3. [The Analysis Process](#3-the-analysis-process)
-4. [Analysis in Practice](#4-analysis-in-practice)
-5. [Tcpdump](#5-tcpdump)
-6. [Wireshark](#6-wireshark)
+3. [The Analysis Process](#3-the-analysis-process---detailed-section-4)
+4. [Analysis in Practice](#4-analysis-in-practice-section-5)
+5. [Tcpdump Fundamentals](#5-tcpdump-fundamentals-section-6)
+6. [Tcpdump Packet Filtering](#6-tcpdump---packet-filtering-section-8)
+7. [Interrogating Network Traffic Lab](#7-interrogating-network-traffic---lab-section-9)
+8. [Analysis with Wireshark](#10-analysis-with-wireshark-section-10)
+9. [Wireshark Advanced Usage](#12-wireshark-advanced-usage-section-12)
+10. [Decrypting RDP Connections](#15-decrypting-rdp-connections-section-15)
+11. [Interview Questions](#16-interview-questions)
+12. [Additional Resources](#17-additional-resources)
 
 ---
 
@@ -581,21 +587,11 @@ Scope: 192.168.100.0/24, protocols: HTTP and FTP
 
 ---
 
-## 5. Tcpdump
+## 5. Tcpdump Fundamentals (Section 6)
 
-| Tool | Description |
-|------|-------------|
-| **tcpdump** | Command-line utility that captures and interprets network traffic |
-| **Tshark** | Command-line variant of Wireshark |
-| **Wireshark** |Graphical network traffic analyzer |
-| **NGrep** | Pattern-matching tool for network traffic (regex/BPF) |
-| **tcpick** | Command-line packet sniffer for TCP streams |
-| **Network Taps** | Devices (Gigamon, Niagara) that copy network traffic |
-| **Span Ports** | Mirrored ports for traffic collection |
-| **Elastic Stack** | Data ingestion and visualization |
-| **SIEMs** | Central analysis point (Splunk, etc.) |
+### What is Tcpdump?
 
-### BPF Syntax
+> 📌 **Tcpdump** - Command-line packet sniffer for Unix-like OS. Uses libpcap to capture packets from network interface in promiscuous mode.
 
 Berkeley Packet Filter (BPF) syntax is shared among traffic analysis tools:
 
@@ -1735,6 +1731,241 @@ Now when filtering on RDP, traffic is visible!
 - Wireshark can decrypt traffic if RSA key is acquired
 - Acquire RDP certificate from server → Extract private key with OpenSSL
 - Works for any protocol using encryption where you have the key
+
+---
+
+## 16. Interview Questions
+
+### Q1: What is Network Traffic Analysis (NTA)?
+
+**Answer:** NTA is the process of examining network traffic to characterize common ports and protocols, establish baselines, monitor threats, and ensure visibility into network activity. It helps detect anomalies, security threats, malware, and investigate incidents.
+
+---
+
+### Q2: What is the difference between TCP and UDP?
+
+**Answer:**
+
+| Aspect | TCP | UDP |
+|--------|-----|-----|
+| Connection | Connection-oriented | Connectionless |
+| Reliability | Reliable, ensures delivery | Best-effort, no guarantee |
+| Speed | Slower (overhead) | Faster |
+| Use Cases | HTTP, SSH, Email | DNS, Video, VoIP |
+| Flow Control | Yes | No |
+
+---
+
+### Q3: Explain the TCP three-way handshake.
+
+**Answer:**
+
+```mermaid
+sequenceDiagram
+    Client->>Server: SYN (seq=x)
+    Server->>Client: SYN-ACK (seq=y, ack=x+1)
+    Client->>Server: ACK (ack=y+1)
+```
+
+1. **SYN** - Client sends synchronization request
+2. **SYN-ACK** - Server acknowledges and sends its own SYN
+3. **ACK** - Client acknowledges server's SYN, connection established
+
+---
+
+### Q4: What are the OSI model layers?
+
+**Answer:**
+
+| Layer | Number | Protocol Examples |
+|-------|--------|-------------------|
+| Physical | 1 | Ethernet, USB |
+| Data Link | 2 | MAC, Ethernet |
+| Network | 3 | IP, ICMP |
+| Transport | 4 | TCP, UDP |
+| Session | 5 | RPC, NetBIOS |
+| Presentation | 6 | SSL/TLS, JPEG |
+| Application | 7 | HTTP, DNS, FTP |
+
+---
+
+### Q5: How do you detect a port scan in network traffic?
+
+**Answer:**
+- Look for many SYN packets on different ports
+- Multiple hosts scanning same target
+- Unusual port activity from single source
+- Use: `tcpdump 'tcp[tcpflags] & (tcp-syn) != 0 and tcp[tcpflags] & (tcp-ack) == 0'`
+
+---
+
+### Q6: What is the difference between capture filters and display filters?
+
+**Answer:**
+
+| Filter Type | When Applied | Tool |
+|------------|--------------|------|
+| **Capture Filter** | During capture | tcpdump, tshark |
+| **Display Filter** | After capture | Wireshark |
+
+Capture filters use BPF syntax and reduce CPU during capture. Display filters are more flexible for analysis.
+
+---
+
+### Q7: What is Kerberos and what port does it use?
+
+**Answer:** Kerberos is a network authentication protocol. It uses:
+- Port 88 (TCP/UDP) for authentication
+- Port 53 for DNS (often required for resolution)
+
+---
+
+### Q8: How do you extract files from a PCAP?
+
+**Answer:**
+
+**Wireshark:**
+1. File → Export → HTTP/SMB/DICOM objects
+
+**tcpdump:**
+```bash
+tcpdump -r capture.pcap --export-objects http,./output
+```
+
+---
+
+### Q9: What is the TCP session teardown sequence?
+
+**Answer:**
+
+```mermaid
+sequenceDiagram
+    Client->>Server: FIN, ACK
+    Server->>Client: ACK
+    Server->>Client: FIN, ACK
+    Client->>Server: ACK
+```
+
+Pattern: FIN, ACK → FIN, ACK → ACK
+
+---
+
+### Q10: How do you identify encrypted vs unencrypted traffic?
+
+**Answer:**
+- Port 443 = HTTPS (encrypted)
+- Port 80 = HTTP (unencrypted)
+- Look for TLS/SSL layer in Wireshark
+- Plain text credentials on port 80 = suspicious!
+
+---
+
+### Q11: What is the difference between symmetric and asymmetric encryption?
+
+**Answer:**
+
+| Type | Key | Examples | Speed |
+|------|-----|----------|-------|
+| **Symmetric** | Same key | AES, DES | Fast |
+| **Asymmetric** | Public/Private | RSA, ECC | Slow |
+
+---
+
+### Q12: What is BPF syntax?
+
+**Answer:** Berkeley Packet Filter (BPF) is a filtering syntax used by tcpdump, Wireshark, and other tools:
+
+```bash
+host 192.168.1.1        # Filter by host
+port 80                  # Filter by port
+tcp                      # Filter protocol
+and / or / not           # Logical operators
+```
+
+---
+
+### Q13: How does DNS work and what ports does it use?
+
+**Answer:**
+- DNS translates domain names to IP addresses
+- Uses Port 53 (TCP and UDP)
+- UDP for typical queries
+- TCP for zone transfers and large responses
+
+---
+
+### Q14: What is the difference between sniffer and IDS?
+
+**Answer:**
+
+| Tool | Purpose |
+|------|---------|
+| **Sniffer** (tcpdump, Wireshark) | Captures and analyzes traffic passively |
+| **IDS/IPS** (Snort, Suricata) | Monitors traffic and alerts/blocks threats |
+
+---
+
+### Q15: How do you analyze RDP traffic in Wireshark?
+
+**Answer:**
+1. Filter: `rdp` or `port 3389`
+2. If encrypted (TLS), need RSA private key
+3. Edit → Preferences → Protocols → TLS
+4. Import RSA key with server IP and port
+5. Now can see decrypted RDP content
+
+---
+
+## 17. Additional Resources
+
+### Essential Network Analysis Tools
+
+| Tool | Purpose |
+|------|---------|
+| **Wireshark** | GUI packet analyzer |
+| **tcpdump** | CLI packet capture |
+| **Tshark** | CLI Wireshark |
+| **NetworkMiner** | Extract artifacts from PCAP |
+| **Termshark** | Terminal UI for Wireshark |
+| **ngrep** | Pattern matching for network |
+| **tcpick** | TCP stream reassembly |
+| **Snort/Suricata** | IDS/IPS |
+
+### Important References
+
+- [Wireshark Official Docs](https://www.wireshark.org/docs/)
+- [tcpdump Man Page](https://www.tcpdump.org/manpages/tcpdump.1.html)
+- [BPF Syntax Reference](https://www.tcpdump.org/manpages/pcap-filter.7.html)
+- [IANA Port Numbers](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml)
+- [RFC 791 - IP Protocol](https://tools.ietf.org/html/rfc791)
+- [RFC 793 - TCP Protocol](https://tools.ietf.org/html/rfc793)
+- [RFC 768 - UDP Protocol](https://tools.ietf.org/html/rfc768)
+
+### Key Protocols and RFCs
+
+| Protocol | RFC | Port |
+|----------|-----|------|
+| IP | 791 | - |
+| TCP | 793 | - |
+| UDP | 768 | - |
+| DNS | 1035 | 53 |
+| HTTP | 2616 | 80 |
+| HTTPS | 2818 | 443 |
+| FTP | 959 | 20/21 |
+| SMB | - | 445 |
+| RDP | - | 3389 |
+| SSH | 4253 | 22 |
+| Telnet | 854 | 23 |
+
+### Recommended Learning Path
+
+1. Learn TCP/IP fundamentals
+2. Practice with tcpdump basics
+3. Master Wireshark display filters
+4. Understand PCAP file formats
+5. Learn protocol dissection (HTTP, DNS, SMB)
+6. Practice extracting files from captures
+7. Learn TLS/SSL decryption
 
 ---
 
