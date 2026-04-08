@@ -965,7 +965,101 @@ TCP retransmission packets with PSH, ACK flags (port 23 = Telnet)
 
 ### ICMP Tunneling
 
-*Coming soon...*
+> 📌 **ICMP Tunneling** - Encodes data in ICMP packets to bypass firewalls and exfiltrate data.
+
+#### Basics of Tunneling
+
+**What is Tunneling?**
+- Technique to exfiltrate data through allowed protocols
+- Bypasses network controls/firewalls
+- Uses protocols like SSH, HTTP, HTTPS, DNS, ICMP
+
+**Common Types:**
+- SSH Tunneling
+- HTTP/HTTPS Tunneling
+- DNS Tunneling
+- **ICMP Tunneling**
+
+<img width="900" height="375" alt="image" src="https://github.com/user-attachments/assets/440bd0b5-1019-47ca-9882-1382a9ebc5a7" />
+
+SSH tunnel example.
+
+---
+
+#### ICMP Tunneling
+
+**How ICMP Tunneling Works:**
+
+1. Attacker appends data to ICMP request data field
+2. Data is hidden within common ICMP protocol
+3. Passes through firewall undetected
+4. Data reaches external server
+
+<img width="876" height="403" alt="image" src="https://github.com/user-attachments/assets/b69923b0-025f-4b87-9c45-fc69a38007ec" />
+
+---
+
+#### Finding ICMP Tunneling
+
+**Open PCAP:**
+```bash
+wireshark icmp_tunneling.pcapng
+```
+
+**Filter ICMP:**
+```
+icmp
+```
+
+<img width="1088" height="276" alt="image" src="https://github.com/user-attachments/assets/3594b314-5c66-475c-9d8a-aca5feac3d14" />
+
+ICMP echo requests.
+
+**Detection - Fragmentation:**
+
+<img width="1167" height="359" alt="image" src="https://github.com/user-attachments/assets/8f2e0b02-6a3f-4711-a459-18d7abc4dcdb" />
+
+Large ICMP data = fragmentation.
+
+Normal ICMP: ~48 bytes
+
+<img width="658" height="262" alt="image" src="https://github.com/user-attachments/assets/2a2e1ed8-2fbb-4639-8185-706eeb2cecef" />
+
+Suspicious ICMP: ~38000 bytes!
+
+<img width="650" height="234" alt="image" src="https://github.com/user-attachments/assets/578431e5-03c4-440e-8179-5ca8f1e43ceb" />
+
+> 🔴 **Red Flag:** ICMP data > 48 bytes = possible tunneling!
+
+**Finding Data in ICMP:**
+
+<img width="534" height="557" alt="image" src="https://github.com/user-attachments/assets/fc5395f5-f6eb-4621-be62-21baed4995d3" />
+
+Look for credentials in hex dump (e.g., Username: root; Password: ...)
+
+**Encoded Data:**
+
+<img width="553" height="561" alt="image" src="https://github.com/user-attachments/assets/adc4b3b6-c277-42b0-a82f-d40dfb18eb62" />
+
+Base64 encoded exfiltrated data.
+
+**Decode:**
+```bash
+echo 'VGhpcyBpcyBhIHNlY3VyZSBrZXk6IEtleTEyMzQ1Njc4OQo=' | base64 -d
+# Output: This is a secure key: Key12345678
+```
+
+---
+
+#### Prevention
+
+| Method | Description |
+|--------|-------------|
+| **Block ICMP** | If not needed, block entirely |
+| **Inspect ICMP Data** | Check for malicious content |
+| **Limit Data Size** | Reject ICMP > 64 bytes |
+
+> 💡 If ICMP data length > 48 bytes → investigate!
 
 ---
 
