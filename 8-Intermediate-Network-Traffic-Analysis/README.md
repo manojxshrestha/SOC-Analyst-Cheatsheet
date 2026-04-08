@@ -527,7 +527,84 @@ Beacon frames from both legitimate and fake AP.
 
 ### Fragmentation Attacks
 
-*Coming soon...*
+> 📌 IP fragmentation attacks exploit how large packets are split and reassembled.
+
+#### IP Header Fields
+
+<img width="337" height="183" alt="image" src="https://github.com/user-attachments/assets/77288a24-5f08-4557-a5e2-765cd6701599" />
+
+**Key Fields:**
+| Field | Description |
+|-------|-------------|
+| Length | IP header length |
+| Total Length | Entire IP packet length |
+| Fragment Offset | Instructions to reassemble packets |
+| Source/Dest IP | Origination and destination addresses |
+
+#### Commonly Abused Fields
+
+Attackers craft packets to cause communication issues and evade controls.
+
+#### Abuse of Fragmentation
+
+**Legitimate Use:** Split large packets using MTU (Maximum Transmission Unit) to accommodate transmission.
+
+**Attack Purposes:**
+
+| Attack Type | Description |
+|-------------|-------------|
+| **IPS/IDS Evasion** | Split attack packets to bypass IDS that doesn't reassemble |
+| **Firewall Evasion** | Fragment to bypass firewall rules |
+| **Resource Exhaustion** | Very small MTU (10-15-20) exhausts reassembly resources |
+| **Denial of Service** | Send packets >65535 bytes to crash old hosts |
+
+**Proper Network Behavior:**
+- IDS/IPS/Firewall should reassemble fragments before inspection
+- Delayed reassembly to match destination host behavior
+
+#### Finding Fragmentation Attacks
+
+**Open PCAP:**
+```bash
+wireshark nmap_frag_fw_bypass.pcapng
+```
+
+**Normal Nmap:**
+```bash
+nmap <host ip>
+```
+
+<img width="1134" height="495" alt="image" src="https://github.com/user-attachments/assets/634f8f8e-9066-4e7b-9d88-cbe3a3859094" />
+
+ICMP ping requests - beginning of host discovery.
+
+**Fragmented Nmap:**
+```bash
+nmap -f 10 <host ip>
+```
+
+<img width="1139" height="190" alt="image" src="https://github.com/user-attachments/assets/f87c4426-c0c7-4671-b5ab-061f60f76fa1" />
+
+Packets with max size 10 = fragmentation attack indicator.
+
+**Key Indicator:**
+
+<img width="1143" height="360" alt="image" src="https://github.com/user-attachments/assets/2ee519cf-5bad-42cb-8ffd-4e98c166b1a1" />
+
+> 🔴 **Red Flag:** Single host sending to many ports with fragmentation = fragmented scan!
+
+**Detection:** Destination responds with RST for closed ports.
+
+#### Wireshark Reassembly
+
+**Enable reassembly:**
+```
+Edit → Preferences → Protocols → IPv4 → Reassemble fragmented datagrams
+```
+
+<img width="693" height="507" alt="image" src="https://github.com/user-attachments/assets/7462af0e-1686-4c1d-999e-5d3570b13249" />
+
+---
 
 ### IP Spoofing
 
