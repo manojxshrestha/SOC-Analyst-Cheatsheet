@@ -1395,7 +1395,146 @@ scp htb-student@[TARGET IP]:/home/htb-student/pcaps/patchwork.pcap .
 
 ## 7. Zeek Fundamentals
 
-*Coming soon...*
+> 📌 **Zeek** - An open-source network traffic analyzer used to scrutinize network traffic for suspicious or malicious activity.
+
+### What is Zeek?
+
+Zeek is an open-source network traffic analyzer typically employed to dig deep into network traffic for signs of suspicious or malicious activity. But Zeek isn't limited to just that - it can also be a handy tool for troubleshooting network issues and conducting various measurements.
+
+**Key Points:**
+- Produces log files with elevated view of all network activity
+- Not just signature-based IDS - it's a platform for semantic misuse detection, anomaly detection, and behavioral analysis
+- Highly capable scripting language similar to Suricata rules
+
+---
+
+### Zeek Operation Modes
+
+| Mode | Description |
+|------|-------------|
+| **Fully Passive** | Traffic analysis without intervention |
+| **libpcap Interface** | Packet capture using libpcap |
+| **Real-time** | Live traffic analysis |
+| **Offline** | PCAP-based analysis |
+| **Cluster Support** | Large-scale deployments |
+
+---
+
+### Zeek Architecture
+
+Zeek comprises two primary components:
+
+```mermaid
+flowchart LR
+    A[Packet Stream] --> B[Event Engine<br/>Core]
+    B --> C[Events Queue]
+    C --> D[Script Interpreter]
+    D --> E[Zeek Scripts<br/>Security Policy]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+```
+
+#### 1. Event Engine (Core)
+- Transforms packet stream into high-level events
+- Events describe network activity in policy-neutral terms
+- Example: HTTP request → `http_request` event
+- Events don't offer interpretation - just the facts
+
+#### 2. Script Interpreter
+- Executes event handlers written in Zeek's scripting language
+- Expresses site's security policy
+- Defines actions upon detection of certain events
+
+> 📌 **Event Handlers:** Most events are defined in `.bif` files in `/scripts/base/bif/plugins/`
+
+---
+
+### Zeek Logs
+
+When using Zeek for offline analysis, logs are stored in the current directory.
+
+#### Common Log Files
+
+| Log File | Description |
+|----------|-------------|
+| **conn.log** | IP, TCP, UDP, ICMP connections |
+| **dns.log** | DNS queries and responses |
+| **http.log** | HTTP requests and responses |
+| **ftp.log** | FTP requests and responses |
+| **smtp.log** | SMTP transactions |
+
+#### http.log Fields
+
+| Field | Description |
+|-------|-------------|
+| **host** | HTTP domain/IP |
+| **uri** | HTTP URI |
+| **referrer** | Referrer of HTTP request |
+| **user_agent** | Client's user agent |
+| **status_code** | HTTP status code |
+
+---
+
+### Working with Zeek Logs
+
+#### Log Compression
+- Zeek compresses log files every hour (gzip)
+- Older logs stored in directories named `YYYY-MM-DD`
+
+#### Using zeek-cut
+
+```bash
+# Extract specific columns
+zeek-cut -d < conn.log
+
+# Common fields
+zeek-cut id.orig_h id.resp_h conn_state < conn.log
+```
+
+#### Alternative Tools
+
+```bash
+# View compressed logs
+gzcat conn.log.*.gz
+
+# Search in compressed logs
+zgrep "192.168.1.1" conn.log.*.gz
+```
+
+---
+
+### Zeek Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Comprehensive Logging** | Full network activity logging |
+| **App-Layer Analysis** | HTTP, DNS, FTP, SMTP, SSH, SSL (protocol-aware, not port-based) |
+| **File Inspection** | Analyze files exchanged over protocols |
+| **IPv6 Support** | Full IPv6 support |
+| **Tunnel Detection** | Detect and analyze tunnels |
+| **Protocol Validation** | Sanity checks during protocol analysis |
+| **IDS Pattern Matching** | Pattern matching capabilities |
+| **Scripting Language** | Domain-aware scripting for arbitrary analysis |
+| **Multiple Output Formats** | ASCII, ElasticSearch, DataSeries |
+| **Real-time Integration** | External input integration |
+| **External C Library** | Share events with external programs |
+| **External Process Trigger** | Trigger arbitrary external processes |
+
+---
+
+### Zeek Resources
+
+| Resource | URL |
+|----------|-----|
+| Event List | https://docs.zeek.org/en/stable/scripts/base/bif/ |
+| Log Reference | https://docs.zeek.org/en/master/logs/index.html |
+| Examples | https://docs.zeek.org/en/stable/examples/index.html |
+| Quick Start | https://docs.zeek.org/en/stable/quickstart/index.html |
+| Working with Logs | https://blog.rapid7.com/2016/06/02/working-with-bro-logs-queries-by-example/ |
 
 ---
 
