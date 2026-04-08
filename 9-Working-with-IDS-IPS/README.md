@@ -876,7 +876,146 @@ alert tcp any any -> any any (msg:"Sliver C2 Implant Detected - Cookie"; content
 
 ## 4. Suricata Rule Development Part 2 (Encrypted Traffic)
 
-*Coming soon...*
+> 📌 **Encrypted Traffic Detection** - Developing rules to detect threats in encrypted SSL/TLS traffic using certificate analysis and JA3 fingerprinting.
+
+### The Challenge of Encrypted Traffic
+
+In the ever-evolving landscape of network security, we're often faced with a significant challenge: **encrypted traffic**. Encrypted traffic can pose significant obstacles when it comes to effectively analyzing traffic and developing reliable IDS/IPS rules.
+
+However, there are still several aspects we can leverage to detect potential security threats:
+- Elements within SSL/TLS certificates
+- JA3 fingerprinting
+
+---
+
+### SSL/TLS Certificate Analysis
+
+> 📌 **SSL/TLS Certificates** - During the initial handshake, certificates contain unencrypted details that can reveal malicious activity.
+
+**What we can analyze:**
+| Field | Description |
+|-------|-------------|
+| **Issuer** | Certificate authority information |
+| **Issue Date** | When certificate was issued |
+| **Expiry Date** | When certificate expires |
+| **Subject** | Domain name and organization info |
+
+> 📌 **Anomaly Detection:** Suspicious or malicious domains might utilize SSL/TLS certificates with anomalous or unique characteristics.
+
+---
+
+### JA3 Fingerprinting
+
+> 📌 **JA3 Hash** - A fingerprinting method that provides a unique representation for each SSL/TLS client by combining details from the client hello packet.
+
+**How JA3 Works:**
+1. Collects SSL/TLS Client Hello parameters
+2. Creates a hash/digest
+3. Hash is unique for specific malware families
+
+**Benefits:**
+- Can identify malware without decrypting traffic
+- Works with encrypted connections
+- Useful for detecting specific C2 frameworks
+
+---
+
+### Rule Development Examples
+
+#### Example 1: Detecting Dridex (TLS Encrypted)
+
+```bash
+alert tls $EXTERNAL_NET any -> $HOME_NET any (msg:"ET MALWARE ABUSE.CH SSL Blacklist Malicious SSL certificate detected (Dridex)"; flow:established,from_server; content:"|16|"; content:"|0b|"; within:8; byte_test:3,<,1200,0,relative; content:"|03 02 01 02 02 09 00|"; fast_pattern; content:"|30 09 06 03 55 04 06 13 02|"; distance:0; pcre:"/^[A-Z]{2}/R"; content:"|55 04 07|"; distance:0; content:"|55 04 0a|"; distance:0; pcre:"/^.{2}[A-Z][a-z]{3,}\s(?:[A-Z][a-z]{3,}\s)?(?:[A-Z](?:[A-Za-z]{0,4}?[A-Z]|(?:\.[A-Za-z]){1,3})|[A-Z]?[a-z]+|[a-z](?:\.\A-Za-z]){1,3})\.?[01]/Rs"; content:"|55 04 03|"; distance:0; byte_test:1,>,13,1,relative; content:!"www."; distance:2; within:4; pcre:"/^.{2}(?P<CN>(?:(?:\d?[A-Z]?|[A-Z]?\d?)(?:[a-z]{3,20}|[a-z]{3,6}[0-9_][a-z]{3,6})\.){0,2}?(?:\d?[A-Z]?|[A-Z]?\d?)[a-z]{3,}(?:[0-9_-][a-z]{3,})?\.(?!com|org|net|tv)[a-z]{2,9})[01].*?(?P=CN)[01]/Rs"; content:!"|2a 86 48 86 f7 0d 01 09 01|"; content:!"GoDaddy"; sid:2023476; rev:5;)
+```
+
+**Testing:**
+```bash
+sudo suricata -r /home/htb-student/pcaps/dridex.pcap -l . -k none
+cat fast.log
+```
+
+**Detection Logic:**
+
+| Component | Description |
+|-----------|-------------|
+| `content:"|16|"; content:"|0b|";` | TLS handshake (0x16) + certificate type (0x0b) |
+| `content:"|03 02 01 02 02 09 00|"` | TLS version and certificate patterns |
+| `content:"|30 09 06 03 55 04 06 13 02|"` | CountryName field (OID) |
+| `pcre:"/^[A-Z]{2}/R"` | Country code must be 2 uppercase letters |
+| `content:"|55 04 03|"` | CommonName field |
+| `byte_test:1,>,13,1,relative` | CN length > 13 bytes |
+
+**Key OIDs in X.509 Certificates:**
+
+| OID | Field |
+|-----|-------|
+| `55 04 06` | countryName |
+| `55 04 07` | localityName |
+| `55 04 0a` | organizationName |
+| `55 04 03` | commonName |
+
+> 📌 **X.509 Standard:** These OIDs (Object Identifiers) are part of the PKI standard used to uniquely identify certificate fields.
+
+---
+
+#### Example 2: Detecting Sliver (TLS Encrypted - JA3)
+
+```bash
+alert tls any any -> any any (msg:"Sliver C2 SSL"; ja3.hash; content:"473cd7cb9faa642487833865d516e578"; sid:1002; rev:1;)
+```
+
+**Testing:**
+```bash
+sudo suricata -r /home/htb-student/pcaps/sliverenc.pcap -l . -k none
+cat fast.log
+```
+
+**Calculating JA3 Hash:**
+
+```bash
+ja3 -a --json /home/htb-student/pcaps/sliverenc.pcap
+```
+
+**Example Output:**
+```json
+{
+    "destination_ip": "23.152.0.91",
+    "destination_port": 443,
+    "ja3": "771,49195-49199-49196-49200-52393-52392-49161-49171-49162-49172-156-157-47-53-49170-10-4865-4866-4867,0-5-10-11-13-65281-18-43-51,29-23-24-25,0",
+    "ja3_digest": "473cd7cb9faa642487833865d516e578",
+    "source_ip": "10.10.20.101",
+    "source_port": 53222
+}
+```
+
+**Detection Logic:**
+- Uses `ja3.hash` keyword to match JA3 fingerprint
+- Detects specific hash: `473cd7cb9faa642487833865d516e578`
+
+---
+
+### Encrypted Traffic Detection Summary
+
+| Technique | What It Detects | Example |
+|-----------|-----------------|---------|
+| **Certificate Analysis** | Malicious SSL/TLS certificates | Dridex trojan |
+| **JA3 Fingerprinting** | Unique client signatures | Sliver C2 |
+| **TLS/SSL Metadata** | Unencrypted handshake info | Malicious patterns |
+
+---
+
+### Suricata TLS/SSL Keywords
+
+| Keyword | Description |
+|---------|-------------|
+| `tls` | Match TLS traffic |
+| `ja3.hash` | Match JA3 fingerprint |
+| `ja3.string` | Match JA3 string |
+| `tls.version` | Match TLS version |
+| `tls.subject` | Match certificate subject |
+| `tls.issuer` | Match certificate issuer |
+| `tls.sni` | Match Server Name Indication |
+| `tls.store` | Match certificate from store |
 
 ---
 
