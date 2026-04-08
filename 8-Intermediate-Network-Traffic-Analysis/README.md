@@ -1531,7 +1531,208 @@ ssl.record.content_type == 22
 
 ### Peculiar DNS Traffic
 
-*Coming soon...*
+> 📌 **Peculiar DNS Traffic** - DNS can be used for data exfiltration, command & control, and reconnaissance. Understanding DNS anomalies is critical for SOC analysts.
+
+#### What is DNS?
+
+**DNS (Domain Name System)** translates domain names to IP addresses and vice versa. DNS traffic analysis is crucial because:
+- High volume can hide malicious activity
+- DNS is often allowed through firewalls (trust boundary)
+- Attackers abuse DNS for data exfiltration and C2
+
+#### Related PCAPs
+
+- `dns_enum_detection.pcapng` - DNS Enumeration
+- `dns_tunneling.pcapng` - DNS Tunneling
+
+---
+
+##### DNS Query Flow (Forward Lookup)
+
+![DNS Query Flow](https://github.com/user-attachments/assets/2f381518-83f4-463a-bfe8-f5378951e022)
+
+*Diagram showing DNS query flow from client1.globomantics.com to local DNS server, then to root DNS server, and finally to na.globomantics.com and asia.globomantics.com DNS servers.*
+
+##### Forward Lookup Process
+
+```
+Request:  Where is academy.hackthebox.com?
+Response: Well its at 192.168.10.6
+```
+
+| Step | Description |
+|------|-------------|
+| **1. Query Initiation** | Client wants to visit academy.hackthebox.com |
+| **2. Local Cache Check** | Client checks local DNS cache |
+| **3. Recursive Query** | Client sends query to configured DNS server |
+| **4. Root Servers** | DNS resolver queries root servers for TLD |
+| **5. TLD Servers** | Root responds with authoritative servers for .com |
+| **6. Authoritative Servers** | Queries TLD for hackthebox.com |
+| **7. Domain Authoritative** | Gets IP for academy.hackthebox.com |
+| **8. Response** | Returns IP to client |
+
+---
+
+##### DNS Reverse Lookup Process
+
+```
+Request:  What is your name 192.168.10.6?
+Response: Well its academy.hackthebox.com :)
+```
+
+| Step | Description |
+|------|-------------|
+| **1. Query Initiation** | Client sends reverse query with IP address |
+| **2. Reverse Lookup Zones** | DNS resolver checks reverse zone (e.g., 1.2.0.192.in-addr.arpa) |
+| **3. PTR Record Query** | Looks for PTR record for the IP |
+| **4. Response** | Returns FQDN if PTR record exists |
+
+![DNS Reverse Lookup](https://github.com/user-attachments/assets/c8893fa1-df0e-41eb-b18c-d2df1065c2ee)
+
+*Diagram showing DNS lookup for Google.com resulting in IP 74.125.142.147, and reverse DNS lookup for IP 74.125.142.147 resulting in Google.com.*
+
+---
+
+##### DNS Record Types
+
+| Record Type | Description |
+|------------|-------------|
+| **A (Address)** | Maps domain name to IPv4 address |
+| **AAAA (IPv6 Address)** | Maps domain name to IPv6 address |
+| **CNAME (Canonical Name)** | Creates alias for domain name |
+| **MX (Mail Exchange)** | Specifies mail server for domain |
+| **NS (Name Server)** | Specifies authoritative name servers |
+| **PTR (Pointer)** | Maps IP to domain name (reverse lookup) |
+| **TXT (Text)** | Stores text information |
+| **SOA (Start of Authority)** | Administrative zone information |
+
+---
+
+#### Detecting DNS Enumeration
+
+**Wireshark Filter:** Show all DNS traffic
+```
+dns
+```
+
+![DNS Traffic Overview](https://github.com/user-attachments/assets/413350b1-295c-4eb1-a05b-4280a0925500)
+
+*Wireshark capture showing DNS queries from 192.168.10.5 to 192.168.10.1, protocol DNS, with varying lengths and standard query details.*
+
+**Look for ANY queries:**
+```
+dns
+```
+
+![DNS ANY Query](https://github.com/user-attachments/assets/a3e9fc6f-8520-4729-8838-20cff2a87df3)
+
+*Wireshark capture showing DNS queries from 192.168.10.5 to 192.168.10.1, with standard query and response details.*
+
+> 💡 **Key Indicator:** ANY queries → clear sign of DNS enumeration/subdomain enumeration
+
+---
+
+#### Detecting DNS Tunneling
+
+> 📌 **DNS Tunneling** - Attackers encode data in DNS queries (TXT records) to exfiltrate data or establish C2.
+
+##### Signs of DNS Tunneling
+
+- Excessive TXT records from one host
+- Unusual data patterns in DNS queries
+- Long subdomains with encoded data
+
+**Wireshark Filter:** Look for DNS queries with text records
+
+![DNS Tunneling](https://github.com/user-attachments/assets/a44f8c60-0228-45a8-8ece-2e0dde35bdc5)
+
+*Wireshark capture showing DNS queries from 192.168.10.5 to 192.168.10.1, with standard query and response details indicating format errors for htb.com.*
+
+**Examine DNS data in packet details:**
+
+![Hex Dump](https://github.com/user-attachments/assets/72b1ed32-5f56-4038-a3b2-c73d01bd5016)
+
+*Hex dump showing data with ASCII translation, including a message: 'HTB{This is kind of malicious ;)}'.*
+
+**Encoded data:**
+
+![Encoded Data](https://github.com/user-attachments/assets/c50a4c6a-0289-4a40-9ef8-188cb189a1f7)
+
+*Hex dump showing data with ASCII translation, including a message: 'HTB{This is kind of malicious ;)}' and encoded text.*
+
+**Extracting encoded data in Wireshark:**
+
+![DNS Query Details](https://github.com/user-attachments/assets/523338c8-a205-499d-924d-b8343fd041b4)
+
+*DNS query details for htb.com, showing a TXT record with encoded data.*
+
+##### Decoding DNS Tunneling Data
+
+**Base64 Single Decode:**
+```bash
+echo 'VTBaU1EyVXhaSFprVjNocldETnNkbVJXT1cxaU0wb3pXVmhLYTFneU1XeFlNMUp2WVZoT1ptTklTbXhrU0ZJMVdETkNjMXBYUm5wYQpXREJMQ2c9PQo=' | base64 -d
+```
+
+**Output:**
+```
+U0ZSQ2UxZHZkV3hrWDNsdmRWOW1iM0ozWVhKa1gyMWxYM1JvYVhOZmNISmxkSFI1WDNCc1pXRnpaWDBLCg==
+```
+
+**Multiple Decode (double/triple encoded):**
+```bash
+echo 'VTBaU1EyVXhaSFprVjNocldETnNkbVJXT1cxaU0wb3pXVmhLYTFneU1XeFlNMUp2WVZoT1ptTklTbXhrU0ZJMVdETkNjMXBYUm5wYQpXREJMQ2c9PQo=' | base64 -d | base64 -d | base64 -d
+```
+
+---
+
+##### Why Attackers Use DNS Tunneling
+
+| Reason | Description |
+|--------|-------------|
+| **Data Exfiltration** | Send data out of network without detection |
+| **Command and Control** | Malware uses DNS for C2 communication |
+| **Bypass Firewalls/Proxies** | DNS traffic often allowed through network boundaries |
+| **Domain Generation Algorithms (DGAs)** | Advanced malware uses dynamically generated domain names |
+
+---
+
+#### IPFS and DNS Tunneling
+
+> ⚠️ **Advanced Threat Warning:** Attackers use IPFS (Interplanetary File System) to store malicious files.
+
+**Suspicious URLs to monitor:**
+```
+https://cloudflare-ipfs.com/ipfs/QmS6eyoGjENZTMxM7UdqBk6Z3U3TZPAVeJXdgp9VK4o1Sz
+```
+
+IPFS operates on peer-to-peer basis, making detection exceptionally difficult.
+
+---
+
+#### DNS Anomaly Detection Summary
+
+| Anomaly | Indicator | Wireshark Filter |
+|---------|-----------|------------------|
+| **DNS Enumeration** | Excessive ANY queries | `dns` |
+| **DNS Tunneling** | TXT records with encoded data | `dns and dns.txt` |
+| **Data Exfiltration** | Large DNS queries to external domains | `dns and ip.dst not in 10.0.0.0/8` |
+| **DGA Traffic** | Many failed DNS lookups | `dns and dns.rcode != 0` |
+
+---
+
+#### Prevention & Mitigation
+
+| Method | Description |
+|--------|-------------|
+| **DNS Logging** | Enable DNS query logging |
+| **Block TXT Queries** | If not needed, block TXT records |
+| **Rate Limiting** | Limit DNS queries per client |
+| **DNS Firewall** | Use DNS filtering service |
+| **Monitor External DNS** | Alert on unusual external DNS traffic |
+| **IPFS Monitoring** | Block IPFS gateway URLs |
+| **DNSSEC** | Enable DNSSEC validation |
+
+> 💡 **Key Indicators:** Excessive DNS TXT records OR ANY queries → investigate for tunneling/enumeration!
 
 ### Strange Telnet & UDP
 
