@@ -996,6 +996,190 @@ Through this lab you learned:
 
 > 💡 **Practice:** Try capturing traffic on your home network and answer the same questions!
 
+> 💡 **Practice:** Try capturing traffic on your home network and answer the same questions!
+
+---
+
+## 10. Analysis with Wireshark (Section 10)
+
+### What is Wireshark?
+
+> 📌 **Wireshark** - Free, open-source GUI network traffic analyzer with deep packet inspection capabilities.
+
+**Features:**
+- Deep packet inspection for hundreds of protocols
+- Graphical and TTY interfaces
+- Multi-platform (Windows, Linux, macOS)
+- Supports Ethernet, 802.11, PPP, ATM, Bluetooth, USB, etc.
+- Decryption: IPsec, ISAKMP, Kerberos, SNMPv3, SSL/TLS, WEP, WPA/WPA2
+
+### Requirements
+
+**Windows:**
+- Universal C Runtime (KB2999226)
+- 64-bit processor recommended
+- 500 MB RAM minimum
+- 500 MB disk space
+
+**Linux:**
+```bash
+# Check if installed
+which wireshark
+
+# Install
+sudo apt install wireshark
+```
+
+### TShark vs Wireshark
+
+| Tool | Description |
+|------|-------------|
+| **TShark** | CLI version - perfect for headless servers |
+| **Wireshark** | GUI version - full features |
+
+### Basic TShark Switches
+
+| Switch | Description |
+|--------|-------------|
+| `-D` | List available interfaces |
+| `-L` | List link-layer mediums |
+| `-i` | Select interface |
+| `-f` | Packet filter (libpcap syntax) |
+| `-c` | Grab specific number of packets |
+| `-a` | Autostop condition (duration/size) |
+| `-r` | Read from file |
+| `-W` | Write to file (pcapng) |
+| `-x` | Hex and ASCII output |
+| `-h` | Help menu |
+
+### TShark Examples
+
+**List interfaces:**
+```bash
+tshark -D
+```
+
+**Capture to file:**
+```bash
+sudo tshark -i eth0 -w /tmp/test.pcap
+```
+
+**Apply capture filter:**
+```bash
+sudo tshark -i eth0 -f "host 172.16.146.2"
+```
+
+### Termshark
+
+> 📌 **Termshark** - Text-based UI for Wireshark in terminal
+
+<img width="962" height="607" alt="image" src="https://github.com/user-attachments/assets/27bc70b3-ea65-4849-ac93-9a3d898b6945" />
+
+Termshark showing TCP and TLSv1.3 traffic between IPs.
+
+**Termshark Help:**
+
+<img width="961" height="603" alt="image" src="https://github.com/user-attachments/assets/7dc9e8de-ef14-45b1-8be2-570c291cddc6" />
+
+Termshark interface showing keyboard shortcuts.
+
+**Install:**
+```bash
+# From GitHub releases
+# ./termshark -i eth0
+```
+
+### Wireshark GUI Overview
+
+<img width="1172" height="785" alt="image" src="https://github.com/user-attachments/assets/af09a6ac-381c-42fa-bf6d-d09abca70b7b" />
+
+Wireshark GUI showing HTTP and TCP traffic.
+
+**Wireshark Menu:**
+
+<img width="1179" height="788" alt="image" src="https://github.com/user-attachments/assets/548ec829-6af6-4f41-a64e-8ed1ec1b13a3" />
+
+Wireshark capture showing HTTP and TCP traffic.
+
+**Starting Capture:**
+
+<img width="954" height="768" alt="image" src="https://github.com/user-attachments/assets/3e294dda-20d6-4103-ac8b-f416c5bd0654" />
+
+Steps to start capture in Wireshark.
+
+**Three Main Panes:**
+
+| Pane | Color | Description |
+|------|-------|-------------|
+| **Packet List** | Orange | Summary of each packet (Number, Time, Source, Dest, Protocol, Info) |
+| **Packet Details** | Blue | Drill down into protocols - OSI layers |
+| **Packet Bytes** | Green | Hex and ASCII output |
+
+### Capture Filters
+
+| Filter | Description |
+|--------|-------------|
+| `host x.x.x.x` | Traffic for specific host |
+| `net x.x.x.x/24` | Traffic to/from network |
+| `src/dst net x.x.x.x` | Source or destination network |
+| `port #` | Specific port |
+| `not port #` | All except port |
+| `portrange x-x` | Port range |
+| `ip/tcp/udp` | Specific protocol |
+| `broadcast/multicast/unicast` | Traffic type |
+
+To apply: Click on capture → Options → Select capture filter or type in filter.
+
+<img width="1662" height="1000" alt="image" src="https://github.com/user-attachments/assets/67fb9931-a2b6-4251-b7f8-f7d85e3dff46" />
+
+Wireshark capture filters list with expressions for filtering by Ethernet, IP, TCP, UDP, and specific ports.
+
+**Applying Capture Filter:**
+
+<img width="1892" height="960" alt="image" src="https://github.com/user-attachments/assets/5e00004f-96f7-4237-894d-4ee45ad7f442" />
+
+Wireshark capture options showing interfaces and TCP filter applied.
+
+### Display Filters
+
+| Filter | Description |
+|--------|-------------|
+| `ip.addr == x.x.x.x` | Traffic for host (OR) |
+| `ip.addr == x.x.x.x/24` | Traffic for network |
+| `ip.src/dst == x.x.x.x` | Source/destination host |
+| `dns/tcp/ftp/arp/ip` | Protocol filter |
+| `tcp.port == x` | TCP port |
+| `tcp.port != x` | All except port |
+| `and/or/not` | Logical operators |
+
+**Applying Display Filter:**
+
+<img width="1074" height="374" alt="image" src="https://github.com/user-attachments/assets/c9be2eee-c915-461d-ad2a-0b6d05df297f" />
+
+Wireshark showing filtered TCP traffic - green field = valid filter.
+
+> 💡 **Tip:** Filtering for port 80 ≠ filtering for HTTP. Port 80 shows anything on that port; HTTP looks for protocol markers (GET/POST).
+
+### Toolbar
+
+<img width="1476" height="154" alt="image" src="https://github.com/user-attachments/assets/c916ac19-e7c3-4904-b09b-ce6f412ca3c3" />
+
+Wireshark Toolbar - start/stop captures, open/save files, apply filters.
+
+### Save Capture
+
+```
+File → Save OR Toolbar → Save
+Format: .pcap (or pcapng)
+```
+
+### Capture vs Display Filters
+
+| Type | When Applied | Data Modified? |
+|------|--------------|-----------------|
+| **Capture** | Before capture starts | Drops non-matching packets |
+| **Display** | During/after capture | Shows filtered view only |
+
 ---
 
 ## 8. Wireshark
