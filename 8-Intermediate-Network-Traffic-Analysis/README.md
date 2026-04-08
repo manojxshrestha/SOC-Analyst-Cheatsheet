@@ -1736,7 +1736,171 @@ IPFS operates on peer-to-peer basis, making detection exceptionally difficult.
 
 ### Strange Telnet & UDP
 
-*Coming soon...*
+> 📌 **Strange Telnet & UDP Traffic** - Telnet and UDP can be used for data exfiltration, tunneling, and command & control. These protocols are often overlooked but can reveal malicious activity.
+
+#### What is Telnet?
+
+**Telnet** is a network protocol that allows bidirectional interactive communication between two devices over a network.
+- Developed in the 1970s (RFC 854)
+- Usage has decreased in favor of SSH
+- Transmits data in plaintext (including credentials)
+
+> ⚠️ **Security Concern:** Telnet traffic is decrypted and easily inspectable, but attackers may encrypt, encode, or obfuscate the text.
+
+#### Related PCAPs
+
+- `telnet_tunneling_23.pcapng` - Traditional Telnet on port 23
+- `telnet_tunneling_9999.pcapng` - Telnet on non-standard port
+- `telnet_tunneling_ipv6.pcapng` - Telnet over IPv6
+- `udp_tunneling.pcapng` - UDP Tunneling
+
+---
+
+##### Finding Traditional Telnet Traffic (Port 23)
+
+**Wireshark Filter:**
+```
+telnet
+```
+
+![Telnet Traffic](https://github.com/user-attachments/assets/0084e81a-bd38-45b5-94d8-b5de4d61071e)
+
+*Wireshark capture showing TCP and Telnet traffic between 192.168.10.5 and 192.168.10.7, with sequence and acknowledgment details.*
+
+**Inspecting Telnet Data:**
+
+![Telnet Data](https://github.com/user-attachments/assets/6bb82b91-565b-465f-bd33-7329eac31ef5)
+
+*Network packet details showing Telnet data from 192.168.10.5 to 192.168.10.7, indicating unencrypted Telnet communication.*
+
+---
+
+##### Finding Telnet on Non-Standard Ports
+
+Attackers can run Telnet on any port. Look for suspicious traffic on unusual ports.
+
+**Wireshark Filter:** Look for TCP traffic on port 9999
+```
+tcp.port == 9999
+```
+
+![Telnet Port 9999](https://github.com/user-attachments/assets/87fad04c-d817-4ca6-9a06-b423446196c4)
+
+*Wireshark capture showing TCP traffic between 192.168.10.5 and 192.168.10.7, with sequence and acknowledgment details.*
+
+**Hex Dump Analysis:**
+
+![Hex Dump](https://github.com/user-attachments/assets/13c7959e-5663-43e3-b7e4-b182029fd838)
+
+*Hex dump showing data with ASCII translation, including the text 'Telnet' followed by exclamation marks.*
+
+**Follow TCP Stream:** Right-click → Follow → TCP Stream
+
+![TCP Stream Follow](https://github.com/user-attachments/assets/17149a9b-aa92-444b-a712-e3f51dca9158)
+
+*Wireshark TCP stream showing Telnet data with message: 'telnet!!!!!!!! exfil this why do we exfil? HTB{telnet tunnel pls and thank you}'.*
+
+---
+
+##### Telnet over IPv6
+
+Unless your network uses IPv6, IPv6 traffic can be an indicator of malicious activity.
+
+**Wireshark Filter:** Filter by IPv6 address and telnet
+```
+((ipv6.src_host == fe80::c9c8:ed3:1b10:f10b) or (ipv6.dst_host == fe80::c9c8:ed3:1b10:f10b)) and telnet
+```
+
+![IPv6 Telnet](https://github.com/user-attachments/assets/773e7e45-c972-4e5b-ac75-f409a8fb2806)
+
+*Wireshark capture showing Telnet and TCP traffic between IPv6 addresses, with sequence and acknowledgment details, including ICMPv6 neighbor solicitation and advertisement.*
+
+**Filtered IPv6 Telnet:**
+
+![Filtered IPv6](https://github.com/user-attachments/assets/f78b6b82-b16c-4015-b00c-d43fb8b9e1d4)
+
+*Wireshark capture showing Telnet traffic between IPv6 addresses, with consistent Telnet data packets.*
+
+**Inspecting IPv6 Telnet Data:**
+
+![IPv6 Telnet Data](https://github.com/user-attachments/assets/604100a4-3c1b-4b5e-90cf-99bb613fb9bf)
+
+*Network packet details showing Telnet data from IPv6 address fe80::c9c8:ed3:1b10:f10b to fe80::46a8:5bff:fe95:682a, indicating Telnet tunneling capability.*
+
+---
+
+##### UDP Traffic Analysis
+
+> 📌 **UDP (User Datagram Protocol)** - Connectionless protocol that provides fast transmission without handshake. Attackers use it for tunneling and exfiltration because it's less monitored than TCP.
+
+**TCP vs UDP:**
+
+![TCP vs UDP](https://github.com/user-attachments/assets/a7c19c8c-e2b6-433f-bc35-6a035eeaed3e)
+
+*Diagram comparing TCP and UDP communication. TCP shows a three-way handshake with SYN, SYN-ACK, and ACK. UDP shows a simple request and multiple responses.*
+
+##### Detecting UDP Tunneling
+
+**Wireshark Filter:**
+```
+udp
+```
+
+![UDP Traffic](https://github.com/user-attachments/assets/2ee99266-8602-4b39-8d2e-ab7f11e9a464)
+
+*Wireshark capture showing UDP traffic from 192.168.10.5 to 192.168.10.7, with consistent packet lengths and port numbers.*
+
+**Key Difference:** No SYN/SYN-ACK/ACK handshake - data is sent immediately
+
+**Follow UDP Stream:** Right-click → Follow → UDP Stream
+
+![UDP Stream](https://github.com/user-attachments/assets/6e7c27ca-0d82-4741-bcc6-ec4f2b932ca7)
+
+*Wireshark UDP stream showing alphabet and numbers, with a message about UDP's suitability for exfiltration due to less monitoring compared to TCP.*
+
+---
+
+##### Common Legitimate UDP Traffic
+
+| Protocol | Port | Description |
+|----------|------|-------------|
+| **DNS** | 53 | Domain Name System queries |
+| **DHCP** | 67/68 | Dynamic IP assignment |
+| **SNMP** | 161/162 | Network monitoring |
+| **TFTP** | 69 | Trivial file transfer |
+| **Real-time Apps** | Various | Streaming, gaming, VoIP |
+
+---
+
+##### Detection Signs
+
+| Indicator | Description |
+|-----------|-------------|
+| **Telnet on non-standard ports** | Port != 23 |
+| **Large Telnet data transfers** | Data exfiltration |
+| **IPv6 Telnet** | Unless network uses IPv6 |
+| **UDP high volume** | Potential tunneling |
+| **Unusual UDP patterns** | Consistent packet sizes |
+
+---
+
+#### Prevention & Mitigation
+
+| Method | Description |
+|--------|-------------|
+| **Disable Telnet** | Use SSH instead |
+| **Block Telnet** | Firewall rules |
+| **Monitor Non-standard Ports** | Alert on unusual port usage |
+| **IPv6 Monitoring** | Watch for unexpected IPv6 traffic |
+| **UDP Rate Limiting** | Limit UDP traffic per client |
+| **Deep Packet Inspection** | Inspect UDP payload contents |
+| **Network Segmentation** | Isolate sensitive systems |
+
+> 💡 **Key Indicators:** 
+> - Telnet on ports other than 23
+> - IPv6 telnet (unless network uses IPv6)
+> - High-volume UDP to single destination
+> - "Follow UDP Stream" shows readable text
 
 ---
 
