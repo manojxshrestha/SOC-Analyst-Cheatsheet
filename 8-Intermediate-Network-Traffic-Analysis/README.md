@@ -1067,7 +1067,122 @@ echo 'VGhpcyBpcyBhIHNlY3VyZSBrZXk6IEtleTEyMzQ1Njc4OQo=' | base64 -d
 
 ### HTTP/HTTPS Enumeration
 
-*Coming soon...*
+> 📌 **HTTP/HTTPS Enumeration** - Attackers fuzz web servers to discover hidden pages, vulnerabilities, and gather intelligence before launching attacks.
+
+#### What is HTTP/HTTPS Enumeration?
+
+Web servers are common targets for attackers. Before launching an attack, adversaries often perform **fuzzing** - sending numerous requests to discover:
+- Hidden directories and files
+- Vulnerable endpoints
+- Parameter injection points
+- IDOR (Insecure Direct Object Reference) vulnerabilities
+
+#### Types of Fuzzing Attacks
+
+| Type | Description | Detection Signs |
+|------|-------------|-----------------|
+| **Directory Fuzzing** | Attempting to access hidden files/directories | Multiple 404 responses in rapid succession |
+| **Parameter Fuzzing** | Testing different parameter values | Repeated requests with changing IDs |
+| **Value Fuzzing** | Changing return values (e.g., return=max→min) | Unusual parameter patterns |
+
+#### Related PCAP
+
+- `basic_fuzzing.pcapng`
+
+#### Detecting Directory Fuzzing
+
+**Wireshark Filter:** Show all HTTP traffic
+```
+http
+```
+
+![HTTP Traffic Overview](https://github.com/user-attachments/assets/ba50d64c-0dbc-4e76-b7dd-b29a80674c63)
+
+*Wireshark capture showing HTTP requests from 192.168.10.5 to 192.168.10.1, including unauthorized access attempts to various files.*
+
+**Filter:** Show only HTTP requests (hide responses)
+```
+http.request
+```
+
+![HTTP Requests Only](https://github.com/user-attachments/assets/30770610-8cf2-49ff-8772-f23e7b2b53fa)
+
+*Wireshark capture showing HTTP requests from 192.168.10.5 to 192.168.10.1, including attempts to access various files.*
+
+##### Directory Fuzzing Signs
+
+- A host repeatedly attempts to access files that do not exist (404 response)
+- Requests sent in rapid succession
+- Common targets: `.bash_history`, `.git/HEAD`, `.config`, `.cache`, hidden files
+
+#### Analyzing with Access Logs
+
+**Using grep:**
+```bash
+cat access.log | grep "192.168.10.5"
+```
+
+**Output:**
+```
+192.168.10.5 - - [18/Jul/2023:12:58:07 -0600] "GET /randomfile1 HTTP/1.1" 404 435 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+192.168.10.5 - - [18/Jul/2023:12:58:07 -0600] "GET /frand2 HTTP/1.1" 404 435 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+192.168.10.5 - - [18/Jul/2023:12:58:07 -0600] "GET /.bash_history HTTP/1.1" 404 435 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+192.168.10.5 - - [18/Jul/2023:12:58:07 -0600] "GET /.bashrc HTTP/1.1" 404 435 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+192.168.10.5 - - [18/Jul/2023:12:58:07 -0600] "GET /.cache HTTP/1.1" 404 435 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+192.168.10.5 - - [18/Jul/2023:12:58:07 -0600] "GET /.config HTTP/1.1" 404 435 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+192.168.10.5 - - [18/Jul/2023:12:58:07 -0600] "GET /.cvs HTTP/1.1" 404 435 "-" "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+...SNIP...
+```
+
+**Using awk:**
+```bash
+cat access.log | awk '$1 == "192.168.10.5"'
+```
+
+#### Detecting Parameter Fuzzing
+
+**Wireshark Filter:** Filter by source/destination IP
+```
+http.request and ((ip.src_host == <suspected IP>) or (ip.dst_host == <suspected IP>))
+```
+
+![HTTP Parameter Fuzzing](https://github.com/user-attachments/assets/dd124829-f01f-4082-a11a-6be2dea4ef74)
+
+*Wireshark capture showing HTTP requests from 192.168.10.5 to 192.168.10.7, accessing user IDs.*
+
+**Follow HTTP Stream:** Right-click → Follow → HTTP Stream
+
+![HTTP Stream Follow](https://github.com/user-attachments/assets/dc937e3c-4a85-4ebb-b66c-24e70bc97c38)
+
+*HTTP 404 error page showing 'Not Found' for user IDs 8 and 9 on server 192.168.10.7.*
+
+##### Fuzzing Detection Signs
+
+- Many requests sent in rapid succession → indicates fuzzing attempt
+- Multiple 404/403 responses from same host
+- Unusual parameter patterns in requests
+
+#### Advanced evasion Techniques
+
+Attackers may attempt to evade detection by:
+
+| Technique | Description |
+|-----------|-------------|
+| **Time Staggering** | Spacing requests across longer time periods |
+| **Source IP Rotation** | Using multiple source addresses |
+| **Slow Scanning** | Sending requests slowly to avoid rate limits |
+
+#### Prevention & Mitigation
+
+| Method | Description |
+|--------|-------------|
+| **Configure Virtual Hosts** | Return proper response codes to throw off scanners |
+| **WAF Rules** | Block suspicious IP addresses |
+| **Rate Limiting** | Limit requests per IP per time window |
+| **Logging & Monitoring** | Monitor access logs for unusual patterns |
+| **Web Application Firewall** | Deploy WAF to filter malicious traffic |
+
+> 💡 **Key Indicator:** If you see >50 404 responses from one host in short timeframe → likely fuzzing attempt!
 
 ### Strange HTTP Headers
 
