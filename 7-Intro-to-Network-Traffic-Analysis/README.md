@@ -410,9 +410,60 @@ Network packet capture showing SMB and TCP traffic.
 
 ---
 
-## 3. The Analysis Process
+## 3. The Analysis Process - Detailed (Section 4)
 
-### Common Traffic Analysis Tools
+### What is Network Traffic Analysis?
+
+> 📌 **Traffic Analysis** - Breaking down network data into understandable chunks, examining for deviations from regular traffic, detecting malicious traffic (unauthorized RDP, SSH, Telnet), and identifying network issues.
+
+**Key Points:**
+- Highly versatile and essential defensive tool
+- Provides visibility into network usage
+- Enables baseline establishment for detecting changes
+- Works with IDS/IPS, firewalls, logs, SIEMs (Splunk, ELK)
+- Helps troubleshoot connection issues
+- Manual analysis + automated tools = best detection
+
+### Analysis Dependencies
+
+| Dependency | Passive | Active | Description |
+|------------|---------|--------|-------------|
+| **Permission** | ✅ | ✅ | Must obtain written permission (legal/ethical requirement) |
+| **Mirrored Port** | ✅ | ❌ | Switch/router configured to copy traffic to analysis port |
+| **Capture Tool** | ✅ | ✅ | Tools like tcpdump, Wireshark, NetworkMiner |
+| **In-line Placement** | ❌ | ✅ | Network tap requires topology change |
+| **Network Tap/Multiple NICs** | ❌ | ✅ | Two NICs or tap device to maintain traffic flow |
+| **Storage & Processing** | ✅ | ✅ | PCAP files get large; need plenty of resources |
+
+### Passive vs Active Capture
+
+| Type | Description |
+|------|-------------|
+| **Passive** | Copy data without directly interacting with packets |
+| **Active/In-line** | Hands-on approach, acts as invisible next hop |
+
+### Using a Baseline
+
+> 💡 **Critical:** Understanding day-to-day traffic flow is essential for effective analysis!
+
+**Scenario without baseline:**
+- Grab a ton of captured data
+- Must examine every conversation to ensure it's legitimate
+- Determine if hosts belong on network or are rogue
+- Time-consuming and daunting task
+
+**Scenario with baseline:**
+- Quickly strip away known-good communications
+- Use "Top Talkers" to identify hosts sending unusual data
+- Check against baseline to determine if out of character
+- Spot anomalies (e.g., user PCs talking to each other over port 8080 or 445)
+- Faster incident detection!
+
+> 🔴 **Critical:** The faster we get visibility during network intrusions, the less potential damage!
+
+---
+
+## 4. Tcpdump
 
 | Tool | Description |
 |------|-------------|
