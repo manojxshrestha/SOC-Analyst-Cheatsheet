@@ -791,7 +791,115 @@ Open packet → IPv4 tab → Look for **very low TTL** (e.g., TTL = 3)
 
 ### TCP Handshake Abnormalities
 
-*Coming soon...*
+> 📌 **TCP Handshake Attacks** - Attackers exploit TCP flags to scan ports and evade detection.
+
+#### Normal TCP 3-Way Handshake
+
+<img width="368" height="178" alt="image" src="https://github.com/user-attachments/assets/f9d99c23-6387-4a0d-aafc-5ecd4d2258ea" />
+
+1. Client sends **SYN**
+2. Server responds **SYN-ACK**
+3. Client sends **ACK** → Connection established
+
+#### TCP Flags
+
+| Flag | Description |
+|------|-------------|
+| **URG** | Urgent data in stream |
+| **ACK** | Acknowledges receipt |
+| **PSH** | Push to application immediately |
+| **RST** | Reset/terminate connection |
+| **SYN** | Establish initial connection |
+| **FIN** | Finish/close connection |
+| **ECN** | Explicit Congestion Notification |
+
+#### Strange Conditions to Watch
+
+| Indicator | Description |
+|-----------|-------------|
+| **Too many flags** | Scanning occurring |
+| **Unusual flags** | RST attack, hijacking, evasion |
+| **One host to many ports/hosts** | Port scanning |
+
+---
+
+### Excessive SYN Flags
+
+**Related PCAP:** nmap_syn_scan.pcapng
+
+**How it works:**
+- Attacker sends TCP SYN packets to target ports
+- Open port → responds SYN-ACK → attacker sends RST
+- Closed port → responds RST
+
+<img width="976" height="362" alt="image" src="https://github.com/user-attachments/assets/216b73b0-6b67-4640-8828-57aa091b84a5" />
+
+**SYN Scan Types:**
+| Scan | Description |
+|------|-------------|
+| **SYN Scan** | Completes handshake, ends with RST |
+| **SYN Stealth** | Partially completes to evade detection |
+
+---
+
+### No Flags (NULL Scan)
+
+**Related PCAP:** nmap_null_scan.pcapng
+
+**How NULL scan works:**
+| Port State | Response |
+|-----------|----------|
+| **Open** | No response |
+| **Closed** | RST packet |
+
+<img width="935" height="410" alt="image" src="https://github.com/user-attachments/assets/1dd2444b-c589-4427-8e96-6d5844183581" />
+
+---
+
+### Too Many ACKs (ACK Scan)
+
+**Related PCAP:** nmap_ack_scan.pcapng
+
+**How ACK scan works:**
+| Port State | Response |
+|-----------|----------|
+| **Open** | No response or RST |
+| **Closed** | RST packet |
+
+<img width="948" height="375" alt="image" src="https://github.com/user-attachments/assets/ce217647-34d0-485a-99a3-838444d7297a" />
+
+---
+
+### Excessive FINs (FIN Scan)
+
+**Related PCAP:** nmap_fin_scan.pcapng
+
+**How FIN scan works:**
+| Port State | Response |
+|-----------|----------|
+| **Open** | No response |
+| **Closed** | RST packet |
+
+<img width="960" height="393" alt="image" src="https://github.com/user-attachments/assets/961ca0c7-dee8-4f7f-bd68-d2f284a4e923" />
+
+---
+
+### All Flags (XMAS Tree Scan)
+
+**Related PCAP:** nmap_xmas_scan.pcapng
+
+**How XMAS scan works:**
+- Sets ALL TCP flags (FIN, PSH, URG)
+- Hard to detect but easy to spot
+
+| Port State | Response |
+|-----------|----------|
+| **Open** | No response or RST |
+| **Closed** | RST packet |
+
+<img width="1019" height="376" alt="image" src="https://github.com/user-attachments/assets/5a80f8ac-ff1f-49c3-a5bb-7fc6e7930186" />
+
+---
 
 ### TCP Connection Resets & Hijacking
 
