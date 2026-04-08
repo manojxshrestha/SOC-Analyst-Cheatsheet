@@ -83,6 +83,8 @@ unzip Resources/pcap_files.zip -d pcaps/
    - [Peculiar DNS Traffic](#peculiar-dns-traffic)
    - [Strange Telnet & UDP](#strange-telnet--udp)
 5. [Skills Assessment](#5-skills-assessment)
+6. [Interview Questions](#interview-questions)
+7. [Additional Resources](#additional-resources)
 
 ---
 

@@ -32,6 +32,21 @@ This module offers an in-depth exploration of Suricata, Snort, and Zeek, coverin
 
 ---
 
+## Table of Contents
+
+1. [Introduction To IDS/IPS](#1-introduction-to-idsips)
+2. [Suricata Fundamentals](#2-suricata-fundamentals)
+3. [Suricata Rule Development](#3-suricata-rule-development)
+4. [Snort Fundamentals](#4-snort-fundamentals)
+5. [Snort Rule Development](#5-snort-rule-development)
+6. [Zeek Fundamentals](#6-zeek-fundamentals)
+7. [Intrusion Detection With Zeek](#7-intrusion-detection-with-zeek)
+8. [Skills Assessment](#8-skills-assessment)
+9. [Interview Questions](#interview-questions)
+10. [Additional Resources](#additional-resources)
+
+---
+
 ## 1. Introduction To IDS/IPS
 
 ### What is IDS/IPS?
@@ -551,6 +566,52 @@ sudo tcpreplay -i ens160 /home/htb-student/pcaps/suspicious.pcap
 ## 5. Skills Assessment
 
 *Coming soon...*
+
+---
+
+## Interview Questions
+
+### IDS/IPS Fundamentals
+
+1. **What is the difference between IDS and IPS?**
+2. **Explain signature-based vs anomaly-based detection.**
+3. **What are the four operation modes of Suricata?**
+
+### Suricata
+
+4. **How do you configure Suricata in IPS mode?**
+5. **What is the EVE JSON output format?**
+6. **How do you extract files using Suricata?**
+7. **What is live rule reloading in Suricata?**
+
+### Snort
+
+8. **How does Snort differ from Suricata?**
+9. **What are the Snort rule components?**
+
+### Zeek
+
+10. **What is Zeek and how does it differ from IDS/IPS?**
+11. **How do you detect malicious activity using Zeek logs?**
+
+---
+
+## Additional Resources
+
+### Tools
+
+| Tool | Description |
+|------|-------------|
+| Suricata | Open-source IDS/IPS/NSM |
+| Snort | Open-source IDS/IPS |
+| Zeek | Network security monitor |
+| suricata-update | Rule update tool |
+
+### Documentation
+
+- [Suricata Documentation](https://suricata.readthedocs.io/)
+- [Snort Documentation](https://www.snort.org/documents)
+- [Zeek Documentation](https://docs.zeek.org/)
 
 ---
 
