@@ -274,7 +274,147 @@ arp.opcode
 
 ### 802.11 Denial-of-Service
 
-*Coming soon...*
+> 📌 Wi-Fi link-layer attacks that can lead to perimeter compromise.
+
+#### Capturing 802.11 Traffic
+
+**Requirements:**
+- WIDS/WIPS system OR
+- Wireless interface with monitor mode
+
+**List wireless interfaces:**
+```bash
+iwconfig
+```
+
+**Set monitor mode (Airmon-NG):**
+```bash
+sudo airmon-ng start wlan0
+```
+
+**Set monitor mode (manual):**
+```bash
+sudo ifconfig wlan0 down
+sudo iwconfig wlan0 mode monitor
+sudo ifconfig wlan0 up
+```
+
+**Verify monitor mode:**
+```bash
+iwconfig
+# Should show Mode:Monitor
+```
+
+**Capture traffic:**
+```bash
+sudo airodump-ng -c 4 --bssid F8:14:FE:4D:E6:F1 wlan0 -w raw
+```
+
+#### How Deauthentication Attacks Work
+
+**Attack Purposes:**
+- Capture WPA handshake for offline dictionary attack
+- Cause general DoS
+- Force users to join attacker's network (Evil Twin)
+
+**Attack Method:**
+1. Attacker spoofs 802.11 deauthentication frame
+2. Pretends to come from legitimate AP
+3. Client disconnects and reconnects
+4. Attacker sniffs during handshake
+
+<img width="647" height="470" alt="image" src="https://github.com/user-attachments/assets/8132377c-5c59-4204-a985-168f315c6052" />
+
+> 🔴 Attack spoofs MAC - client can't distinguish without 802.11w (Management Frame Protection)
+
+**Common reason code:** 7 (used by aireplay-ng, mdk4)
+
+#### Finding Deauthentication Attacks
+
+**Open PCAP:**
+```bash
+sudo wireshark deauthandbadauth.cap
+```
+
+**Filter by BSSID:**
+```
+wlan.bssid == xx:xx:xx:xx:xx:xx
+```
+
+<img width="1172" height="464" alt="image" src="https://github.com/user-attachments/assets/2424d49c-5d41-4276-bc95-eb43fa1bf3a1" />
+
+Wireshark showing probe responses from AP.
+
+**Filter deauth frames:**
+```
+(wlan.bssid == xx:xx:xx:xx:xx:xx) and (wlan.fc.type == 00) and (wlan.fc.type_subtype == 12)
+```
+
+- `wlan.fc.type == 00` = Management frame
+- `wlan.fc.type_subtype == 12` = Deauthentication
+
+<img width="1089" height="430" alt="image" src="https://github.com/user-attachments/assets/11bf462a-a945-437a-82fa-1aeec88370c3" />
+
+**Filter with Reason Code 7:**
+```
+(wlan.bssid == F8:14:FE:4D:E6:F1) and (wlan.fc.type == 00) and (wlan.fc.type_subtype == 12) and (wlan.fixed.reason_code == 7)
+```
+
+<img width="1037" height="113" alt="image" src="https://github.com/user-attachments/assets/93e326f5-cd00-4139-92ab-cf4b8169317b" />
+
+Reason code: Class 3 frame received from nonassociated STA (0x0007)
+
+<img width="971" height="465" alt="image" src="https://github.com/user-attachments/assets/774653da-06c6-402d-90a9-f6150f7c2147" />
+
+> 🔴 **Red Flag:** Excessive deauth frames to one client + reason code 7
+
+#### Revolving Reason Codes
+
+Sophisticated attackers evade detection by changing reason codes.
+
+**Detection method:** Increment through reason codes
+
+```
+# Reason code 1
+(wlan.bssid == F8:14:FE:4D:E6:F1) and (wlan.fc.type == 00) and (wlan.fc.type_subtype == 12) and (wlan.fixed.reason_code == 1)
+```
+
+<img width="961" height="465" alt="image" src="https://github.com/user-attachments/assets/e18c48eb-de60-4d37-9aff-015f72ab5ab2" />
+
+**Reason code 1:**
+```
+(wlan.bssid == F8:14:FE:4D:E6:F1) and (wlan.fc.type == 00) and (wlan.fc.type_subtype == 12) and (wlan.fixed.reason_code == 2)
+```
+
+<img width="941" height="466" alt="image" src="https://github.com/user-attachments/assets/d137b8a4-47c9-4ddc-8759-c9e6d8643263" />
+
+**Reason code 3:**
+```
+(wlan.bssid == F8:14:FE:4D:E6:F1) and (wlan.fc.type == 00) and (wlan.fc.type_subtype == 12) and (wlan.fixed.reason_code == 3)
+```
+
+<img width="988" height="464" alt="image" src="https://github.com/user-attachments/assets/40e9b803-72fb-4c59-8884-82f3c753f671" />
+
+#### Prevention
+
+| Measure | Description |
+|---------|-------------|
+| **Enable IEEE 802.11w** | Management Frame Protection |
+| **Use WPA3-SAE** | Stronger authentication |
+| **Modify WIDS/WIPS rules** | Detect unusual reason codes |
+
+#### Finding Failed Authentication
+
+**Filter auth/association attempts:**
+```
+(wlan.bssid == F8:14:FE:4D:E6:F1) and (wlan.fc.type == 00) and (wlan.fc.type_subtype == 0) or (wlan.fc.type_subtype == 1) or (wlan.fc.type_subtype == 11)
+```
+
+<img width="977" height="467" alt="image" src="https://github.com/user-attachments/assets/1494cc22-5180-410c-8937-8c693089ef97" />
+
+Authentication and association response frames.
+
+> 💡 **Note:** Distinguishing legitimate vs attacker traffic is crucial for perimeter security.
 
 ---
 
