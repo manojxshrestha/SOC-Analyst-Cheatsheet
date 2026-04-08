@@ -34,10 +34,11 @@ Network Traffic Analysis helps security specialists:
 
 ## Table of Contents
 
-1. [Introduction & Networking Primer](#1-introduction--networking-primer-layers-1-4)
-2. [The Analysis Process](#2-the-analysis-process)
-3. [Tcpdump](#3-tcpdump)
-4. [Wireshark](#4-wireshark)
+1. [Introduction & Networking Primer - Layers 1-4](#1-introduction--networking-primer-layers-1-4)
+2. [Networking Primer - Layers 5-7](#2-networking-primer---layers-5-7)
+3. [The Analysis Process](#3-the-analysis-process)
+4. [Tcpdump](#4-tcpdump)
+5. [Wireshark](#5-wireshark)
 
 ---
 
@@ -289,7 +290,127 @@ TCP Session Teardown - Network packet capture showing TCP connections with SYN, 
 
 ---
 
-## 2. The Analysis Process
+## 2. Networking Primer - Layers 5-7
+
+Now that we understand lower-level networking, let's look at upper layer protocols that handle applications.
+
+### HTTP (Hypertext Transfer Protocol)
+
+> 📌 **HTTP** - Stateless Application Layer protocol (port 80/8000) that transfers data in clear text between client and server over TCP.
+
+**HTTP Methods:**
+
+| Method | Description | Safe? |
+|--------|-------------|-------|
+| **GET** | Request information and content from server | ✅ Required |
+| **HEAD** | Like GET but without message body | ✅ Required |
+| **POST** | Submit information to server | ❌ Optional |
+| **PUT** | Create or update object at URI | ❌ Optional |
+| **DELETE** | Remove object at given URI | ❌ Optional |
+| **TRACE** | Remote server diagnosis | ❌ Optional |
+| **OPTIONS** | Get supported HTTP methods | ❌ Optional |
+| **CONNECT** | Tunnel over HTTP (SSL proxies) | ❌ Optional |
+
+> 📌 **GET and HEAD** are the only required methods. Others are optional.
+
+**Common GET Request:**
+```
+GET /Webserver/index.html HTTP/1.1
+```
+
+### HTTPS (HTTP Secure)
+
+> 📌 **HTTPS** - HTTP with TLS/SSL encryption (port 443/8443)
+
+**Why HTTPS?**
+- Encrypts entire conversation (not just data)
+- Prevents Man-in-the-Middle attacks
+- Secures web traffic, sessions, bank transactions
+
+**TLS Handshake:**
+
+<img width="2416" height="886" alt="image" src="https://github.com/user-attachments/assets/eaa76325-a4bd-4cc2-8dfb-c7e20edecf7c" />
+
+Network packet capture showing TCP and TLSv1.3 connections between IPs.
+
+**TLS Handshake Steps:**
+1. Client and server exchange hello messages
+2. Exchange cryptographic parameters for premaster secret
+3. Exchange x.509 certificates for authentication
+4. Generate master secret from premaster secret
+5. Issue negotiated security parameters to record layer
+6. Verify peer calculated same parameters
+
+> 🔴 Once session established, all data appears as **TLS Application Data** (red box)
+
+### FTP (File Transfer Protocol)
+
+> 📌 **FTP** - Application Layer protocol for data transfer between computing devices
+
+**FTP Ports:**
+- Port 20: Data transfer
+- Port 21: Commands (control session)
+
+**FTP Modes:**
+
+| Mode | Description |
+|------|-------------|
+| **Active** | Server listens for PORT command from client |
+| **Passive** | Client sends PASV, server responds with IP/port for data channel |
+
+> 📌 Passive mode used for FTP servers behind firewalls/NAT.
+
+**FTP Commands:**
+
+| Command | Description |
+|---------|-------------|
+| USER | Specify username |
+| PASS | Send password |
+| PORT | Change data port (active mode) |
+| PASV | Switch to passive mode |
+| LIST | List files in directory |
+| CWD | Change working directory |
+| PWD | Print working directory |
+| SIZE | Get file size |
+| RETR | Retrieve file |
+| QUIT | End session |
+
+**FTP Command & Response:**
+
+<img width="1247" height="494" alt="image" src="https://github.com/user-attachments/assets/7a6cc6dc-e6bf-4353-b13c-d632553c7237" />
+
+FTP traffic showing directory changes, file transfers, and connection status.
+
+### SMB (Server Message Block)
+
+> 📌 **SMB** - Windows protocol for sharing resources (printer, drives, authentication)
+
+**SMB Ports:**
+- Port 445: Direct TCP
+- Port 139: NetBIOS over TCP
+
+**SMB Characteristics:**
+- Connection-oriented
+- Requires user authentication
+- Used for file shares, printers, authentication servers
+
+**SMB On The Wire:**
+
+<img width="1207" height="604" alt="image" src="https://github.com/user-attachments/assets/2b73402b-f414-4186-ad69-9a9ad603ca79" />
+
+Network packet capture showing SMB and TCP traffic.
+
+**SMB Analysis Tips:**
+- TCP handshake performed for each session
+- Port 445 = SMB over TCP
+- Look for authentication failures (red flag!)
+- Multiple auth failures = potential attacker trying to move laterally
+
+> 🔴 Large cluster of SMB auth failures = potential credential stuffing/attack!
+
+---
+
+## 3. The Analysis Process
 
 ### Common Traffic Analysis Tools
 
