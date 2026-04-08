@@ -917,7 +917,88 @@ sudo tcpdump -i eth0 'tcp[13] & 2 != 0'
 
 ---
 
-## 7. Wireshark
+## 7. Interrogating Network Traffic - Lab (Section 9)
+
+### Lab Overview
+
+This lab provides hands-on practice with packet filters to analyze PCAP files.
+
+### Tasks
+
+**Task #1: Read capture from file without filters**
+```bash
+sudo tcpdump -r capture.pcap
+```
+
+**Task #2: Identify traffic types**
+- Common protocols observed
+- Ports utilized
+- Protocols used
+
+**Task #3: Identify conversations**
+- Find patterns between server and host
+- Note client/server port numbers in TCP handshake
+- Identify servers (responding on well-known ports)
+
+**Task #4: Interpret capture in depth**
+- Timestamp of first established conversation
+- IP addresses for apache.org from DNS
+- Protocol used in first conversation
+
+**Task #5: Filter for DNS traffic**
+```bash
+# Filter DNS only
+sudo tcpdump -r capture.pcap port 53
+
+# DNS server for segment
+# Domain names requested
+# DNS record types (A, AAAA, PTR, etc.)
+```
+
+**Task #6: Filter for HTTP/HTTPS**
+```bash
+# HTTP traffic
+sudo tcpdump -r capture.pcap tcp port 80
+
+# HTTPS traffic  
+sudo tcpdump -r capture.pcap tcp port 443
+```
+- Most common HTTP request methods (GET, POST)
+- Most common HTTP response codes
+
+**Task #7: Deep analysis**
+- Use hex and ASCII output
+```bash
+sudo tcpdump -r capture.pcap -X port 80
+```
+- Determine what application is running the webserver
+
+### Tips For Analysis
+
+| Question | Purpose |
+|----------|---------|
+| What type of traffic do you see? | Protocol, port identification |
+| Is there more than one conversation? | Count conversations |
+| How many unique hosts? | Identify all endpoints |
+| Timestamp of first conversation? | Establish timeline |
+| What traffic to filter out? | Clean up view |
+| Who are the servers? | Identify services |
+| What records/methods used? | Understand activity |
+
+### Summary
+
+Through this lab you learned:
+- Capture and display filters effectively
+- Dissect traffic to identify protocols
+- Identify DNS and Web servers
+- Extract domain names and IP addresses
+- Analyze HTTP request/response methods
+
+> 💡 **Practice:** Try capturing traffic on your home network and answer the same questions!
+
+---
+
+## 8. Wireshark
 
 ### NTA Workflow
 
