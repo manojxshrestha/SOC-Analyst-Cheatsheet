@@ -1652,5 +1652,91 @@ tshark -r capture.pcap --export-objects http,./output
 
 ---
 
+## 15. Decrypting RDP Connections (Section 15)
+
+### Lab Overview
+
+This lab demonstrates Wireshark's power to decrypt RDP traffic using the RSA key.
+
+**Scenario:**
+- IR team captured RDP traffic from Bob's host
+- Found RDP-key hidden in folder on Bob's host
+- Use key to decrypt and inspect RDP traffic
+
+### Tasks
+
+**Task #1: Open the PCAP**
+```bash
+# Unzip and open rdp.pcapng in Wireshark
+```
+
+**Task #2: Analyze RDP Traffic**
+
+> 🔴 By default, RDP uses TLS encryption - can't see content!
+
+**Filter RDP:**
+```wireshark
+rdp
+```
+
+**RDP Filter:**
+
+<img width="952" height="795" alt="image" src="https://github.com/user-attachments/assets/ce65db4c-d2df-4c61-b0b8-b389425c77b9" />
+
+Wireshark interface with RDP filter - not much visible due to TLS encryption.
+
+**Verify RDP exists (port 3389):**
+```wireshark
+port 3389
+```
+
+<img width="1114" height="599" alt="image" src="https://github.com/user-attachments/assets/55cf5f19-6cef-40ac-9c48-abfc1e42a036" />
+
+Wireshark capture showing TCP and TLSv1.2 packets between IPs.
+
+**Task #3: Provide RDP Key to Wireshark**
+
+To decrypt RDP traffic:
+
+1. **Edit → Preferences → Protocols → TLS**
+2. **Select Edit by RSA keys list**
+3. **Add new key:**
+   - IP Address: `10.129.43.29` (RDP server)
+   - Port: `3389`
+   - Protocol: `tpkt` or blank
+   - Key File: Browse to `server.key`
+
+**TLS Settings:**
+
+<img width="887" height="660" alt="image" src="https://github.com/user-attachments/assets/78f6fac8-e08d-44e3-a1a3-71cca7c522d2" />
+
+Wireshark Preferences window showing TLS settings.
+
+**Import Steps:**
+
+<img width="885" height="629" alt="image" src="https://github.com/user-attachments/assets/f3458f69-2b91-4f49-984a-13203f02d47a" />
+
+TLS Decrypt settings showing IP, port, protocol, and key file path.
+
+**After decryption - RDP In The Clear:**
+
+Now when filtering on RDP, traffic is visible!
+
+### Analysis Questions
+
+**Q1: Which host initiated the RDP session?**
+- Answer: `10.129.43.27`
+
+**Q2: Which user account was used?**
+- Check the cookie value in the RDP traffic
+
+### Summary
+
+- Wireshark can decrypt traffic if RSA key is acquired
+- Acquire RDP certificate from server → Extract private key with OpenSSL
+- Works for any protocol using encryption where you have the key
+
+---
+
 *Module 7/15 - Intro to Network Traffic Analysis*
 *For learning and SOC career preparation*
