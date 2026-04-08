@@ -1021,7 +1021,246 @@ ja3 -a --json /home/htb-student/pcaps/sliverenc.pcap
 
 ## 5. Snort Fundamentals
 
-*Coming soon...*
+> 📌 **Snort** - An open-source IDS/IPS that can also function as a packet logger or sniffer, similar to Suricata.
+
+### What is Snort?
+
+Snort is an open-source tool that serves as both an Intrusion Detection System (IDS) and Intrusion Prevention System (IPS), but can also function as a packet logger or sniffer. By thoroughly inspecting all network traffic, Snort has the capability to identify and log all activity within that traffic, providing a comprehensive view and detailed logs of all application layer transactions.
+
+**Key Points:**
+- Requires specific rule sets for inspection
+- Created to operate efficiently on both general-purpose and custom hardware
+- Similar to Suricata in many ways
+
+---
+
+### Snort Operation Modes
+
+| Mode | Description |
+|------|-------------|
+| **Inline IDS/IPS** | Actively blocks traffic in IPS mode |
+| **Passive IDS** | Monitors and alerts without blocking |
+| **Network-based IDS** | Monitors network traffic |
+| **Host-based IDS** | Monitors host-specific traffic (not ideal for Snort) |
+
+> 📌 **DAQ (Data Acquisition Library):** LibDAQ is an abstraction layer used by modules to communicate with network data sources.
+
+#### Passive vs Inline Mode
+
+| Mode | Behavior |
+|------|----------|
+| **Passive** | Observes and detects traffic, cannot block |
+| **Inline** | Can block traffic if a packet warrants it |
+
+> 🔴 **Note:** Using `-r` (pcap) or `-i` (interface) runs Snort in passive mode. Using `-Q` flag enables inline mode (requires DAQ module like afpacket).
+
+---
+
+### Snort Architecture
+
+Snort consists of four main components:
+
+```mermaid
+flowchart LR
+    A[Packet Sniffer<br/>Packet Decoder] --> B[Preprocessor]
+    B --> C[Detection Engine]
+    C --> D[Logging & Alerting<br/>Output Modules]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+```
+
+#### 1. Packet Sniffer / Packet Decoder
+- Extracts network traffic
+- Recognizes structure of each packet
+- Forwards raw packets to Preprocessors
+
+#### 2. Preprocessors
+- Identify type/behaviour of packets
+- Plugins include:
+  - HTTP plugin - distinguishes HTTP traffic
+  - port_scan - identifies port scanning attempts
+
+#### 3. Detection Engine
+- Compares packets with predefined Snort rules
+- If match found → forwards to Logging/Alerting
+
+#### 4. Logging and Alerting System / Output Modules
+- Records or triggers alerts based on rule actions
+- Output formats: syslog, unified2, database
+
+---
+
+### Snort Configuration
+
+#### Configuration Files
+
+| File | Description |
+|------|-------------|
+| `snort.lua` | Principal configuration file |
+| `snort_defaults.lua` | Default settings |
+
+**snort.lua Sections:**
+- Network variables
+- Decoder configuration
+- Base detection engine configuration
+- Dynamic library configuration
+- Preprocessor configuration
+- Output plugin configuration
+- Rule set customization
+
+#### Network Variables
+
+```lua
+HOME_NET = 'any'
+EXTERNAL_NET = 'any'
+```
+
+#### Validating Configuration
+
+```bash
+snort -c /root/snorty/etc/snort/snort.lua --daq-dir /usr/local/lib/daq
+```
+
+---
+
+### Snort Modules
+
+#### Viewing Available Modules
+
+```bash
+snort --help-modules
+```
+
+#### Viewing Module Configuration
+
+```bash
+snort --help-config arp_spoof
+```
+
+#### Enabling Modules
+
+In `snort.lua`, modules are enabled as Lua table literals:
+
+```lua
+stream = { }
+stream_tcp = { }
+arp_spoof = { }
+```
+
+---
+
+### Snort Inputs
+
+#### Offline Mode (PCAP)
+
+```bash
+snort -c /root/snorty/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -r /home/htb-student/pcaps/icmp.pcap
+```
+
+#### Live Mode
+
+```bash
+snort -c /root/snorty/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -i ens160
+```
+
+---
+
+### Snort Rules
+
+> 📌 **Snort Rules** - Resemble Suricata rules, consisting of rule header and rule options.
+
+**Rule Structure:**
+```bash
+action protocol source_ip source_port -> dest_ip dest_port (msg:"Message"; content:"content"; sid:1000001; rev:1;)
+```
+
+**Including Rules:**
+
+```lua
+ips =
+{
+    { variables = default_variables, include = '/home/htb-student/local.rules' }
+}
+```
+
+**Command Line:**
+```bash
+# Single rules file
+snort -c snort.lua -R local.rules
+
+# Rules directory
+snort -c snort.lua --rule-path /path/to/rules
+```
+
+> 📌 **Reference:** For Snort rule writing, see [Snort Documentation](https://docs.snort.org/) and [Suricata vs Snort](https://docs.suricata.io/en/latest/rules/differences-from-snort.html)
+
+---
+
+### Snort Outputs
+
+#### Alert Types
+
+| Option | Description |
+|--------|-------------|
+| `-A cmg` | Fast + header + payload (`-A fast -d -e`) |
+| `-A u2` | Unified2 binary format |
+| `-A csv` | Comma-separated values |
+| `-A fast` | Brief text format |
+| `-A json` | JSON format |
+| `-A full` | Full packet dump |
+
+#### Example - CMG Output
+
+```bash
+snort -c snort.lua -r icmp.pcap -A cmg
+```
+
+**Output:**
+```
+06/19-08:45:56.838904 [**] [1:1000001:1] "ICMP test" [**] [Classification: Generic ICMP event] [Priority: 3] {ICMP} 192.168.158.139 -> 174.137.42.77
+00:0C:29:34:0B:DE -> 00:50:56:E0:14:49 type:0x800 len:0x4A
+192.168.158.139 -> 174.137.42.77 ICMP TTL:128 TOS:0x0 ID:55107 IpLen:20 DgmLen:60
+Type:8  Code:0  ID:512   Seq:8448  ECHO
+```
+
+#### List Available Loggers
+
+```bash
+snort --list-plugins | grep logger
+```
+
+---
+
+### Statistics Output
+
+#### Packet Statistics
+- Received/analyzed packets
+- Protocol breakdown (TCP, UDP, ICMP, etc.)
+
+#### Module Statistics
+- Each module tracks activity through peg counts
+- Examples: HTTP GET requests, TCP resets
+
+#### Summary Statistics
+- Total runtime
+- Packets per second
+- Profiling data (if configured)
+
+---
+
+### Snort Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Deep packet inspection** | Packet capture and logging |
+| **Intrusion detection/prevention** | Signature and anomaly detection |
+| **Network Security Monitoring** | Comprehensive traffic analysis |
+| **Anomaly detection** | Behavioral-based detection |
+| **Multi-tenancy** | Support for multiple networks |
+| **IPv4/IPv6** | Full protocol support |
 
 ---
 
