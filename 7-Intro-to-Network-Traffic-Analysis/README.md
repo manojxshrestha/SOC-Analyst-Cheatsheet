@@ -769,7 +769,155 @@ man tcpdump
 
 ---
 
-## 6. Tcpdump - Packet Filtering
+## 6. Tcpdump - Packet Filtering (Section 8)
+
+### Filtering and Advanced Syntax
+
+> 📌 Tcpdump filters help trim down traffic printed to output or sent to file. Reduces storage and speeds up processing.
+
+### Helpful Tcpdump Filters
+
+| Filter | Description |
+|--------|-------------|
+| `host` | Filter by host (bi-directional) |
+| `src / dest` | Source or destination host/port |
+| `net` | Filter by network (CIDR notation) |
+| `proto` | Filter by protocol (tcp, udp, icmp) |
+| `port` | Filter by port (bi-directional) |
+| `portrange` | Filter by port range (e.g., 0-1024) |
+| `less / greater` | Filter by packet size |
+| `and / &&` | Combine filters |
+| `or / \|\|` | Match either condition |
+| `not / !` | Negate filter |
+
+### Host Filter
+
+```bash
+sudo tcpdump -i eth0 host 172.16.146.2
+
+# Shows all traffic involving 172.16.146.2 (source or destination)
+```
+
+### Source/Destination Filter
+
+```bash
+# Source only
+sudo tcpdump -i eth0 src host 172.16.146.2
+
+# Destination only
+sudo tcpdump -i eth0 dst net 172.16.146.0/24
+
+# Source port
+sudo tcpdump -i eth0 tcp src port 80
+```
+
+### Protocol Filter
+
+```bash
+# Using name
+sudo tcpdump -i eth0 udp
+
+# Using protocol number (17 = UDP)
+sudo tcpdump -i eth0 proto 17
+```
+
+### Port Filter
+
+```bash
+# TCP port 443
+sudo tcpdump -i eth0 tcp port 443
+
+# Any port 53 (TCP or UDP)
+sudo tcpdump -i eth0 port 53
+```
+
+### Port Range Filter
+
+```bash
+# Common ports only
+sudo tcpdump -i eth0 portrange 0-1024
+```
+
+### Less/Greater Filter
+
+```bash
+# Packets less than 64 bytes
+sudo tcpdump -i eth0 less 64
+
+# Packets greater than 500 bytes
+sudo tcpdump -i eth0 greater 500
+```
+
+### AND Filter
+
+```bash
+# Both conditions must match
+sudo tcpdump -i eth0 host 192.168.0.1 and port 23
+```
+
+### OR Filter
+
+```bash
+# Either condition matches
+sudo tcpdump -r sus.pcap icmp or host 172.16.146.1
+```
+
+### NOT Filter
+
+```bash
+# Exclude ICMP traffic
+sudo tcpdump -r sus.pcap not icmp
+```
+
+### Pre-Capture vs Post-Capture Filters
+
+| Type | Description |
+|------|-------------|
+| **Pre-capture** | Applied during capture - drops non-matching packets |
+| **Post-capture** | Applied when reading file - doesn't modify PCAP |
+
+### Tips and Tricks
+
+**Absolute Sequence Numbers:**
+```bash
+# -S shows absolute sequence numbers (very long)
+sudo tcpdump -i eth0 -S
+```
+
+**ASCII Only:**
+```bash
+# -A shows ASCII only (no hex)
+sudo tcpdump -Ar telnet.pcap
+```
+
+**Line Buffer (for piping):**
+```bash
+# -l enables line buffering for grep
+sudo tcpdump -Ar http.cap -l | grep 'mailto:*'
+```
+
+### TCP Flags Filtering
+
+**Find SYN packets (port scan detection):**
+```bash
+# tcp[13] & 2 checks the 2nd bit (SYN flag)
+sudo tcpdump -i eth0 'tcp[13] & 2 != 0'
+```
+
+> 📌 This counts to the 13th byte in TCP header and checks if 2nd bit is set (SYN flag).
+
+### Protocol RFC Links
+
+| Protocol | RFC |
+|----------|-----|
+| IP | RFC 791 |
+| ICMP | RFC 792 |
+| TCP | RFC 793 |
+| UDP | RFC 768 |
+
+---
+
+## 7. Wireshark
 
 ### NTA Workflow
 
