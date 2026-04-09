@@ -1908,5 +1908,70 @@ forwardable="true" renewable="true"
 
 ---
 
+### Detecting Golden Tickets (Zeek) {#detecting-golden-tickets-1}
+
+#### Golden Ticket Detection via Network Analysis
+
+**Limitation**: Zeek cannot reliably identify Golden Tickets directly.
+
+> 📌 Instead, we detect **anomalies in Kerberos ticket creation** - attacks bypass the normal AS-REQ/AS-REP process.
+
+**Golden Ticket / Pass-the-Ticket Behavior:**
+
+| Attack | Normal Auth | Attack Behavior |
+|--------|-------------|-----------------|
+| Normal | AS-REQ → AS-REP → TGT → TGS-REQ → TGS-REP | Uses valid TGT |
+| Golden Ticket | Forged TGT → TGS-REQ directly (no AS-REQ/AS-REP) | Bypasses KDC auth |
+| Pass-the-Ticket | Stolen TGT/TGS → TGS-REQ directly | Uses stolen ticket |
+
+#### Golden Ticket Traffic
+
+![Golden Ticket Traffic](https://github.com/user-attachments/assets/f2b3fcf1-230a-4103-8a42-fad0cfc178d3)
+
+*Network capture showing TGS-REQ/TGS-REP without prior AS-REQ/AS-REP*
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/golden_ticket_attack` |
+| Splunk Index | `golden_ticket_attack` |
+| Sourcetype | `bro:kerberos:json` |
+
+---
+
+#### Detecting Golden Tickets With Splunk & Zeek
+
+```spl
+index="golden_ticket_attack" sourcetype="bro:kerberos:json"
+| where client!="-"
+| bin _time span=1m 
+| stats values(client), values(request_type) as request_types, dc(request_type) as unique_request_types by _time, id.orig_h, id.resp_h
+| where request_types=="TGS" AND unique_request_types==1
+```
+
+![Golden Ticket Detection](https://github.com/user-attachments/assets/631569f8-4cec-4b09-b7f1-f504f34c653d)
+
+*Detecting Golden Ticket anomalies*
+
+**Search Breakdown:**
+
+1. **Filter**: Exclude events where client is "-"
+2. **Bin**: Group into 1-minute intervals
+3. **Stats**: Get client values, request types, and count of unique request types
+4. **Filter**: Only show TGS-only requests (no AS-REQ/AS-REP)
+
+> 📌 **Key Detection**: TGS requests WITHOUT preceding AS-REQ/AS-REP indicates Golden/Pass-the-Ticket activity!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
