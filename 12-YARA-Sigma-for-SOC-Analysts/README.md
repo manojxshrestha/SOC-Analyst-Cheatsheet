@@ -43,8 +43,9 @@ This module covers:
 4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition) - Disk, Process, ETW Hunting (Windows)
 5. [Hunting Evil with YARA](#5-hunting-evil-with-yara-linux-edition) - Memory Forensics with YARA & Volatility
 6. [Hunting Evil with YARA](#6-hunting-evil-with-yara-web-edition) - Online YARA Hunting with Unpac.me
-7. [Leveraging Sigma](#7-leveraging-sigma) - *Coming soon*
-8. [Skills Assessment](#8-skills-assessment) - *Coming soon*
+7. [Sigma and Sigma Rules](#7-sigma-and-sigma-rules) - Overview, Structure, Value Modifiers, Development
+8. [Leveraging Sigma](#8-leveraging-sigma) - *Coming soon*
+9. [Skills Assessment](#9-skills-assessment) - *Coming soon*
 
 ### Quick Reference
 - [YARA Rule Structure](#yara-rule-structure)
@@ -1651,11 +1652,218 @@ rule ransomware_dharma {
 
 ---
 
-## 7. Leveraging Sigma {#7-leveraging-sigma}
+## 7. Sigma and Sigma Rules {#7-sigma-and-sigma-rules}
+
+> 📌 **Sigma** is a generic signature format for describing detection rules for log analysis and SIEM systems. It allows SOC analysts to create portable rules that work across multiple platforms.
+
+### Overview
+
+Sigma is a standardized format for analysts to create and share detection rules. It helps convert IOCs into queries that can be easily integrated with SIEMs and EDRs.
+
+Sigma rules are written in YAML format and can be used to detect suspicious activities in various log sources. This also helps in building efficient processes for **Detection as Code**.
+
+![Sigma Rule Conversion](https://github.com/user-attachments/assets/ce4f8cd3-ce01-4505-8545-df1b5c6a5fc1)
+
+*Diagram showing Sigma Rule conversion using Uncoder.io or Sigma Converter to integrate with SIEM and EDR tools like ArcSight and Splunk.*
+
+---
+
+### Usages of Sigma
+
+| Usage | Description |
+|-------|-------------|
+| **Universal Log Analytics Tool** | Write detection rules once, convert to various SIEM formats |
+| **Community-driven Rule Sharing** | Tap into community that regularly contributes detection rules |
+| **Incident Response** | Quickly search and analyze logs for specific patterns |
+| **Proactive Threat Hunting** | Use specific patterns to pinpoint anomalies |
+| **Seamless Integration** | Convert rules for SOAR platforms and automation tools |
+| **Customization** | Tailor rules to unique environment characteristics |
+| **Gap Identification** | Perform gap analysis against broader community rules |
+
+---
+
+### How Does Sigma Work?
+
+At its heart, Sigma is about expressing patterns found in log events in a structured manner. Instead of scattered proprietary formats, Sigma provides a unified open standard - the **lingua franca** for log-based threat detection.
+
+#### Key Components:
+
+1. **Sigma Rules (YAML)**: Describe patterns of log events that correlate with malicious activity
+2. **sigmac**: Converter that transforms Sigma rules into SIEM queries (ElasticSearch, QRadar, Splunk, etc.)
+3. **pySigma**: Newer translation tool (replacing sigmac)
+
+> 📌 **Note:** pySigma is increasingly becoming the go-to option for rule translation, as sigmac is now considered obsolete.
+
+---
+
+### Sigma Rule Structure
+
+Sigma rule files are written in YAML format with the following structure:
+
+![Sigma Rule Structure](https://github.com/user-attachments/assets/36bf57a1-35ed-4b6f-bdf3-1ee993fe9a94)
+
+*Structure showing fields: title, status, description, author, reference, logsource, detection, and condition. Required fields are highlighted.*
+
+---
+
+### Sigma Rule Example
+
+```yaml
+title: Potential LethalHTA Technique Execution 
+id: ed5d72a6-f8f4-479d-ba79-02f6a80d7471 
+status: test 
+description: Detects potential LethalHTA technique where "mshta.exe" is spawned by an "svchost.exe" process
+references:
+    - https://codewhitesec.blogspot.com/2018/07/lethalhta.html
+author: Markus Neis 
+date: 2018/06/07 
+tags: 
+    - attack.defense_evasion 
+    - attack.t1218.005 
+logsource: 
+    category: process_creation  
+    product: windows
+detection:
+    selection: 
+        ParentImage|endswith: '\svchost.exe'
+        Image|endswith: '\mshta.exe'
+    condition: selection
+falsepositives: 
+    - Unknown
+level: high
+```
+
+![Sigma Rule Components](https://github.com/user-attachments/assets/48fa9215-8c50-4b01-b054-2615cbf7b200)
+
+*Image showing Sigma Rule components: title, ID, status, description, references, author, date, tags, logsource, detection, falsepositives, level*
+
+---
+
+### Sigma Rule Breakdown
+
+📌 **title**: Brief title (max 256 characters) describing what the rule detects
+
+📌 **id**: Globally unique identifier (UUID v4 recommended)
+
+📌 **status**: Rule status
+- `stable`: Tested over long period, no false positives
+- `test`: Tested on limited systems, no obvious false positives
+- `experimental`: Not tested outside lab environments
+- `deprecated`: To be replaced by another rule
+- `unsupported`: Cannot be used in current state
+
+📌 **description**: Short description of the detection (max 65,535 characters)
+
+📌 **references**: Citations to original sources (blog posts, articles, tweets)
+
+📌 **author**: Creator of the rule
+
+📌 **date**: Creation date in YYYY/MM/DD format
+
+📌 **logsource**: Describes the log data
+- **category**: Product group (firewall, web, antivirus)
+- **product**: Specific product (windows, apache)
+- **service**: Subset of product logs (sshd, security)
+
+📌 **detection**: Search identifiers + condition
+- Search identifiers represent properties to search in log data
+- Condition defines how fields relate to each other
+
+![Detection Structure](https://github.com/user-attachments/assets/1900f2b3-fc0d-457c-9790-ab912aeaaa10)
+
+*Detection attributes showing search-identifiers for cmd.exe and powershell.exe with parent images*
+
+---
+
+### Value Modifiers
+
+| Modifier | Explanation | Example |
+|----------|-------------|---------|
+| **contains** | Adds wildcard (*) around value | CommandLine\|contains |
+| **all** | Links list elements with AND | CommandLine\|contains\|all |
+| **startswith** | Adds wildcard at end | ParentImage\|startswith |
+| **endswith** | Adds wildcard at beginning | Image\|endswith |
+| **re** | Regular expression | CommandLine\|re: '\String' |
+
+---
+
+### Search Identifiers
+
+#### Lists
+- Contains strings applied to full log message (OR logic)
+- Contains maps (OR logic)
+
+![Lists and Maps](https://github.com/user-attachments/assets/3ec9c36c-7e28-4712-a4b1-fd7732ca6329)
+
+*Detection examples with lists and maps*
+
+**Example - List of strings:**
+```yaml
+detection:
+    keywords:
+        - evilservice
+        - svchost.exe -n evil
+```
+
+**Example - List of maps:**
+```yaml
+detection:
+    selection:
+        - Image|endswith: '\example.exe'
+        - Description|contains: 'Test executable'
+```
+
+#### Maps
+- Key/value pairs where key is log field and value is string/integer
+- All elements joined with AND
+
+**Example - Event Log Security with multiple Event IDs:**
+```yaml
+detection:
+    selection:
+        EventLog: Security
+        EventID:
+          - 517
+          - 1102
+    condition: selection
+```
+
+---
+
+### Condition Operators
+
+| Operator | Example |
+|----------|---------|
+| **Logical AND/OR** | keywords1 or keywords2 |
+| **1/all of them** | all of them |
+| **1/all of search-identifier-pattern** | all of selection* |
+| **Negation with 'not'** | keywords and not filters |
+| **Brackets** | selection1 and (keywords1 or keywords2) |
+
+**Example:**
+```yaml
+condition: selection1 or selection2 or selection3
+```
+
+---
+
+### Sigma Rule Development Best Practices
+
+📌 **Resources:**
+- [SigmaHQ Specification](https://github.com/SigmaHQ/sigma/wiki/Specification)
+- [Sigma Rule Creation Guide](https://github.com/SigmaHQ/sigma/tree/master/rules)
+
+> 📌 **Key Takeaway:** Sigma enables portable detection rules that work across multiple SIEM platforms. Write once, use everywhere!
+
+---
+
+## 8. Leveraging Sigma {#8-leveraging-sigma}
 
 *Coming soon...*
 
 ---
+
+## 9. Skills Assessment {#9-skills-assessment}
 
 ## 8. Skills Assessment {#8-skills-assessment}
 
