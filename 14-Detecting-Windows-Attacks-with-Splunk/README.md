@@ -1429,5 +1429,170 @@ index=main earliest=1690623888 latest=1690623890 EventCode=4742
 
 ---
 
+## 2. Creating Custom Splunk Applications {#2-creating-custom-splunk-applications}
+
+### Overview
+
+Custom Splunk applications allow SOC analysts to organize and automate detection searches, dashboards, and reports for specific threat scenarios.
+
+---
+
+### How To Create A Custom Splunk Application
+
+#### Step 1: Access Splunk Web
+
+Navigate to Splunk Web in your browser.
+
+#### Step 2: Manage Apps
+
+From the menu bar, select **Apps** → **Manage Apps**.
+
+![Manage Apps](https://github.com/user-attachments/assets/35b28367-7e0b-4f28-8318-f98fc3293fc3)
+
+*Splunk Apps menu*
+
+#### Step 3: Create New App
+
+Click **Create app** and fill in the details:
+
+| Field | Value |
+|-------|-------|
+| Name | Academy hackthebox - Detection of Active Directory Attacks |
+| Folder name | Detection_of_Active_Directory_Attacks |
+| Version | 1.0.0 |
+| Description | App description |
+| Template | barebones |
+
+![Create App](https://github.com/user-attachments/assets/3948088b-6e8c-4bc6-913e-aea8e489f9ff)
+
+*App creation form*
+
+#### Step 4: Save and Verify
+
+Click **Save**. Your app will appear in the Apps menu.
+
+![App Listed](https://github.com/user-attachments/assets/63dc950b-7c1a-4bd8-9f4f-8f9688071157)
+
+*New app in Apps menu*
+
+---
+
+### App Directory Structure
+
+Navigate to `$SPLUNK_HOME/etc/apps/<your app>`:
+
+```
+/bin          # Scripts
+/default      # Configuration, views, dashboards, navigation
+/local        # User-modified configurations
+/metadata     # Permissions files
+```
+
+![Directory Structure](https://github.com/user-attachments/assets/d101a5f9-3211-49f4-b2e2-8ac2fa332b2d)
+
+*App directory structure*
+
+---
+
+### Navigation Configuration
+
+The navigation is defined in `default/data/ui/nav/default.xml`:
+
+```xml
+<nav search_view="search">
+  <view name="search" default='true' />
+  <view name="analytics_workspace" />
+  <view name="datasets" />
+  <view name="reports" />
+  <view name="alerts" />
+  <view name="dashboards" />
+</nav>
+```
+
+- `search_view`: Default view for searches
+- `default='true'`: Home page view
+
+---
+
+### Creating Dashboards
+
+#### Step 1: Create New Dashboard
+
+Go to **Dashboards** → **Create New Dashboard**
+
+![Create Dashboard](https://github.com/user-attachments/assets/5ff34086-0a1f-4fe0-a030-9aaa578eee9d)
+
+*Create dashboard form*
+
+Enter:
+- **Title**: Domain Reconnaissance
+- **Description**: (optional)
+- **Permissions**: (set as needed)
+- **Type**: Classic Dashboards
+
+#### Step 2: Configure Dashboard
+
+Add inputs and panels:
+
+1. **Add Time Input**: Select "Time" token, set default range
+2. **Add Panel**: Choose "Statistics Table"
+3. **Search String**: Enter Splunk search (use `$token$` for inputs)
+
+![Add Panel](https://github.com/user-attachments/assets/9bf2a2df-4aa4-4271-bbc3-3e9fb5874d8a)
+
+*Adding panel to dashboard*
+
+#### Step 3: Save Dashboard
+
+Dashboards are stored at:
+```
+<AppPath>/local/data/ui/views/<dashboard_name>.xml
+```
+
+To add to navigation, update `default.xml`:
+
+```xml
+<nav search_view="search">
+  <view name="search" default='true' />
+  <view name="domain_reconnaissance" />
+</nav>
+```
+
+![Navigation XML](https://github.com/user-attachments/assets/5b26851f-2615-40a9-9977-7f59535f7b0d)
+
+*Navigation XML configuration*
+
+#### Step 4: Restart Splunk
+
+Reboot your Splunk instance. The dashboard will appear in the navigation bar.
+
+---
+
+### Grouping Dashboards
+
+To group multiple dashboards under one entry:
+
+```xml
+<collection label="Command and Control">
+  <view name="c2_investigator" />
+  <view name="c2_investigator_zeek" />
+</collection>
+```
+
+---
+
+### Importing Existing Applications
+
+To update an existing app:
+1. Download `Detection-of-Active-Directory-Attacks.tar.gz` from Resources
+2. Go to **Apps** → **Manage Apps** → **Install app from file**
+3. Browse and select the file
+4. Check "Upgrade app" to overwrite
+5. Click **Upload**
+
+> 📌 Custom apps allow SOC teams to consolidate detection searches, automate monitoring, and create reusable dashboards for specific threat scenarios.
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
