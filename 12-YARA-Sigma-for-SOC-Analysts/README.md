@@ -36,23 +36,19 @@ This module covers:
 
 ## Table of Contents
 
-### Module Sections
-1. [Introduction to YARA & Sigma](#1-introduction-to-yara--sigma) - Overview, Why SOC Analysts Need YARA & Sigma
-2. [Leveraging YARA](#2-leveraging-yara) - What is YARA, Rule Structure, Components, Reserved Keywords
-3. [Developing YARA Rules](#3-developing-yara-rules) - Manual Development, yarGen, Advanced Examples
-4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition) - Disk, Process, ETW Hunting (Windows)
-5. [Hunting Evil with YARA](#5-hunting-evil-with-yara-linux-edition) - Memory Forensics with YARA & Volatility
-6. [Hunting Evil with YARA](#6-hunting-evil-with-yara-web-edition) - Online YARA Hunting with Unpac.me
-7. [Sigma and Sigma Rules](#7-sigma-and-sigma-rules) - Overview, Structure, Value Modifiers
-8. [Developing Sigma Rules](#8-developing-sigma-rules) - Manual Development, sigmac, False Positives
-9. [Leveraging Sigma](#9-leveraging-sigma) - *Coming soon*
-10. [Skills Assessment](#10-skills-assessment) - *Coming soon*
-
-### Quick Reference
-- [YARA Rule Structure](#yara-rule-structure)
-- [YARA Rule Components](#yara-rule-components)
-- [Reserved Keywords](#reserved-keywords)
-- [YARA Resources](#yara-resources)
+0. [Overview](#0-overview)
+1. [Introduction to YARA & Sigma](#1-introduction-to-yara--sigma)
+2. [Leveraging YARA](#2-leveraging-yara)
+3. [Developing YARA Rules](#3-developing-yara-rules)
+4. [Hunting Evil with YARA (Windows Edition)](#4-hunting-evil-with-yara-windows-edition)
+5. [Hunting Evil with YARA (Linux Edition)](#5-hunting-evil-with-yara-linux-edition)
+6. [Hunting Evil with YARA (Web Edition)](#6-hunting-evil-with-yara-web-edition)
+7. [Sigma and Sigma Rules](#7-sigma-and-sigma-rules)
+8. [Developing Sigma Rules](#8-developing-sigma-rules)
+9. [Hunting Evil with Sigma (Chainsaw Edition)](#9-hunting-evil-with-sigma-chainsaw-edition)
+10. [Hunting Evil with Sigma (Splunk Edition)](#10-hunting-evil-with-sigma-splunk-edition)
+11. [Interview Questions](#11-interview-questions)
+12. [Additional Resources](#12-additional-resources)
 
 ---
 
@@ -2211,15 +2207,465 @@ level: medium
 
 ---
 
-## 9. Leveraging Sigma {#9-leveraging-sigma}
+## 9. Hunting Evil with Sigma (Chainsaw Edition) {#9-hunting-evil-with-sigma-chainsaw-edition}
 
-*Coming soon...*
+> 📌 **Chainsaw** - A fast tool to hunt security threats in Windows Event Logs using Sigma rules when no SIEM is available.
+
+### Overview
+
+In cybersecurity, time is of the essence. Rapid analysis allows us to not just identify but also respond to threats before they escalate.
+
+When we're up against the clock, racing to find a needle in a haystack of Windows Event Logs without access to a SIEM, **Sigma rules combined with tools like Chainsaw and Zircolite** are our best allies.
+
+Both tools allow us to use Sigma rules to scan not just one, but multiple EVTX files concurrently, offering a broader and more comprehensive scan in a very efficient manner.
 
 ---
 
-## 10. Skills Assessment {#10-skills-assessment}
+### Scanning Windows Event Logs With Chainsaw
 
-## 9. Skills Assessment {#9-skills-assessment}
+**Chainsaw** is a freely available tool designed to swiftly pinpoint security threats within Windows Event Logs. This tool enables efficient keyword-based event log searches and is equipped with integrated support for Sigma detection rules as well as custom Chainsaw rules. Therefore, it serves as a valuable asset for validating our Sigma rules by applying them to actual event logs.
+
+> 📌 Chainsaw can be found inside the `C:\Tools\chainsaw` directory of this section's target.
+
+Let's first run Chainsaw with `-h` flag to see the help menu:
+
+```powershell
+PS C:\Tools\chainsaw> .\chainsaw_x86_64-pc-windows-msvc.exe -h
+Rapidly work with Forensic Artefacts
+
+Usage: chainsaw_x86_64-pc-windows-msvc.exe [OPTIONS] <COMMAND>
+
+Commands:
+  dump     Dump an artefact into a different format
+  hunt     Hunt through artefacts using detection rules for threat detection
+  lint     Lint provided rules to ensure that they load correctly
+  search   Search through forensic artefacts for keywords
+  analyse  Perform various analyses on artifacts
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+      --no-banner                  Hide Chainsaw's banner
+      --num-threads <NUM_THREADS>  Limit the thread number (default: num of CPUs)
+  -h, --help                       Print help
+  -V, --version                    Print version
+```
+
+#### Chainsaw Commands
+
+| Command | Description |
+|---------|-------------|
+| `dump` | Dump an artefact into a different format |
+| `hunt` | Hunt through artefacts using detection rules for threat detection |
+| `lint` | Lint provided rules to ensure that they load correctly |
+| `search` | Search through forensic artefacts for keywords |
+| `analyse` | Perform various analyses on artifacts |
+
+#### Chainsaw Examples
+
+```bash
+# Hunt with Sigma and Chainsaw Rules
+./chainsaw hunt evtx_attack_samples/ -s sigma/ --mapping mappings/sigma-event-logs-all.yml -r rules/
+
+# Hunt with Sigma rules and output in JSON
+./chainsaw hunt evtx_attack_samples/ -s sigma/ --mapping mappings/sigma-event-logs-all.yml --json
+
+# Search for the case-insensitive word 'mimikatz'
+./chainsaw search mimikatz -i evtx_attack_samples/
+
+# Search for Powershell Script Block Events (EventID 4104)
+./chainsaw search -t 'Event.System.EventID: =4104' evtx_attack_samples/
+```
+
+> 🔴 **Important:** The mapping file (specified through the `--mapping` parameter) tells Chainsaw which fields in the event logs to use for rule matching. Configuration is paramount!
+
+---
+
+### Example 1: Hunting for Multiple Failed Logins From Single Source With Sigma
+
+Let's put Chainsaw to work by applying our Sigma rule, `win_security_susp_failed_logons_single_source2.yml` (available at `C:\Rules\sigma`), to `lab_events_2.evtx` (available at `C:\Events\YARASigma\lab_events_2.evtx`) that contains multiple failed login attempts from the same source.
+
+```powershell
+PS C:\Tools\chainsaw> .\chainsaw_x86_64-pc-windows-msvc.exe hunt C:\Events\YARASigma\lab_events_2.evtx -s C:\Rules\sigma\win_security_susp_failed_logons_single_source2.yml --mapping .\mappings\sigma-event-logs-all.yml
+
+ ██████╗██╗  ██╗ █████╗ ██╗███╗   ██╗███████╗ █████╗ ██╗    ██╗
+██╔════╝██║  ██║██╔══██╗██║████╗  ██║██╔════╝██╔══██╗██║    ██║
+██║     ███████║███████║██║██╔██╗ ██║███████╗███████║██║ █╗ ██║
+██║     ██╔══██║██╔══██║██║██║╚██╗██║╚════██║██╔══██║██║███╗██║
+╚██████╗██║  ██║██║  ██║██║██║ ╚████║███████║██║  ██║╚███╔███╔╝
+ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝
+    By Countercept (@FranticTyping, @AlexKornitzer)
+
+[+] Loading detection rules from: C:\Rules\sigma\win_security_susp_failed_logons_single_source2.yml
+[+] Loaded 1 detection rules
+[+] Loading forensic artefacts from: C:\Events\YARASigma\lab_events_2.evtx (extensions: .evt, .evtx)
+[+] Loaded 1 forensic artefacts (69.6 KB)
+[+] Hunting: [========================================] 1/1 -
+[+] Group: Sigma
+┌─────────────────────┬───────────────────────────┬───────┬────────────────────────────────┬──────────┬───────────┬─────────────────┬────────────────────────────────┐
+│      timestamp      │        detections         │ count │     Event.System.Provider      │ Event ID │ Record ID │    Computer     │           Event Data           │
+├─────────────────────┼───────────────────────────┼───────┼────────────────────────────────┼──────────┼───────────┼─────────────────┼────────────────────────────────┤
+│ 2021-05-20 12:49:52 │ + Failed NTLM Logins with │ 5     │ Microsoft-Windows-Security-Aud │ 4776     │ 1861986   │ fs01.offsec.lan │ PackageName: MICROSOFT_AUTHENT │
+│                     │ Different Accounts from   │       │ iting                          │          │           │                 │ ICATION_PACKAGE_V1_0           │
+│                     │ Single Source System      │       │                                │          │           │                 │ Status: '0xc0000064'           │
+│                     │                           │       │                                │          │           │                 │ TargetUserName: NOUSER         │
+│                     │                           │       │                                │          │           │                 │ Workstation: FS01              │
+└─────────────────────┴───────────────────────────┴───────┴────────────────────────────────┴──────────┴───────────┴─────────────────┴────────────────────────────────┘
+
+[+] 1 Detections found on 1 documents
+```
+
+> 📌 **Result:** Our Sigma rule was able to identify the multiple failed login attempts against NOUSER.
+
+Using the `-s` parameter, we can specify a directory containing Sigma detection rules (or one Sigma detection rule) and Chainsaw will automatically load, convert and run these rules against the provided event logs. The mapping file (specified through the `--mapping` parameter) tells Chainsaw which fields in the event logs to use for rule matching.
+
+---
+
+### Example 2: Hunting for Abnormal PowerShell Command Line Size With Sigma (Based on Event ID 4688)
+
+Firstly, let's set the stage by recognizing that PowerShell, being a highly flexible scripting language, is an attractive target for attackers. Its deep integration with Windows APIs and .NET Framework makes it an ideal candidate for a variety of post-exploitation activities.
+
+To conceal their actions, attackers utilize complex encoding layers or misuse cmdlets for purposes they weren't designed for. This leads to **abnormally long PowerShell commands** that often incorporate Base64 encoding, string merging, and several variables containing fragmented parts of the command.
+
+A Sigma rule that can detect abnormally long PowerShell command lines can be found inside the `C:\Rules\sigma` directory of this section's target, saved as `proc_creation_win_powershell_abnormal_commandline_size.yml`.
+
+```yaml
+title: Unusually Long PowerShell CommandLine
+id: d0d28567-4b9a-45e2-8bbc-fb1b66a1f7f6
+status: test
+description: Detects unusually long PowerShell command lines with a length of 1000 characters or more
+references:
+    - https://speakerdeck.com/heirhabarov/hunting-for-powershell-abuse
+author: oscd.community, Natalia Shornikova / HTB Academy, Dimitrios Bougioukas
+date: 2020/10/06
+modified: 2023/04/14
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - detection.threat_hunting
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 4688
+        NewProcessName|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+    selection_powershell:
+        CommandLine|contains:
+            - 'powershell.exe'
+            - 'pwsh.exe'
+    selection_length:        
+        CommandLine|re: '.{1000,}'
+    condition: selection and selection_powershell and selection_length
+falsepositives:
+    - Unknown
+level: low
+```
+
+#### Sigma Rule Breakdown
+
+| Section | Description |
+|---------|-------------|
+| **logsource** | Category: process_creation, Product: windows |
+| **selection** | EventID 4688, NewProcessName ends with powershell.exe, pwsh.exe, or cmd.exe |
+| **selection_powershell** | CommandLine contains powershell.exe or pwsh.exe |
+| **selection_length** | CommandLine with 1000+ characters using regex `.{1000,}` |
+| **condition** | All three selections must match |
+
+Let's put Chainsaw to work by applying the abovementioned Sigma rule, `proc_creation_win_powershell_abnormal_commandline_size.yml` (available at `C:\Rules\sigma`), to `lab_events_3.evtx` (available at `C:\Events\YARASigma\lab_events_3.evtx`) that contains 4688 events with abnormally long PowerShell commands.
+
+![Event 4688 - Long PowerShell Command](https://github.com/user-attachments/assets/9971481e-f35e-4e60-8f90-b2f48dc1914e)
+
+*Event 4688 in Windows security auditing showing process creation with long PowerShell command line.*
+
+#### First Attempt (Default Mapping)
+
+```powershell
+PS C:\Tools\chainsaw> .\chainsaw_x86_64-pc-windows-msvc.exe hunt C:\Events\YARASigma\lab_events_3.evtx -s C:\Rules\sigma\proc_creation_win_powershell_abnormal_commandline_size.yml --mapping .\mappings\sigma-event-logs-all.yml
+
+[+] Loading detection rules from: C:\Rules\sigma\proc_creation_win_powershell_abnormal_commandline_size.yml
+[+] Loaded 1 detection rules
+[+] Loading forensic artefacts from: C:\Events\YARASigma\lab_events_3.evtx (extensions: .evtx)
+[+] Loaded 1 forensic artefacts (69.6 KB)
+[+] Hunting: [========================================] 1/1 -
+[+] 0 Detections found on 0 documents
+```
+
+> 🔴 **Issue:** Our Sigma rule didn't find anything! The NewProcessName field was missing from the sigma-event-logs-all.yml mapping file.
+
+We introduced the NewProcessName field into a `sigma-event-logs-all-new.yml` mapping file inside the `C:\Tools\chainsaw\mappings` directory.
+
+#### Second Attempt (Updated Mapping)
+
+```powershell
+PS C:\Tools\chainsaw> .\chainsaw_x86_64-pc-windows-msvc.exe hunt C:\Events\YARASigma\lab_events_3.evtx -s C:\Rules\sigma\proc_creation_win_powershell_abnormal_commandline_size.yml --mapping .\mappings\sigma-event-logs-all-new.yml
+
+[+] Loading detection rules from: C:\Rules\sigma\proc_creation_win_powershell_abnormal_commandline_size.yml
+[+] Loaded 1 detection rules
+[+] Loading forensic artefacts from: C:\Events\YARASigma\lab_events_3.evtx (extensions: .evtx, .evt)
+[+] Loaded 1 forensic artefacts (69.6 KB)
+[+] Hunting: [========================================] 1/1 -
+[+] Group: Sigma
+┌─────────────────────┬─────────────────────────────┬───────┬────────────────────────────────┬──────────┬───────────┬─────────────────────┬──────────────────────────────────┐
+│      timestamp      │         detections          │ count │     Event.System.Provider      │ Event ID │ Record ID │      Computer       │            Event Data            │
+├─────────────────────┼─────────────────────────────┼───────┼────────────────────────────────┼──────────┼───────────┼─────────────────────┼──────────────────────────────────┤
+│ 2021-04-22 08:51:04 │ + Unusually Long PowerShell │ 1     │ Microsoft-Windows-Security-Aud │ 4688     │ 435121    │ fs03vuln.offsec.lan │ CommandLine: powershell.exe -n   │
+│                     │ CommandLine                 │       │ iting                          │          │           │                     │ op -w hidden -noni -c "if([Int   │
+│                     │                             │       │                                │          │           │                     │ Ptr]::Size -eq 4){$b='powershe   │
+│                     │                             │       │                                │          │           │                     │ ll.exe'}else{$b=$env:windir+'\   │
+│                     │                             │       │                                │          │           │                     │ syswow64\WindowsPowerShell\v1.   │
+│                     │                             │       │                                │          │           │                     │ 0\powershell.exe'};$s=New-Obje   │
+│                     │                             │       │                                │          │           │                     │ ct System.Diagnostics.ProcessS   │
+│                     │                             │       │                                │          │           │                     │ tartInfo;$s.FileName=$b;$s.Arg   │
+│                     │                             │       │                                │          │           │                     │ uments='-noni -nop -w hidden -   │
+│                     │                             │       │                                │          │           │                     │ c &([scriptblock]::create((New   │
+│                     │                             │       │                                │          │           │                     │ -Object System.IO.StreamReader   │
+│                     │                             │       │                                │          │           │                     │ (New-Object System.IO.Compress   │
+│                     │                             │       │                                │          │           │                     │ ion.GzipStream((New-Object Sys   │
+│                     │                             │       │                                │          │           │                     │ tem.IO.MemoryStream(,[System.C   │
+│                     │                             │       │                                │          │           │                     │ onvert]::FromBase64String(''H4   │
+│                     │                             │       │                                │          │           │                     │ sIAPg2gWACA7VWbW+bSBD+nEj5D6iy   │
+│                     │                             │       │                                │          │           │                     │ ...                              │
+│                     │                             │       │                                │          │           │                     │ (use --full to show all content) │
+│                     │                             │       │                                │          │           │                     │ NewProcessId: '0x7f0'            │
+│                     │                             │       │                                │          │           │                     │ NewProcessName: C:\Windows\Sys   │
+│                     │                             │       │                                │          │           │                     │ tem32\WindowsPowerShell\v1.0\p   │
+│                     │                             │       │                                │          │           │                     │ owershell.exe                    │
+├─────────────────────┼─────────────────────────────┼───────┼────────────────────────────────┼──────────┼───────────┼─────────────────────┼──────────────────────────────────┤
+│ 2021-04-22 08:51:04 │ + Unusually Long PowerShell │ 1     │ Microsoft-Windows-Security-Aud │ 4688     │ 435120    │ fs03vuln.offsec.lan │ CommandLine: C:\Windows\system   │
+│                     │ CommandLine                 │       │ iting                          │          │           │                     │ 32\cmd.exe /b /c start /b /min   │
+│                     │                             │       │                                │          │           │                     │  powershell.exe -nop -w hidden   │
+├─────────────────────┼─────────────────────────────┼───────┼────────────────────────────────┼──────────┼───────────┼─────────────────────┼──────────────────────────────────┤
+│ 2021-04-22 08:51:05 │ + Unusually Long PowerShell │ 1     │ Microsoft-Windows-Security-Aud │ 4688     │ 435124    │ fs03vuln.offsec.lan │ CommandLine: '"C:\Windows\sysw   │
+│                     │ CommandLine                 │       │ iting                          │          │           │                     │ ow64\WindowsPowerShell\v1.0\po   │
+└─────────────────────┴─────────────────────────────┴───────┴────────────────────────────────┴──────────┴───────────┴─────────────────────┴──────────────────────────────────┘
+
+[+] 3 Detections found on 3 documents
+```
+
+> 📌 **Success!** Our Sigma rule successfully uncovered all three abnormally long PowerShell commands that exist inside lab_events_3.evtx.
+
+---
+
+### 🔴 Key Takeaway
+
+> 📌 **Configuration when it comes to using or translating Sigma rules is of paramount importance!**
+
+The mapping file tells Chainsaw which event log fields to use for rule matching. Without the correct mapping, even a well-written Sigma rule will fail to detect threats.
+
+---
+
+## 10. Hunting Evil with Sigma (Splunk Edition) {#10-hunting-evil-with-sigma-splunk-edition}
+
+> 📌 **Splunk** - Convert Sigma rules to SIEM-specific queries using sigmac tool.
+
+### Overview
+
+As discussed when introducing Sigma, Sigma rules revolutionize our approach to log analysis and threat detection. What we're dealing with here is a sort of **Rosetta Stone for SIEM systems**. Sigma is like a universal translator that brings in a level of abstraction to event logs, taking away the painful element of SIEM-specific query languages.
+
+Let's validate this assertion by converting two Sigma rules into their corresponding SPL formats and examining the outcomes.
+
+---
+
+### Example 1: Hunting for MiniDump Function Abuse to Dump LSASS's Memory (comsvcs.dll via rundll32)
+
+A Sigma rule named `proc_access_win_lsass_dump_comsvcs_dll.yml` can be found inside the `C:\Tools\chainsaw\sigma\rules\windows\process_access` directory of the previous section's target.
+
+> 📌 This Sigma rule detects adversaries leveraging the MiniDump export function of comsvcs.dll via rundll32 to perform a memory dump from LSASS.
+
+We can translate this rule into a Splunk search with sigmac (available at `C:\Tools\sigma-0.21\tools`) as follows:
+
+```powershell
+PS C:\Tools\sigma-0.21\tools> python sigmac -t splunk C:\Tools\chainsaw\sigma\rules\windows\process_access\proc_access_win_lsass_dump_comsvcs_dll.yml -c .\config\splunk-windows.yml
+(TargetImage="*\\lsass.exe" SourceImage="C:\\Windows\\System32\\rundll32.exe" CallTrace="*comsvcs.dll*")
+```
+
+> 📌 **sigmac command breakdown:**
+> - `-t splunk` - Output format for Splunk
+> - `-c .\config\splunk-windows.yml` - Use Splunk Windows configuration
+
+Let's now navigate to the target system. Then, let's navigate to `http://[Target IP]:8000`, open the "Search & Reporting" application, and submit the Splunk search sigmac provided us with.
+
+![Splunk Search - LSASS Dump Detection](https://github.com/user-attachments/assets/376c3b09-23b2-4a46-8e07-539fc42cc82a)
+
+*Splunk interface showing a search for events with target image lsass.exe and source image rundll32.exe. Event details include host, source, and call trace information.*
+
+> 📌 **Result:** The Splunk search provided by sigmac was indeed able to detect MiniDump function abuse to dump LSASS's memory.
+
+---
+
+### Example 2: Hunting for Notepad Spawning Suspicious Child Process
+
+A Sigma rule named `proc_creation_win_notepad_susp_child.yml` can be found inside the `C:\Rules\sigma` directory of the previous section's target.
+
+> 📌 This Sigma rule detects notepad.exe spawning a suspicious child process.
+
+We can translate this rule into a Splunk search with sigmac (available at `C:\Tools\sigma-0.21\tools`) as follows:
+
+```powershell
+PS C:\Tools\sigma-0.21\tools> python sigmac -t splunk C:\Rules\sigma\proc_creation_win_notepad_susp_child.yml -c .\config\splunk-windows.yml
+(ParentImage="*\\notepad.exe" (Image="*\\powershell.exe" OR Image="*\\pwsh.exe" OR Image="*\\cmd.exe" OR Image="*\\mshta.exe" OR Image="*\\cscript.exe" OR Image="*\\wscript.exe" OR Image="*\\taskkill.exe" OR Image="*\\regsvr32.exe" OR Image="*\\rundll32.exe" OR Image="*\\calc.exe"))
+```
+
+> 📌 **SPL Query Breakdown:**
+> - `ParentImage="*\\notepad.exe"` - Parent process is notepad.exe
+> - `(Image="*\\powershell.exe" OR ...)` - Any of these suspicious child processes
+
+Let's navigate to the target system. Then, let's navigate to `http://[Target IP]:8000`, open the "Search & Reporting" application, and submit the Splunk search sigmac provided us with.
+
+![Splunk Search - Notepad Suspicious Child](https://github.com/user-attachments/assets/128ae3e8-d432-46f9-8aa6-8c9c21cd6d1a)
+
+*Splunk interface showing a search for events with target image winlogon.exe and various image filters. Event details include host, source, command line, and computer name.*
+
+> 📌 **Result:** The Splunk search provided by sigmac was indeed able to detect notepad.exe spawning suspicious processes (such as PowerShell).
+
+---
+
+### 🔴 Important Note
+
+> 📌 **Sigma Config Files:**
+> Please note that more frequently than not you will have to tamper with Sigma's config files (available inside the `C:\Tools\sigma-0.21\tools\config` directory of the previous section's target) in order for the SIEM queries to be readily usable.
+
+The configuration files define how Sigma maps its generic field names to SIEM-specific field names. Without proper configuration, the generated queries may not work correctly.
+
+---
+
+### Sigma to Splunk Conversion Summary
+
+| Sigma Rule | Splunk Query |
+|------------|--------------|
+| LSASS Dump (comsvcs.dll) | `(TargetImage="*\\lsass.exe" SourceImage="C:\\Windows\\System32\\rundll32.exe" CallTrace="*comsvcs.dll*")` |
+| Notepad Suspicious Child | `(ParentImage="*\\notepad.exe" (Image="*\\powershell.exe" OR Image="*\\pwsh.exe" OR ...))` |
+
+---
+
+## 11. Interview Questions {#11-interview-questions}
+
+### Q1: What is the difference between YARA and Sigma?
+
+**Answer:** YARA excels in file and memory analysis, pattern matching on disk and in running processes. Sigma is particularly adept at log analysis and SIEM systems, providing a generic format that can be converted to various SIEM query languages.
+
+---
+
+### Q2: What are the main components of a YARA rule?
+
+**Answer:** A YARA rule consists of:
+- **Rule Identifier** - Unique name for the rule
+- **Metadata** - Additional information (author, date, description)
+- **Strings** - Patterns to search for
+- **Condition** - Logic that determines a match
+
+---
+
+### Q3: Explain the condition logic in YARA rules.
+
+**Answer:** Conditions use Boolean operators (and, or, not) and can include:
+- String matching: `$string1 at 0`, `$string2 in (100..200)`
+- Count: `#string > 5`
+- File size: `filesize < 10MB`
+- Regular expressions: `$regex1 matches /(pattern)/`
+
+---
+
+### Q4: What is sigmac and what does it do?
+
+**Answer:** sigmac is a command-line tool that converts Sigma rules into SIEM-specific query formats (Splunk SPL, Elasticsearch DSL, Azure KQL, etc.). It uses configuration files to map Sigma's generic field names to SIEM-specific field names.
+
+---
+
+### Q5: How do you detect encoded PowerShell commands?
+
+**Answer:** Look for:
+- Long PowerShell command lines (1000+ characters)
+- Base64 encoded strings in command arguments
+- Common obfuscation patterns: `-enc`, `-encodedcommand`, `-e`
+- Unusual encoding methods in Sigma rules like `CommandLine|re: '.{1000,}'`
+
+---
+
+### Q6: What is Chainsaw and when would you use it?
+
+**Answer:** Chainsaw is a fast tool to hunt security threats in Windows Event Logs. It's used when you don't have access to a SIEM and need to scan multiple EVTX files concurrently using Sigma rules. It supports both Sigma and custom Chainsaw detection rules.
+
+---
+
+### Q7: How do you handle false positives in Sigma rules?
+
+**Answer:**
+1. Add filters to exclude known false positives
+2. Use `filter_optional_*` naming convention in Sigma rules
+3. Test rules against production logs before deployment
+4. Adjust detection logic with additional conditions
+5. Add `not` conditions for legitimate activities
+
+---
+
+### Q8: What is the Pyramid of Pain in the context of YARA/Sigma?
+
+**Answer:** The Pyramid of Pain shows indicator difficulty:
+- **Bottom (easy to change):** Hash values, IP addresses
+- **Top (hard to change):** TTPs (Tools, Tactics, Procedures)
+
+YARA and Sigma rules detect TTPs, which are more valuable than simple IOCs.
+
+---
+
+### Q9: Explain the logsource section in Sigma rules.
+
+**Answer:** The logsource defines where the rule applies:
+- `product` - Operating system (windows, linux, macos)
+- `service` - Windows service (security, system, application)
+- `category` - Event category (process_creation, network_connection)
+
+This ensures rules only match relevant log sources.
+
+---
+
+### Q10: What are the key differences between YARA and Sigma rules?
+
+| Aspect | YARA | Sigma |
+|--------|------|-------|
+| **Primary Use** | File/memory scanning | Log analysis |
+| **Target** | Static files, processes | SIEM events |
+| **Format** | Custom syntax | YAML |
+| **Conversion** | Standalone | Converts to SIEM queries |
+
+---
+
+## 12. Additional Resources {#12-additional-resources}
+
+### YARA Resources
+- [YARA-Rules](https://github.com/Yara-Rules/rules/tree/master/malware)
+- [Open-Source YARA rules](https://github.com/mikesxrs/Open-Source-YARA-rules/tree/master)
+- [YARA Documentation](https://yara.readthedocs.io/)
+- [yarGen](https://github.com/Neo23x0/yarGen)
+
+### Sigma Resources
+- [SigmaHQ Rules](https://github.com/SigmaHQ/sigma/tree/master/rules)
+- [Sigma Specification](https://github.com/SigmaHQ/sigma-specification)
+- [SigmaHQ Rule Creation Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide)
+- [joesecurity sigma-rules](https://github.com/joesecurity/sigma-rules)
+- [SIGMA detection rules](https://github.com/mdecrevoisier/SIGMA-detection-rules)
+
+### Tools
+- [Chainsaw](https://github.com/WithSecureLabs/chainsaw)
+- [Zircolite](https://github.com/wagga40/Zircolite)
+- [sigmac](https://github.com/SigmaHQ/sigma/tree/master/tools)
+
+### Communities
+- r/cybersecurity (Reddit)
+- r/SOCanalysts (Reddit)
+- Twitter/X security researchers
+- SANS Digital Forensics
+- FIRST (Forum of Incident Response)
+
+### Further Learning
+- [MITRE ATT&CK](https://attack.mitre.org)
+- [Red Canary Blog](https://redcanary.com/blog/)
+- [The DFIR Report](https://thedfirreport.com/)
+- [Carbon Black Blog](https://www.carbonblack.com/blog/)
 
 ---
 
