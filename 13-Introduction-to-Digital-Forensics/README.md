@@ -576,5 +576,248 @@ Deferred file count: 17. Copying locked files...
 
 ---
 
+## 4. Memory Forensics {#4-memory-forensics}
+
+> 📌 **Memory Forensics** - Analysis of volatile RAM data to uncover malware, processes, and indicators of compromise.
+
+### Memory Forensics Definition & Process
+
+Memory forensics (also known as volatile memory analysis) is a specialized branch of digital forensics that focuses on examining and analyzing the volatile memory (RAM) of a computer or digital device.
+
+#### Types of Valuable Data in RAM
+
+| Data Type | Description |
+|-----------|-------------|
+| **Network connections** | Active and recent network connections |
+| **File handles** | Open files on the system |
+| **Open registry keys** | Registry keys in use |
+| **Running processes** | Active processes on the system |
+| **Loaded modules** | Loaded DLLs and modules |
+| **Loaded drivers** | Device drivers in memory |
+| **Command history** | Console session history |
+| **Kernel data structures** | Kernel-level information |
+| **User credentials** | Authentication data in memory |
+| **Malware artifacts** | Malicious code traces |
+| **System configuration** | Current system settings |
+| **Process memory regions** | Memory regions for each process |
+
+> 📌 As discussed in previous sections, when malware operates, it leaves traces in system memory. By analyzing this memory, investigators can uncover malicious processes and reconstruct malware actions.
+
+---
+
+### Six-Step Memory Forensics Methodology
+
+1. **Process Identification and Verification**
+   - Enumerate all running processes
+   - Determine origin within OS
+   - Cross-reference with known legitimate processes
+   - Highlight discrepancies or suspicious naming
+
+2. **Deep Dive into Process Components**
+   - Examine DLLs linked to suspicious processes
+   - Check for unauthorized/malicious DLLs
+   - Investigate signs of DLL injection/hijacking
+
+3. **Network Activity Analysis**
+   - Review active and passive network connections
+   - Identify external IPs and domains
+   - Determine nature of communication
+   - Validate process legitimacy
+
+4. **Code Injection Detection**
+   - Detect anomalies like process hollowing
+   - Identify unusual memory spaces
+
+5. **Rootkit Discovery**
+   - Scan for rootkit activity
+   - Identify processes at high privileges
+
+6. **Extraction of Suspicious Elements**
+   - Dump suspicious components from memory
+   - Store securely for further analysis
+
+---
+
+### The Volatility Framework
+
+**Volatility** is the preferred open-source memory forensics framework. It supports Windows, macOS, and Linux.
+
+#### Volatility Versions
+
+| Version | Documentation |
+|---------|---------------|
+| **Volatility v2** | https://github.com/volatilityfoundation/volatility/wiki/Command-Reference |
+| **Volatility v3** | https://volatility3.readthedocs.io/en/latest/index.html |
+
+> 📌 Cheatsheet: https://blog.onfvp.com/post/volatility-cheatsheet/
+
+#### Commonly Used Volatility Plugins
+
+| Plugin | Description |
+|--------|-------------|
+| `pslist` | Lists running processes |
+| `cmdline` | Displays process command-line arguments |
+| `netscan` | Scans for network connections and open ports |
+| `malfind` | Scans for potentially malicious injected code |
+| `handles` | Scans for open handles |
+| `svcscan` | Lists Windows services |
+| `dlllist` | Lists loaded DLLs in a process |
+| `hivelist` | Lists registry hives in memory |
+
+---
+
+### Volatility v2 Fundamentals
+
+#### Identifying the Profile
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem imageinfo
+```
+
+**Output:**
+```
+INFO    : volatility.debug    : Determining profile based on KDBG search...
+          Suggested Profile(s) : Win7SP1x64, Win7SP0x64, Win2008R2SP0x64, Win2008R2SP1x64_24000, Win2008R2SP1x64_23418, Win2008R2SP1x64, Win7SP1x64_24000, Win7SP1x64_23418
+               AS Layer1 : WindowsAMD64PagedMemory (Kernel AS)
+               AS Layer2 : FileAddressSpace (/home/htb-student/MemoryDumps/Win7-2515534d.vmem)
+                    PAE type : No PAE
+                         DTB : 0x187000L
+                        KDBG : 0xf80002be9120L
+        Number of Processors : 1
+   Image Type (Service Pack) : 1
+            KPCR for CPU 0 : 0xfffff80002beb000L
+         KUSER_SHARED_DATA : 0xfffff78000000000L
+      Image date and time : 2023-06-22 12:34:03 UTC+0000
+```
+
+#### Identifying Running Processes
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 pslist
+```
+
+**Sample Output:**
+```
+Offset(V)          Name                    PID   PPID   Thds     Hnds   Sess  Wow64 Start                          Exit
+------------------ -------------------- ------ ------ ------ -------- ------ ------ ------------------------------ ------------------------------
+0xfffffa8000ca8860 System                    4      0     97      446 ------      0 2023-06-22 12:04:39 UTC+0000
+0xfffffa8001a64920 smss.exe                264      4      2       29 ------      0 2023-06-22 12:04:39 UTC+0000
+...
+0xfffffa8000ee96d0 Ransomware.wan         1512   2820     11      167      1      1 2023-06-22 12:23:41 UTC+0000
+0xfffffa8002ca4240 Ransomware.wan         2320    508    117      497      0      1 2023-06-22 12:30:19 UTC+0000
+0xfffffa8001d0f8b0 tasksche.exe           2972   1512      0 --------      1      0 2023-06-22 12:31:13 UTC+0000   2023-06-22 12:31:43 UTC+0000
+0xfffffa8001d22b00 tasksche.exe           1792   1044      8       82      0      1 2023-06-22 12:31:13 UTC+0000
+0xfffffa8002572060 @WanaDecryptor         1060   1792      2       71      0      1 2023-06-22 12:31:27 UTC+0000
+...
+```
+
+> 📌 Notice the suspicious processes: `Ransomware.wan`, `tasksche.exe`, `@WanaDecryptor` - indicators of WannaCry ransomware!
+
+---
+
+### Identifying Network Artifacts
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 netscan
+```
+
+Shows active connections, listening ports, and established connections. Can find suspicious external IPs.
+
+---
+
+### Identifying Injected Code
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 malfind --pid=608
+```
+
+Used to identify and extract injected code and malicious payloads from process memory.
+
+---
+
+### Identifying Handles
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 handles -p 1512 --object-type=Key
+```
+
+Shows registry keys accessed by a process.
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 handles -p 1512 --object-type=File
+```
+
+Shows files accessed by a process.
+
+---
+
+### Identifying Windows Services
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 svcscan
+```
+
+Lists Windows services running in memory.
+
+---
+
+### Identifying Loaded DLLs
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 dlllist -p 1512
+```
+
+Lists DLLs loaded into a specific process (PID 1512 = Ransomware.wan).
+
+---
+
+### Identifying Hives
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 hivelist
+```
+
+Lists registry hives present in memory.
+
+---
+
+### Rootkit Analysis with Volatility v2
+
+#### Understanding the EPROCESS Structure
+
+EPROCESS is a kernel data structure representing a process. Each running process has a corresponding EPROCESS block in kernel memory.
+
+![EPROCESS Structure](https://github.com/user-attachments/assets/11d05efe-82b2-4ef6-b0d2-7a89321c1557)
+
+*Windows kernel EPROCESS structure with ActiveProcessLinks field.*
+
+#### FLINK and BLINK
+
+A doubly-linked list contains:
+- **flink**: Forward pointer to next EPROCESS structure
+- **blink**: Backward pointer to previous EPROCESS structure
+
+![EPROCESS Linked List](https://github.com/user-attachments/assets/1bcd414e-d262-4d5f-b4f8-8529dead35ae)
+
+*Diagram showing EPROCESS structures linked via Flink and Blink pointers.*
+
+#### Identifying Rootkit Signs
+
+**Direct Kernel Object Manipulation (DKOM)** - Rootkits manipulate kernel data structures to hide from security tools.
+
+![DKOM Process Unlinking](https://github.com/user-attachments/assets/c5286ec8-2e89-4fc9-a1b5-6bdf3d4a04a2)
+
+*Diagram showing normal vs DKOM process linking.*
+
+#### psscan Plugin
+
+The `psscan` plugin scans memory pool tags to find processes that may have been hidden or unlinked by rootkits.
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/rootkit.vmem psscan
+```
+
+---
+
 *Module 13/15 - Introduction to Digital Forensics*
 *For learning and SOC career preparation*
