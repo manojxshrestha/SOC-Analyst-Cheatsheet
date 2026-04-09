@@ -1022,7 +1022,7 @@ rule susp_file_enumerator_with_encrypted_resource_101 {
 
 ---
 
-## 4. Leveraging Sigma
+## 5. Leveraging Sigma
 
 *Coming soon...*
 
