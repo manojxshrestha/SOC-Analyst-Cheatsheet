@@ -43,6 +43,11 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
 5. [Disk Forensics](#5-disk-forensics)
 6. [Rapid Triage Examination & Analysis Tools](#6-rapid-triage-examination--analysis-tools)
 7. [Practical Digital Forensics Scenario](#7-practical-digital-forensics-scenario)
+   - [7.0 Overview](#7-0-overview)
+   - [7.1 Memory Analysis with Volatility v3](#7-1-memory-analysis-with-volatility-v3)
+   - [7.2 Disk Image & Rapid Triage Analysis](#7-2-disk-image--rapid-triage-analysis)
+   - [7.3 Timeline Construction](#7-3-timeline-construction)
+   - [7.4 Summary](#7-4-summary)
 8. [Interview Questions](#8-interview-questions)
 9. [Additional Resources](#9-additional-resources)
 
@@ -1516,13 +1521,13 @@ API Monitor captures and displays API calls made by applications. This is valuab
 
 ---
 
-# 🎯 Practical Digital Forensics Scenario
+# 🎯 Practical Digital Forensics Scenario {#7-practical-digital-forensics-scenario}
 
 ## SOC Analyst Cheatsheet - Module 13/15 - Section 7
 
 ---
 
-## 0. Overview
+## 0. Overview {#7-0-overview}
 
 > 📌 **Practical Digital Forensics** - This section covers hands-on memory dump analysis, disk forensics, and rapid triage artifact examination using industry-standard tools like Volatility, Autopsy, and Chainsaw.
 
