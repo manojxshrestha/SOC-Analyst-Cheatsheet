@@ -1030,6 +1030,380 @@ rule susp_file_enumerator_with_encrypted_resource_101 {
 
 ---
 
+## 4. Hunting Evil with YARA (Windows Edition)
+
+> 📌 This section covers using YARA on Windows systems for identifying threats on disk, in memory, and ETW data.
+
+### Hunting for Malicious Executables on Disk with YARA
+
+YARA is a potent weapon for detecting and hunting malicious executables on disk. With custom YARA rules, we can pinpoint suspicious files based on distinct patterns, traits, or behaviors.
+
+We will use the sample `dharma_sample.exe` residing in the `C:\Samples\YARASigma` directory.
+
+#### Examining Malware in Hex Editor
+
+First, examine the malware sample inside a hex editor (HxD) to identify the string `C:\crysis\Release\PDB\payload.pdb`.
+
+![HxD Hex Editor - Find Dialog](https://github.com/user-attachments/assets/d102119d-946e-429b-8b34-e69b02803d73)
+
+*Hex editor showing 'dharma_sample.exe' with hex values and decoded text. A find dialog searches for 'C:\crysis\Release\PDB\payload.pdb'.*
+
+![HxD Hex Editor - PDB Path Found](https://github.com/user-attachments/assets/491743fe-3d83-4a17-9bd5-81991fe5ad3e)
+
+*Hex editor displaying 'dharma_sample.exe' with hex values and decoded text. Highlighted path: 'C:\crysis\Release\PDB\payload.pdb'. Data inspector shows binary and character values.*
+
+If we scroll almost to the bottom, we will notice another seemingly unique string `sssssbsss`.
+
+![HxD Hex Editor - Repeated s Characters](https://github.com/user-attachments/assets/2c414959-ca23-44c5-a6d4-2fcb844f92b0)
+
+*Hex editor displaying 'dharma_sample.exe' with hex values and decoded text. Highlighted section shows repeated 's' characters. Data inspector shows binary and character values.*
+
+#### Linux Alternative - hexdump
+
+On a Linux machine, the hexdump utility can be used to identify the hex bytes:
+
+```bash
+hexdump dharma_sample.exe -C | grep crysis -n3
+```
+
+**Output:**
+```
+3140-0000c7e0  52 00 43 6c 6f 73 65 48  61 6e 64 6c 65 00 4b 45  |R.CloseHandle.KE|
+3141-0000c7f0  52 4e 45 4c 33 32 2e 64  6c 6c 00 00 52 53 44 53  |RNEL32.dll..RSDS|
+3142-0000c800  25 7e 6d 90 fc 96 43 42  8e c3 87 23 6b 61 a4 92  |%~m...CB...#ka..|
+3143:0000c810  03 00 00 00 43 3a 5c 63  72 79 73 69 73 5c 52 65  |....C:\crysis\Re|
+3144-0000c820  6c 65 61 73 65 5c 50 44  42 5c 70 61 79 6c 6f 61  |lease\PDB\payloa|
+3145-0000c830  64 2e 70 64 62 00 00 00  00 00 00 00 00 00 00 00  |d.pdb...........|
+```
+
+```bash
+hexdump dharma_sample.exe -C | grep sssssbsss -n3
+```
+
+**Output:**
+```
+5738-00016be0  3d 00 00 00 26 00 00 00  73 73 73 64 00 00 00 00  |=...&...sssd....|
+5739-00016bf0  26 61 6c 6c 3d 00 00 00  73 64 00 00 2d 00 61 00  |&all=...sd..-.a.|
+5740-00016c00  00 00 00 00 73 00 73 00  62 00 73 00 73 00 00 00  |....s.s.b.s.s...|
+5741:00016c10  73 73 73 73 73 62 73 73  73 00 00 00 73 73 73 73  |sssssbsss...ssss|
+```
+
+#### Creating YARA Rule with Hex Strings
+
+Let's incorporate all identified hex bytes into a rule:
+
+```yara
+rule ransomware_dharma {
+
+    meta:
+        author = "Madhukar Raina"
+        version = "1.0"
+        description = "Simple rule to detect strings from Dharma ransomware"
+        reference = "https://www.virustotal.com/gui/file/bff6a1000a86f8edf3673d576786ec75b80bed0c458a8ca0bd52d12b74099071/behavior"
+
+    strings:
+        $string_pdb = {  433A5C6372797369735C52656C656173655C5044425C7061796C6F61642E706462 }
+        $string_ssss = { 73 73 73 73 73 62 73 73 73 }
+
+        condition: all of them
+}
+```
+
+> 📌 **Key Points:**
+> - `$string_pdb` uses hex notation `{ 43...62 }` to match the UTF-8 encoded path string
+> - `$string_ssss` uses hex bytes to match the ASCII repeated "s" pattern
+> - `condition: all of them` requires both strings to be found for a match
+
+#### Scanning Filesystem with YARA
+
+Initiating the YARA executable with this rule:
+
+```powershell
+yara64.exe -s C:\Rules\yara\dharma_ransomware.yar C:\Samples\YARASigma\ -r 2>null
+```
+
+**Output:**
+```
+ransomware_dharma C:\Samples\YARASigma\\dharma_sample.exe
+0xc814:$string_pdb: 43 3A 5C 63 72 79 73 69 73 5C 52 65 6C 65 61 73 65 5C 50 44 42 5C 70 61 79 6C 6F 61 64 2E 70 64 62
+0x16c10:$string_ssss: 73 73 73 73 73 62 73 73 73
+ransomware_dharma C:\Samples\YARASigma\\check_updates.exe
+0xc814:$string_pdb: 43 3A 5C 63 72 79 73 69 73 5C 52 65 6C 65 61 73 65 5C 50 44 42 5C 70 61 79 6C 6F 61 64 2E 70 64 62
+0x16c10:$string_ssss: 73 73 73 73 73 62 73 73 73
+ransomware_dharma C:\Samples\YARASigma\\microsoft.com
+0xc814:$string_pdb: 43 3A 5C 63 72 79 73 69 73 5C 52 65 6C 65 61 73 65 5C 50 44 42 5C 70 61 79 6C 6F 61 64 2E 70 64 62
+0x16c10:$string_ssss: 73 73 73 73 73 62 73 73 73
+ransomware_dharma C:\Samples\YARASigma\\KB5027505.exe
+0xc814:$string_pdb: 43 3A 5C 63 72 79 73 69 73 5C 52 65 6C 65 61 73 65 5C 50 44 42 5C 70 61 79 6C 6F 61 64 2E 70 64 62
+0x16c10:$string_ssss: 73 73 73 73 73 62 73 73 73
+ransomware_dharma C:\Samples\YARASigma\\pdf_reader.exe
+0xc814:$string_pdb: 43 3A 5C 63 72 79 73 69 73 5C 52 65 6C 65 61 73 65 5C 50 44 42 5C 70 61 79 6C 6F 61 64 2E 70 64 62
+0x16c10:$string_ssss: 73 73 73 73 73 62 73 73 73
+```
+
+**Command Breakdown:**
+
+- `yara64.exe`: The YARA64 executable for 64-bit systems
+- `-s C:\Rules\yara\dharma_ransomware.yar`: Specifies the YARA rules file
+- `C:\Samples\YARASigma`: Directory to scan
+- `-r`: Recursive scanning (subdirectories included)
+- `2>nul`: Suppresses error messages
+
+> 📌 **Detection Results:** pdf_reader.exe, microsoft.com, check_updates.exe, and KB5027505.exe are detected in addition to dharma_sample.exe.
+
+---
+
+### Hunting for Evil Within Running Processes with YARA
+
+To detect malware in running processes, we'll use YARA scanner on active processes.
+
+#### Meterpreter Shellcode Detection Rule
+
+```yara
+rule meterpreter_reverse_tcp_shellcode {
+    meta:
+        author = "FDD @ Cuckoo sandbox"
+        description = "Rule for metasploit's meterpreter reverse tcp raw shellcode"
+
+    strings:
+        $s1 = { fce8 8?00 0000 60 }     // shellcode prologe in metasploit
+        $s2 = { 648b ??30 }             // mov edx, fs:[???+0x30]
+        $s3 = { 4c77 2607 }             // kernel32 checksum
+        $s4 = "ws2_"                    // ws2_32.dll
+        $s5 = { 2980 6b00 }             // WSAStartUp checksum
+        $s6 = { ea0f dfe0 }             // WSASocket checksum
+        $s7 = { 99a5 7461 }             // connect checksum
+
+    condition:
+        5 of them
+}
+```
+
+> 📌 **Key Points:**
+> - `$s1` uses wildcards (`?`) to match variable bytes
+> - `$s2` uses `??` for any byte at that position
+> - Rule requires 5 of 7 strings to match
+
+#### Running the Malware Sample
+
+We use `htb_sample_shell.exe` which injects Metasploit's meterpreter shellcode into cmdkey.exe:
+
+```powershell
+.\htb_sample_shell.exe
+```
+
+**Output:**
+```
+<-- Hack the box sample for yara signatures -->
+
+[+] Parent process with PID 7972 is created : C:\Samples\YARASigma\htb_sample_shell.exe
+[+] Child process with PID 9084 is created : C:\Windows\System32\cmdkey.exe
+[+] Shellcode is written at address 000002686B1C0000 in remote process C:\Windows\System32\cmdkey.exe
+[+] Remote thread to execute the shellcode is started with thread ID 368
+
+Press enter key to terminate...
+```
+
+> 📌 **Process Injection:** Parent: htb_sample_shell.exe (PID 7972), Victim: cmdkey.exe (PID 9084), Shellcode address: 000002686B1C0000
+
+#### Scanning Running Processes
+
+```powershell
+Get-Process | ForEach-Object { "Scanning with Yara for meterpreter shellcode on PID "+$_.id; & "yara64.exe" "C:\Rules\yara\meterpreter_shellcode.yar" $_.id }
+```
+
+**Key Output:**
+```
+Scanning with Yara for meterpreter shellcode on PID 9084
+meterpreter_reverse_tcp_shellcode 9084
+...
+Scanning with Yara for meterpreter shellcode on PID 7972
+meterpreter_reverse_tcp_shellcode 7972
+```
+
+#### Scanning Specific PID
+
+```powershell
+yara64.exe C:\Rules\yara\meterpreter_shellcode.yar 9084 --print-strings
+```
+
+**Output:**
+```
+meterpreter_reverse_tcp_shellcode 9084
+0x2686b1c0104:$s3: 4C 77 26 07
+0xe3fea7fef8:$s4: ws2_
+0x2686b1c00d9:$s4: ws2_
+0x7ffbfdad4490:$s4: ws2_
+...
+0x2686b1c0115:$s5: 29 80 6B 00
+0x2686b1c0135:$s6: EA 0F DF E0
+0x2686b1c014a:$s7: 99 A5 74 61
+```
+
+![YARA Process Scanner](https://github.com/user-attachments/assets/c2c9989d-9766-4e98-bd6e-5a0665fe221e)
+
+*PowerShell and Process Hacker showing shellcode analysis. Parent process cmdkey.exe PID 9084. YARA detects meterpreter reverse TCP shellcode.*
+
+> 📌 **Detection:** Shellcode found in PID 9084 (cmdkey.exe) and PID 7972 (htb_sample_shell.exe)
+
+---
+
+### Hunting for Evil Within ETW Data with YARA
+
+Event Tracing For Windows (ETW) is a high-speed tracing facility using buffering and logging in the kernel.
+
+![ETW Process Flow](https://github.com/user-attachments/assets/7f957d8a-7342-4b25-b838-50aa936dd1fd)
+
+*ETW process: Controller enables/disables ETW collection, Event Trace Session with Buffer Pool logs events, Provider generates events, Consumer logs/analyzes events.*
+
+#### ETW Components:
+
+| Component | Description |
+|-----------|-------------|
+| **Controllers** | Initiate/terminate trace sessions, enable/disable providers |
+| **Providers** | Generate events and channel to ETW sessions |
+| **Consumers** | Subscribe to events for processing |
+
+#### Useful ETW Providers:
+
+| Provider | Use Case |
+|----------|----------|
+| **Microsoft-Windows-Kernel-Process** | Process injection, hollowing detection |
+| **Microsoft-Windows-Kernel-File** | Unauthorized file access, ransomware |
+| **Microsoft-Windows-Kernel-Network** | C2 communication, data exfiltration |
+| **Microsoft-Windows-SMBClient/SMBServer** | Lateral movement detection |
+| **Microsoft-Windows-DotNETRuntime** | Malicious .NET assembly loading |
+| **OpenSSH** | Brute force attack detection |
+| **Microsoft-Windows-PowerShell** | Suspicious PowerShell activity |
+| **Microsoft-Windows-Kernel-Registry** | Persistence mechanism detection |
+| **Microsoft-Windows-DNS-Client** | DNS tunneling, C2 detection |
+| **Microsoft-Antimalware-Protection** | Evasion technique detection |
+
+#### SilkETW with YARA
+
+SilkETW is an open-source tool for ETW data with YARA integration.
+
+```powershell
+.\SilkETW.exe -h
+```
+
+**Help Output:**
+```
+██████╗██╗██╗   ██╗  ██╗███████╗████████╗██╗    ██╗
+██╔════╝██║██║   ██║ ██╔╝██╔════╝╚══██╔══╝██║    ██║
+██████╗██║██║   █████╔╝ █████╗     ██║   ██║ █╗ ██║
+╚════██║██║██║   ██╔═██╗ ██╔══╝     ██║   ██║███╗██║
+██████║██║█████╗██║  ██╗███████╗   ██║   ╚███╔███╔╝
+╚══════╝╚═╝╚════╝╚═╝  ╚═╝╚══════╝   ╚═╝    ╚══╝╚══╝
+                  [v0.8 - Ruben Boonen => @FuzzySec]
+
+ >--~~--> Args? <--~~--<
+
+-h  (--help)          This help menu
+-t  (--type)         Kernel or User collector
+-kk (--kernelkeyword) Valid keywords: Process, Thread, ImageLoad, VirtualAlloc, NetworkTCPIP, etc.
+-uk (--userkeyword)  User keyword mask, eg 0x2038
+-pn (--providername) Provider name or GUID
+-l  (--level)        Logging level: Always, Critical, Error, Warning, Informational, Verbose
+-ot (--outputtype)   Output: POST to "URL", "file", or "eventlog"
+-p  (--path)         Output file path or URL
+-f  (--filter)       Filter types: None, EventName, ProcessID, ProcessName, Opcode
+-fv (--filtervalue)  Filter value
+-y  (--yara)         Path to folder containing Yara rules
+-yo (--yaraoptions)  Record "All" events or only "Matches"
+```
+
+**Usage Examples:**
+```powershell
+# VirtualAlloc Kernel collector to Elasticsearch
+SilkETW.exe -t kernel -kk VirtualAlloc -ot url -p https://some.elk:9200/valloc/_doc/
+
+# DNS User collector with YARA matching
+SilkETW.exe -t user -pn Microsoft-Windows-DNS-Client -l Always -ot file -p C:\Some\Path\out.json -y C:\Some\Yara\Folder -yo matches
+```
+
+---
+
+### Example 1: YARA on PowerShell ETW
+
+```powershell
+.\SilkETW.exe -t user -pn Microsoft-Windows-PowerShell -ot file -p ./etw_ps_logs.json -l verbose -y C:\Rules\yara -yo Matches
+```
+
+**Command Breakdown:**
+- `-t user`: User-mode event tracing
+- `-pn Microsoft-Windows-PowerShell`: Target PowerShell events
+- `-ot file`: Save to file
+- `-p ./etw_ps_logs.json`: Output JSON file
+- `-l verbose`: Detailed logging
+- `-y C:\Rules\yara`: Enable YARA scanning
+- `-yo Matches`: Display only matches
+
+**YARA Rule (etw_powershell_hello.yar):**
+```yara
+rule powershell_hello_world_yara {
+    strings:
+        $s0 = "Write-Host" ascii wide nocase
+        $s1 = "Hello" ascii wide nocase
+        $s2 = "from" ascii wide nocase
+        $s3 = "PowerShell" ascii wide nocase
+    condition:
+        3 of ($s*)
+}
+```
+
+**Trigger Detection:**
+```powershell
+Invoke-Command -ScriptBlock {Write-Host "Hello from PowerShell"}
+```
+
+**Result:**
+```
+[>] Starting trace collector (Ctrl-c to stop)..
+[?] Events captured: 28
+     -> Yara match: powershell_hello_world_yara
+     -> Yara match: powershell_hello_world_yara
+```
+
+---
+
+### Example 2: YARA on DNS ETW
+
+```powershell
+.\SilkETW.exe -t user -pn Microsoft-Windows-DNS-Client -ot file -p ./etw_dns_logs.json -l verbose -y C:\Rules\yara -yo Matches
+```
+
+**YARA Rule (etw_dns_wannacry.yar):**
+```yara
+rule dns_wannacry_domain {
+    strings:
+        $s1 = "iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com" ascii wide nocase
+    condition:
+        $s1
+}
+```
+
+**Trigger Detection:**
+```powershell
+ping iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+```
+
+**Result:**
+```
+Reply from 104.17.244.81: bytes=32 time=14ms TTL=56
+...
+[?] Events captured: 60
+     -> Yara match: dns_wannacry_domain
+     -> Yara match: dns_wannacry_domain
+```
+
+> 📌 **Key Points:**
+> - Detects hardcoded WannaCry kill switch domain in DNS queries
+> - Real-time C2 domain detection capability
+> - `-yo Matches` reduces noise by showing only detections
+
+---
+
 ## 5. Skills Assessment
 
 *Coming soon...*
