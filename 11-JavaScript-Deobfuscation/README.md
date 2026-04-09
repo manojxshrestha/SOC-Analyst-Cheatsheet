@@ -216,6 +216,72 @@ eval(function (p, a, c, k, e, d) { e = function (c) { '...SNIP... |true|function
 
 ---
 
+### What is Obfuscation?
+
+> 📌 **Obfuscation** is a technique used to make a script more difficult to read by humans but allows it to function the same from a technical point of view.
+
+**How Obfuscation Works:**
+
+Obfuscation tools take code as input and rewrite it in a way that is much more difficult to read. They often:
+1. Convert code into a dictionary of words/symbols
+2. Rebuild the original code during execution by referring to the dictionary
+3. Encode strings, rename variables, add dead code
+
+**Example of Obfuscation:**
+
+![Obfuscation Example](https://github.com/user-attachments/assets/e48b73a3-733e-46e6-9b7d-813fd4ebbb21)
+
+*JavaScript obfuscation tool interface*
+
+> 🔴 **Reference:** https://beautifytools.com/javascript-obfuscator.php
+
+---
+
+### Why Obfuscation?
+
+Languages like Python, PHP, and JavaScript are **interpreted languages**:
+- **Python/PHP** - Server-side, hidden from users
+- **JavaScript** - Client-side, sent to users in cleartext
+
+This is why obfuscation is very commonly used with JavaScript.
+
+---
+
+### Use Cases
+
+| Use Case | Description |
+|----------|-------------|
+| **Code Reuse Prevention** | Prevent code from being copied/reused |
+| **Reverse Engineering Protection** | Make it difficult to understand functionality |
+| **Client-Side Security** | Add security layer for authentication/encryption |
+| **Malware Evasion** | Hide malicious scripts from IDS/IPS |
+
+> 🔴 **Warning:** Client-side authentication/encryption is not recommended. Code is more prone to attacks.
+
+---
+
+### Obfuscation Tools
+
+| Tool | Description | URL |
+|------|-------------|-----|
+| **JavaScript Obfuscator** | Online JS obfuscation | beautifytools.com |
+| **jsfuck** | JSFuck encoding | jsfuck.com |
+| **AAEncode** | Asian art encoding | https://... |
+| **URL Encode/Decode** | URL encoding | Various online tools |
+
+---
+
+### Obfuscation vs Encryption
+
+| Aspect | Obfuscation | Encryption |
+|--------|-------------|------------|
+| **Purpose** | Hide code readability | Hide data content |
+| **Reversibility** | Usually reversible | Requires key to decrypt |
+| **Security** | Low - can be decoded | High - requires key |
+| **Use Case** | JavaScript code | Sensitive data |
+
+---
+
 ## 3. Deobfuscation Examples
 
 *Coming soon...*
