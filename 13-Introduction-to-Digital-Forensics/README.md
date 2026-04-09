@@ -1123,6 +1123,14 @@ The MFT file record contains various attributes including $STANDARD_INFORMATION,
 
 *Active@ Disk Editor displaying hex, ASCII, and Unicode data for a file.*
 
+![MFT Structure Attribute](https://github.com/user-attachments/assets/64f6f20e-92a6-4ec1-a646-2bf5e3b9eae0)
+
+*FILE Record Header diagram with Signature, Update Sequence, and Entry ID.*
+
+![MFT Explorer with ADS](https://github.com/user-attachments/assets/0c248ee5-20fd-4925-a68a-08f2fe5d069b)
+
+*MFT Explorer showing file details for 'pass.exe' in Temp directory with ADS highlighted.*
+
 ![MFT Structure Non-Resident](https://github.com/user-attachments/assets/24916c77-a9fb-4846-8bed-24f4bc714c62)
 
 *MFT file record structure diagram - Non-Resident flag*
@@ -1161,9 +1169,17 @@ The USN Journal file is designated as $J. The KAPE Output directory houses the c
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$Extend\$J' --csv C:\Users\johndoe\Desktop\forensic_data\mft_analysis\ --csvf MFT-J.csv
 ```
 
+![Timeline Explorer loading](https://github.com/user-attachments/assets/c0fd9111-2086-47ff-8325-f9cdfe2f82b1)
+
+*Timeline Explorer v2.0.0.1 interface showing a loading message for 'kape_event_log.csv'.*
+
 ![Timeline Explorer USN Journal](https://github.com/user-attachments/assets/45aea578-c48a-4b42-8ec2-e0cc481020a2)
 
 *Timeline Explorer v2.0.0.1 displaying 'MFT-J.csv' with update timestamps, file names, extensions, and update reasons.*
+
+![Timeline Explorer events](https://github.com/user-attachments/assets/42aa7519-fe74-43b8-abcf-7aaa212d3256)
+
+*Timeline Explorer v2.0.0.1 displaying 'kape_event_log.csv' with a chronological view of events.*
 
 By applying a filter on the Entry Number 93866, which corresponds to the Entry ID for uninstall.exe, we can glean the nature of modifications executed on this specific file.
 
@@ -1187,7 +1203,7 @@ EvtxECmd parses Windows Event Log files (EVTX) to CSV or JSON.
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe -h
 ```
 
-![EvtxECmd Help](https://github.com/user-attachments/assets/317086d6-3f69-46af-bffb-a15aecdf9467)
+![EvtxECmd help output](https://github.com/user-attachments/assets/2d81df11-a9e2-4f07-a744-c81472c71986)
 
 *EvtxeCmd help screen showing options for processing EVTX files.*
 
@@ -1344,6 +1360,10 @@ The destination directory contains the parsed output in CSV format.
 
 Now we can easily analyse the output in Timeline Explorer. Let's load both files.
 
+![Timeline Explorer PECmd](https://github.com/user-attachments/assets/e27180e9-168a-464b-aa5c-214f8a6a47cb)
+
+*File Explorer showing Windows prefetch folder with DISCORD.EXE-7191FAD6.pf.*
+
 ![Timeline Explorer PECmd](https://github.com/user-attachments/assets/efab1aba-ab1f-4d0b-bf33-35ce23203b63)
 
 *Timeline Explorer showing PECmd output with columns for Source Created, Executable Name, Files Loaded, Directories, Run Count.*
@@ -1363,6 +1383,76 @@ AmcacheParser extracts program execution history from Amcache.hve.
 ```powershell
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\AmcacheParser.exe -f "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\AppCompat\Programs\AmCache.hve" --csv C:\Users\johndoe\Desktop\forensic_data\amcache-analysis
 ```
+
+![AmcacheParser CSV](https://github.com/user-attachments/assets/0a24b7c3-47a2-4bb9-9566-b2ff73184045)
+
+*Registry Explorer showing SYSTEM hive with AppCompatCache key.*
+
+![AmcacheParser output](https://github.com/user-attachments/assets/afc9cef0-d457-4c0b-bab4-691cd1ce8b95)
+
+*Registry Explorer showing Amcache.hve contents.*
+
+---
+
+### API Monitor Analysis
+
+API Monitor captures and displays API calls made by applications. This is valuable for forensic analysis of process behavior.
+
+#### Loading API Monitor Data
+
+![API Monitor dashboard](https://github.com/user-attachments/assets/c2962073-767b-416a-b67a-48ded8a5bb2d)
+
+*API Monitor v2 interface with loading definitions.*
+
+![API Monitor discord.exe details](https://github.com/user-attachments/assets/d115d95f-f30e-446e-b312-9ef44e25da49)
+
+*API Monitor showing SYSTEM hive with BAM user settings.*
+
+#### Analyzing API Calls
+
+![API Monitor summary](https://github.com/user-attachments/assets/a076e261-28dc-40d9-b80e-14e365995485)
+
+*API Monitor v2 loading definitions progress.*
+
+![API Monitor call details](https://github.com/user-attachments/assets/94ba139f-e9db-40f4-b847-131bc2f5d442)
+
+*API Monitor v2 interface with File menu.*
+
+![API Monitor process](https://github.com/user-attachments/assets/040d5075-8fbc-4c73-be3d-542556d6872c)
+
+*API Monitor showing API calls, modules, and monitored processes.*
+
+![API Monitor process info](https://github.com/user-attachments/assets/d00f723f-22b9-47c9-981b-66288af015a4)
+
+*API Monitor showing discord.exe process details.*
+
+#### Registry Persistence Detection
+
+![API Monitor child process](https://github.com/user-attachments/assets/fb7b236b-e564-430c-8b83-2fbb2efc6617)
+
+*API Monitor showing RegOpenKeyExA function call.*
+
+![API Monitor exec](https://github.com/user-attachments/assets/fa5ad21c-c16a-4ee0-bb20-38f317e0dded)
+
+*API Monitor showing RegSetValueExA function call.*
+
+![API Monitor lpData](https://github.com/user-attachments/assets/b24fa6e6-e59b-4a05-8ce3-7aa8698a6624)
+
+*API Monitor showing RegSetValueExA with lpData parameter revealing backdoor location.*
+
+#### Process Injection Detection
+
+![API Monitor lpCommandLine](https://github.com/user-attachments/assets/85971990-5f17-4d77-ac92-a15d363a4063)
+
+*API Monitor showing CreateProcessA function call.*
+
+![API Monitor process injection](https://github.com/user-attachments/assets/46193e72-0ce8-4cde-9b4e-342991a3ed61)
+
+*API Monitor showing OpenProcess, VirtualAllocEx, WriteProcessMemory, and CreateRemoteThread calls.*
+
+![API Monitor summary injection](https://github.com/user-attachments/assets/9a0c3883-2ab6-459c-bc1b-4656263363f7)
+
+*FTK Imager showing PowerShell transcript with recorded activity.*
 
 ---
 
