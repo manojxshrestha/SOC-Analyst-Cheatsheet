@@ -2442,5 +2442,72 @@ EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
 
 ---
 
-*Module 13/15 - Practical Digital Forensics Scenario*
+## 8. Interview Questions {#8-interview-questions}
+
+### Q1: What is the difference between volatile and non-volatile data?
+
+**Answer:** Volatile data is information that disappears when a system is powered off, such as RAM contents, running processes, and network connections. Non-volatile data persists on storage devices like hard drives, including files, logs, and registry data.
+
+### Q2: What is the order of volatility and why is it important?
+
+**Answer:** The order of volatility (from most to least volatile): CPU registers → Cache → RAM → Network connections → Running processes → Disk → Remote logs. Following this order ensures critical evidence isn't lost during acquisition.
+
+### Q3: How do you analyze a memory dump?
+
+**Answer:** Use Volatility framework to: 1) Identify the memory profile, 2) List processes (pslist/psscan), 3) Find injected code (malfind), 4) Analyze network connections (netscan), 5) Examine DLLs (dlllist), 6) Check handles and registry hives.
+
+### Q4: What is timestomping?
+
+**Answer:** Timestomping is a forensic anti-evasion technique where attackers modify file timestamps (MAC times) to make malicious files appear legitimate or blend in with normal system files.
+
+### Q5: How do you detect persistence mechanisms?
+
+**Answer:** Check registry Run keys, scheduled tasks, services, startup folders, WMI event consumers, and DLL search order hijacking. Tools like Autoruns, RegRipper, and KAPE can help identify these.
+
+### Q6: What is the difference between MFT $STANDARD_INFORMATION and $FILE_NAME timestamps?
+
+**Answer:** $STANDARD_INFORMATION can be modified by user-space applications and is what Windows Explorer displays. $FILE_NAME timestamps can only be modified by the kernel and represent the actual file creation time.
+
+### Q7: What is the USN Journal?
+
+**Answer:** USN (Update Sequence Number) Journal is an NTFS feature that logs all changes to files and directories including creation, deletion, modification, and renaming. It's valuable for timeline analysis.
+
+### Q8: How do you analyze Windows Event Logs?
+
+**Answer:** Use tools like EvtxECmd to parse EVTX files to CSV/JSON, then correlate events by timestamp, Event ID, user, and source IP. Key Event IDs: 4624/4625 (logon), 4688 (process creation), 7045 (service install).
+
+### Q9: What is KAPE and when would you use it?
+
+**Answer:** KAPE (Kroll Artifact Parser and Extractor) is a rapid triage tool that collects and parses forensic artifacts. Use it when you need quick evidence collection during time-sensitive investigations.
+
+### Q10: How do you build a forensic timeline?
+
+**Answer:** Combine artifacts from multiple sources (MFT, USN Journal, Event Logs, Prefetch, Registry) using tools like Timeline Explorer. Sort events chronologically to reconstruct the attack sequence.
+
+---
+
+## 9. Additional Resources {#9-additional-resources}
+
+### Tools
+- **FTK Imager** - Disk imaging and mounting
+- **KAPE** - Rapid artifact collection
+- **Velociraptor** - Endpoint forensics
+- **Volatility** - Memory forensics
+- **Autopsy** - Disk analysis
+- **Eric Zimmerman Tools** - Registry, MFT, Event Log parsing
+
+### References
+- SANS Digital Forensics Blog
+- The DFIR Report
+- MITRE ATT&CK
+- Windows Registry Forensics (SANS)
+
+### Further Learning
+- Advanced Memory Forensics
+- Malware Analysis Fundamentals
+- Log Analysis with Splunk/Elastic
+
+---
+
+*Module 13/15 - Introduction to Digital Forensics*
 *For learning and SOC career preparation*
