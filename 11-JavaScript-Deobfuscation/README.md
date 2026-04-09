@@ -41,8 +41,10 @@ This module covers the fundamentals of JavaScript Deobfuscation:
 
 1. [Introduction](#1-introduction)
 2. [Obfuscation](#2-obfuscation)
-3. [Deobfuscation Examples](#3-deobfuscation-examples)
-4. [Skills Assessment](#4-skills-assessment)
+3. [Basic Obfuscation](#3-basic-obfuscation)
+4. [Advanced Obfuscation](#4-advanced-obfuscation)
+5. [Deobfuscation Examples](#5-deobfuscation-examples)
+6. [Skills Assessment](#6-skills-assessment)
 
 ---
 
