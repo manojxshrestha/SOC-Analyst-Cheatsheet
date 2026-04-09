@@ -1564,13 +1564,13 @@ You belong to the digital forensics team and are assigned to investigate an inci
 
 ---
 
-## 1. Memory Analysis with Volatility v3
+## 1. Memory Analysis with Volatility v3 {#7-1-memory-analysis-with-volatility-v3}
 
 > 📌 Memory forensics allows analysts to examine the state of a system at the time of memory acquisition, revealing running processes, loaded DLLs, network connections, and artifacts that may not be visible on disk.
 
 The affected system's memory dump resides in `C:\Users\johndoe\Desktop\memdump\PhysicalMemory.raw`.
 
-### 1.1 Identifying the Memory Dump Profile
+### 1.1 Identifying the Memory Dump Profile {#7-1-1-identifying-the-memory-dump-profile}
 
 Before analyzing, we need to identify the operating system and kernel details of the Windows memory sample:
 
@@ -1593,7 +1593,7 @@ python vol.py -q -f ../memdump/PhysicalMemory.raw windows.info
 
 ---
 
-### 1.2 Identifying Injected Code
+### 1.2 Identifying Injected Code {#7-1-2-identifying-injected-code}
 
 > 🔴 **PAGE_EXECUTE_READWRITE** is a strong indicator of potential code injection. Legitimate applications typically separate code execution from data storage.
 
@@ -1621,7 +1621,7 @@ In essence, while not every instance of PAGE_EXECUTE_READWRITE is malicious, its
 
 ---
 
-### 1.3 Identifying Running Processes
+### 1.3 Identifying Running Processes {#7-1-3-identifying-running-processes}
 
 List all processes present in the memory image:
 
@@ -1814,7 +1814,7 @@ python vol.py -q -f ../memdump/PhysicalMemory.raw windows.netscan
 
 ---
 
-## 2. Disk Image & Rapid Triage Analysis
+## 2. Disk Image & Rapid Triage Analysis {#7-2-disk-image--rapid-triage-analysis}
 
 ### 2.1 Searching for Keywords with Autopsy
 
@@ -2308,7 +2308,7 @@ Since the MFT entry was overwritten, search pagefile.sys for the file's content 
 
 ---
 
-## 3. Timeline Construction
+## 3. Timeline Construction {#7-3-timeline-construction}
 
 ### 3.1 Building the Execution Timeline
 
@@ -2346,7 +2346,7 @@ Here are the real actions taken by the attacker (from ground truth):
 
 ---
 
-## 4. Summary
+## 4. Summary {#7-4-summary}
 
 ### Key Findings
 
