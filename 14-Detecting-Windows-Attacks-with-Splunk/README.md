@@ -1853,5 +1853,60 @@ success="false" request_type=AS
 
 ---
 
+### Detecting Kerberoasting (Zeek) {#detecting-kerberoasting-1}
+
+#### Kerberoasting via Network Analysis
+
+While we covered Kerberoasting detection using Windows Event Logs earlier, we can also detect it via **network traffic analysis** using Zeek logs.
+
+> 📌 Kerberoasting uses RC4 encryption for TGS tickets - this is a key detection opportunity.
+
+#### Kerberoasting Traffic
+
+![Kerberoasting Traffic](https://github.com/user-attachments/assets/6242d5d9-4e56-4242-912c-d75e935b6b4a)
+
+*Network capture showing TGS-REQ/TGS-REP with RC4 encryption*
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/sharphound` |
+| Splunk Index | `sharphound` |
+| Sourcetype | `bro:kerberos:json` |
+
+---
+
+#### Detecting Kerberoasting With Splunk & Zeek
+
+```spl
+index="sharphound" sourcetype="bro:kerberos:json"
+request_type=TGS cipher="rc4-hmac" 
+forwardable="true" renewable="true"
+| table _time, id.orig_h, id.resp_h, request_type, cipher, forwardable, renewable, client, service
+```
+
+![Kerberoast Zeek Detection](https://github.com/user-attachments/assets/df3cda6f-6b9a-4390-b203-94cdcf3c1e46)
+
+*Detecting Kerberoasting via Zeek logs*
+
+**Search Breakdown:**
+
+1. **Filter**: TGS requests with RC4-HMAC cipher
+2. **Filter**: Forwardable and renewable tickets
+3. **Table**: Display key fields
+
+> 📌 **Key Detection**: TGS requests with RC4 cipher, forwardable/renewable flags indicate Kerberoasting activity!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
