@@ -987,6 +987,10 @@ Having covered memory forensics, let's shift our attention to disk forensics (di
 
 Eric Zimmerman has curated a suite of indispensable tools for forensic analysis. These tools are available at: https://ericzimmerman.github.io/#!index.md
 
+![Eric Zimmerman Tools Webpage](https://github.com/user-attachments/assets/a2840d3c-d894-47ba-938f-54adbd7c2b6f)
+
+*Eric Zimmerman's tools webpage with download options for .net 4 and .net 6.*
+
 #### Downloading Tools
 
 ```powershell
@@ -1057,36 +1061,83 @@ MAC(b) times are timestamps pivotal for forensic chronology:
 
 MFTECmd analyzes NTFS MFT files to extract file metadata and timestamps.
 
+#### Timestomping Investigation
+
+Identifying instances of timestamp manipulation (Timestomping/T1070.006). This tactic is employed by various tools as illustrated in MITRE ATT&CK's timestomp technique.
+
+![MITRE ATT&CK Timestomp](https://github.com/user-attachments/assets/1bfba04c-c548-4915-b856-7f48e6fd4e47)
+
+*Mitre ATT&CK Timestomp technique - Cobalt Strike and Empire tools can modify file timestamps.*
+
+When we load the $MFT file into MFT Explorer, we can identify tampered timestamps:
+
+![MFT Explorer Timestomping](https://github.com/user-attachments/assets/bad98a3f-3fa8-424d-a5a5-6ec0af3edcd6)
+
+*MFT Explorer showing 'ChangedFileTime.txt' with Possible Timestamped indicator.*
+
 #### Basic MFT Analysis
 
 ```powershell
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT' --de 0x16169
 ```
 
-**Output:**
-```
-MFTECmd version 1.2.2.1
-Author: Eric Zimmerman (saericzimmerman@gmail.com)
+**Full Output showing timestomping:**
+- **$STANDARD_INFO**: Created On: 2022-01-03 (tampered)
+- **$FILE_NAME**: Created On: 2023-09-07 (actual)
 
-File type: Mft
-Processed C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT in 3.492 seconds
+![STANDARD INFO Timestomping](https://github.com/user-attachments/assets/f1af7861-e04d-41d7-a0c2-844e3e37fdcc)
 
-Dumping details for file record with key 00016169-00000004
+*STANDARD INFO showing Created On as 2022-01-03 (tampered)*
 
-Entry-seq #: 0x16169-0x4, Offset: 0x585A400, Flags: InUse
+![FILE NAME Actual Time](https://github.com/user-attachments/assets/06846589-7f48-444a-bc4e-d3cbea800394)
 
-**** STANDARD INFO ****
-  Created On:         2022-01-03 16:54:25.2726453
-  Modified On:        2023-09-07 08:30:12.4258743
-  Record Modified On: 2023-09-07 08:30:12.4565632
-  Last Accessed On:   2023-09-07 08:30:12.4258743
+*FILE NAME showing actual creation time 2023-09-07*
 
-**** FILE NAME ****
-  File name: ChangedFileTime.txt
-  Created On:         2023-09-07 08:30:12.4258743
-  Modified On:        2023-09-07 08:30:12.4258743
-  Last Accessed On:   2023-09-07 08:30:12.4258743
-```
+> 📌 Note: In NTFS, regular users cannot modify $FILE_NAME timestamps - only system kernel can.
+
+#### MFT Explorer
+
+MFT Explorer provides a graphical interface to analyze MFT metadata.
+
+![MFT Explorer Interface](https://github.com/user-attachments/assets/43d70d11-0c71-4ccb-925d-e92eac8ae1e1)
+
+*MFT Explorer showing file hierarchy for 'discord.exe' in Temp directory*
+
+#### MFT File Record Structure
+
+The MFT file record contains various attributes including $STANDARD_INFORMATION, $FILE_NAME, and $DATA.
+
+![MFT File Record Structure](https://github.com/user-attachments/assets/a71bf00f-ed58-4074-9581-fa33d6820354)
+
+*MFT file record structure diagram showing header and attributes.*
+
+![MFT Attribute Detail](https://github.com/user-attachments/assets/017d7a88-9f3f-48f0-876b-5b6d0f7f9d27)
+
+*MFT file record showing FILE Record Header, Attribute $10 (STANDARD_INFORMATION), Attribute \30 (FILE_NAME), and Attribute \80 ($DATA).*
+
+![Active@ Disk Editor](https://github.com/user-attachments/assets/49a79296-051c-4113-b516-7a0ff331e908)
+
+*Active@ Disk Editor showing raw MFT file record hex data.*
+
+![Active@ Disk Editor Volume](https://github.com/user-attachments/assets/559d26e2-0c62-4642-a210-a13f7df5ab0a)
+
+*Active@ Disk Editor displaying hex, ASCII, and Unicode data for a file.*
+
+![MFT Structure Non-Resident](https://github.com/user-attachments/assets/24916c77-a9fb-4846-8bed-24f4bc714c62)
+
+*MFT file record structure diagram - Non-Resident flag*
+
+![MFTECmd Non-Resident Output](https://github.com/user-attachments/assets/330b0d06-ad00-490a-8b71-cff5b5609f17)
+
+*MFTECmd output showing non-resident data for 'update.exe'*
+
+![MFT Structure Resident](https://github.com/user-attachments/assets/0d4c4d40-561f-4ca9-bd75-8af178f49206)
+
+*MFT file record structure diagram - Resident flag*
+
+![MFTECmd Resident Output](https://github.com/user-attachments/assets/b157da87-7b36-4a6f-860a-5ef770cc2e06)
+
+*MFTECmd output showing resident data for 'users.txt'*
 
 #### MFT to CSV Export
 
@@ -1100,9 +1151,29 @@ PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\
 
 The USN (Update Sequence Number) Journal records file modifications, deletions, and renames.
 
+The USN Journal file is designated as $J. The KAPE Output directory houses the collected USN Journal in the following directory: `<KAPE_output_folder>\<Drive>\$Extend`
+
+![USN Journal Files](https://github.com/user-attachments/assets/ebd05067-6fa6-45c7-b375-3672f1dd3e70)
+
+*File Explorer showing path to $Extend folder with USN Journal files ($J and $Max).*
+
 ```powershell
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$Extend\$J' --csv C:\Users\johndoe\Desktop\forensic_data\mft_analysis\ --csvf MFT-J.csv
 ```
+
+![Timeline Explorer USN Journal](https://github.com/user-attachments/assets/45aea578-c48a-4b42-8ec2-e0cc481020a2)
+
+*Timeline Explorer v2.0.0.1 displaying 'MFT-J.csv' with update timestamps, file names, extensions, and update reasons.*
+
+By applying a filter on the Entry Number 93866, which corresponds to the Entry ID for uninstall.exe, we can glean the nature of modifications executed on this specific file.
+
+![Timeline Explorer Entry 93866](https://github.com/user-attachments/assets/894dfbc5-9e9f-4861-adb9-f2fa4be25613)
+
+*Timeline Explorer showing file entries with timestamps, entry number 93866, and update reasons.*
+
+![Timeline Explorer MFT Zone ID](https://github.com/user-attachments/assets/b7917fa7-6cfb-48a5-8f94-25b8e88936c9)
+
+*Timeline Explorer showing MFT.csv with entry number 93866 for 'uninstall.exe' with Zone ID contents.*
 
 ---
 
@@ -1115,6 +1186,10 @@ EvtxECmd parses Windows Event Log files (EVTX) to CSV or JSON.
 ```powershell
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe -h
 ```
+
+![EvtxECmd Help](https://github.com/user-attachments/assets/317086d6-3f69-46af-bffb-a15aecdf9467)
+
+*EvtxeCmd help screen showing options for processing EVTX files.*
 
 **Examples:**
 ```powershell
@@ -1134,6 +1209,14 @@ PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe --s
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe -f "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\System32\winevt\logs\Microsoft-Windows-Sysmon%4Operational.evtx" --csv "C:\Users\johndoe\Desktop\forensic_data\event_logs\csv_timeline" --csvf kape_event_log.csv
 ```
 
+![Timeline Explorer Event Logs](https://github.com/user-attachments/assets/efaa2d3b-7144-42a2-8b66-5f4477809576)
+
+*Timeline Explorer showing converted logs with events like 'Engine state changed', 'RegistryEvent', and 'Process creation'.*
+
+![Executable Info](https://github.com/user-attachments/assets/c666e397-d949-43bc-a857-6469e15714df)
+
+*Executable Info showing command lines for power settings, registry edits, scheduled tasks.*
+
 ---
 
 ### EQL (Event Query Language)
@@ -1150,17 +1233,49 @@ eql query -f C:\Users\johndoe\Desktop\forensic_data\event_logs\eql_format_json\e
 {"CommandLine": "net  users  ", "Image": "C:\\Windows\\System32\\net.exe", "ParentImage": "C:\\Windows\\System32\\cmd.exe", "User": "HTBVM01\\John Doe", "UtcTime": "2023-09-07 08:30:26.851"}
 ```
 
+![EQL Event Analysis](https://github.com/user-attachments/assets/99d22a69-87db-457c-b027-3f0d5d6097f0)
+
+*Event Analysis showing command lines for user enumeration.*
+
 ---
 
 ### RegRipper - Registry Analysis
 
 RegRipper analyzes Windows Registry hives for forensic artifacts.
 
+Registry-related files harvested from KAPE are typically housed in `<KAPE_output_folder>\Windows\System32\config`
+
+![Registry Config Files](https://github.com/user-attachments/assets/8064104e-c696-4f9a-abcd-5d2848ba601f)
+
+*File Explorer showing config folder with registry hive files: DEFAULT, SAM, SECURITY, SOFTWARE, SYSTEM.*
+
+Additionally, there are user-specific registry hives located within individual user directories.
+
+![Registry Explorer SYSTEM Hive](https://github.com/user-attachments/assets/9c407b50-9061-41b6-9607-9da72b6f330a)
+
+*Registry Explorer showing SYSTEM hive with ComputerName key set to HTBVM01.*
+
+Registry Explorer is a GUI-based tool that offers a streamlined interface to navigate and dissect the contents of Windows Registry hives.
+
+![Registry Explorer SOFTWARE](https://github.com/user-attachments/assets/93e4a6fd-e596-419a-a226-518c69697c88)
+
+*Registry Explorer showing SOFTWARE hive with CurrentVersion key, ProductName as Windows 10 Enterprise LTSC.*
+
+![Registry Explorer Bookmarks](https://github.com/user-attachments/assets/e913ebb8-7fd9-4b23-878b-c8a1cccc0f1f)
+
+*Registry Explorer showing available bookmarks.*
+
 #### List Available Plugins
 
 ```powershell
 PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -l -c > rip_plugins.csv
 ```
+
+This action compiles a comprehensive list of plugins, detailing the associated hives, and saves it as a CSV file.
+
+![RegRipper Plugins List](https://github.com/user-attachments/assets/bef192b6-428c-4479-8ce4-dd8ef57ccc7e)
+
+*LibreOffice Calc showing rip_plugins.csv with columns: Plugin, Version, Hive, and Description.*
 
 #### Extract Computer Name
 
@@ -1220,6 +1335,24 @@ PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\PECmd.exe -f C:\Users\joh
 ```powershell
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\PECmd.exe -d C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\prefetch --csv C:\Users\johndoe\Desktop\forensic_data\prefetch_analysis
 ```
+
+The destination directory contains the parsed output in CSV format.
+
+![Prefetch CSV Output](https://github.com/user-attachments/assets/202356c3-6068-4e2c-b7bb-67de2bf815af)
+
+*File Explorer showing prefetch_analysis folder with CSV output files.*
+
+Now we can easily analyse the output in Timeline Explorer. Let's load both files.
+
+![Timeline Explorer PECmd](https://github.com/user-attachments/assets/efab1aba-ab1f-4d0b-bf33-35ce23203b63)
+
+*Timeline Explorer showing PECmd output with columns for Source Created, Executable Name, Files Loaded, Directories, Run Count.*
+
+The second output file is the timeline file, which shows the executable details sorted by the run time.
+
+![Timeline Explorer PECmd Timeline](https://github.com/user-attachments/assets/ebe8e9b2-fbf6-4d5f-a211-5ffe40fd4433)
+
+*Timeline Explorer showing PECmd timeline output with Run Time and Executable Name.*
 
 ---
 
