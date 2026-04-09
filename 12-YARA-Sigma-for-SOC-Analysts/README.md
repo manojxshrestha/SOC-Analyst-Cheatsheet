@@ -985,7 +985,7 @@ rule susp_file_enumerator_with_encrypted_resource_101 {
       not ($mz in (pe.resources[i].offset..pe.resources[i].offset + pe.resources[i].length))
     )
 }
-``
+```
 
 **Rule Breakdown:**
 
