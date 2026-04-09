@@ -777,26 +777,26 @@ rule APT17_Malware_Oct17_Gen {
 **Rule Breakdown:**
 
 **Rule Imports:**
-- `import "pe"`: By importing the PE module the YARA rule gains access to a set of specialized functions and structures that can inspect and analyze the details of PE files. This makes the rule more precise when it comes to detecting characteristics in Windows executables.
+- import "pe": By importing the PE module the YARA rule gains access to a set of specialized functions and structures that can inspect and analyze the details of PE files. This makes the rule more precise when it comes to detecting characteristics in Windows executables.
 
 **Rule Meta:**
-- `description`: Tells us the main purpose of the rule, which is to detect APT17 malware.
-- `license`: Points to the location and version of the license governing the use of this YARA rule.
-- `author`: The rule was written by Florian Roth from Nextron Systems.
-- `reference`: Provides a link that goes into more detail about the malware or context of this rule.
-- `date`: The date the rule was either created or last updated, in this case, 3rd October 2017.
-- `hash1, hash2, hash3`: Hash values, probably of samples related to APT17, which the author used as references or as foundational data to create the rule.
+- description: Tells us the main purpose of the rule, which is to detect APT17 malware.
+- license: Points to the location and version of the license governing the use of this YARA rule.
+- author: The rule was written by Florian Roth from Nextron Systems.
+- reference: Provides a link that goes into more detail about the malware or context of this rule.
+- date: The date the rule was either created or last updated, in this case, 3rd October 2017.
+- hash1, hash2, hash3: Hash values, probably of samples related to APT17, which the author used as references or as foundational data to create the rule.
 
 **Rule Body:**
-- `$x*` strings (exclusive strings): These are strings that are less likely to appear in benign files
-- `$s*` strings (supplementary strings): Additional strings that support detection
+- $x* strings (exclusive strings): These are strings that are less likely to appear in benign files
+- $s* strings (supplementary strings): Additional strings that support detection
 
 **Rule Condition:**
-- `uint16(0) == 0x5a4d`: Checks if the first two bytes of the file are "MZ", which is the magic number for Windows executables. So, we're focusing on detecting Windows binaries.
-- `filesize < 200KB`: Limits the rule to scan only small files, specifically those smaller than 200KB.
-- `pe.imphash() == "414bbd566b700ea021cfae3ad8f4d9b9"`: This checks the import hash (imphash) of the PE (Portable Executable) file. Imphashes are great for categorizing and clustering malware samples based on the libraries they import.
-- `1 of ($x*)`: At least one of the $x strings (from the strings section) must be present in the file.
-- `6 of them`: Requires that at least six of the strings (from both $x and $s categories) be found within the scanned file.
+- uint16(0) == 0x5a4d: Checks if the first two bytes of the file are "MZ", which is the magic number for Windows executables. So, we're focusing on detecting Windows binaries.
+- filesize < 200KB: Limits the rule to scan only small files, specifically those smaller than 200KB.
+- pe.imphash() == "414bbd566b700ea021cfae3ad8f4d9b9": This checks the import hash (imphash) of the PE (Portable Executable) file. Imphashes are great for categorizing and clustering malware samples based on the libraries they import.
+- 1 of ($x*): At least one of the $x strings (from the strings section) must be present in the file.
+- 6 of them: Requires that at least six of the strings (from both $x and $s categories) be found within the scanned file.
 
 ---
 
@@ -886,15 +886,15 @@ rule neuron_functions_classes_and_vars {
 **Rule Breakdown:**
 
 **Strings Section:**
-- `$class1` to `$class8`: These are eight ASCII strings corresponding to class names within the .NET assembly (StorageUtils, WebServer, StorageFile, StorageScript, ServerConfig, CommandScript, MSExchangeService, W3WPDIAG)
-- `$func1` to `$func7`: These seven ASCII strings represent function names within the .NET assembly (AddConfigAsString, DelConfigAsString, GetConfigAsString, EncryptScript, ExecCMD, KillOldThread, FindSPath)
-- `$dotnetMagic = "BSJB"`: This signature is present in the CLI (Common Language Infrastructure) header of .NET binaries. Its presence indicates the file is a .NET assembly. Specifically, it's in the Signature field of the CLI header, which follows the PE header and additional tables.
+- $class1 to $class8: These are eight ASCII strings corresponding to class names within the .NET assembly (StorageUtils, WebServer, StorageFile, StorageScript, ServerConfig, CommandScript, MSExchangeService, W3WPDIAG)
+- $func1 to $func7: These seven ASCII strings represent function names within the .NET assembly (AddConfigAsString, DelConfigAsString, GetConfigAsString, EncryptScript, ExecCMD, KillOldThread, FindSPath)
+- $dotnetMagic = "BSJB": This signature is present in the CLI (Common Language Infrastructure) header of .NET binaries. Its presence indicates the file is a .NET assembly. Specifically, it's in the Signature field of the CLI header, which follows the PE header and additional tables.
 
 **Condition Section:**
-- `uint16(0) == 0x5A4D`: This checks if the first two bytes at the start of the file are "MZ", a magic number indicating a Windows Portable Executable (PE) format.
-- `uint16(uint32(0x3c)) == 0x4550`: A two-step check. First, it reads a 32-bit (4 bytes) value from offset 0x3c of the file. In PE files, this offset typically contains a pointer to the PE header. It then checks whether the two bytes at that pointer are "PE" (0x4550), indicating a valid PE header. This ensures the file is a legitimate PE format and not a corrupted or obfuscated one.
-- `$dotnetMagic`: Verifies the presence of the BSJB string. This signature is present in the CLI (Common Language Infrastructure) header of .NET binaries.
-- `6 of them`: This condition states that at least six of the previously defined strings (either classes or functions) must be found within the file. This ensures that even if a few signatures are absent or have been modified, the rule will still trigger if a substantial number remain.
+- uint16(0) == 0x5A4D: This checks if the first two bytes at the start of the file are "MZ", a magic number indicating a Windows Portable Executable (PE) format.
+- uint16(uint32(0x3c)) == 0x4550: A two-step check. First, it reads a 32-bit (4 bytes) value from offset 0x3c of the file. In PE files, this offset typically contains a pointer to the PE header. It then checks whether the two bytes at that pointer are "PE" (0x4550), indicating a valid PE header. This ensures the file is a legitimate PE format and not a corrupted or obfuscated one.
+- $dotnetMagic: Verifies the presence of the BSJB string. This signature is present in the CLI (Common Language Infrastructure) header of .NET binaries.
+- 6 of them: This condition states that at least six of the previously defined strings (either classes or functions) must be found within the file. This ensures that even if a few signatures are absent or have been modified, the rule will still trigger if a substantial number remain.
 
 ---
 
@@ -983,29 +983,29 @@ rule susp_file_enumerator_with_encrypted_resource_101 {
 **Rule Breakdown:**
 
 **Rule Imports:**
-- `import "pe"`: By importing the PE module the YARA rule gains access to a set of specialized functions and structures that can inspect and analyze the details of PE files. This makes the rule more precise when it comes to detecting characteristics in Windows executables.
-- `import "math"`: Imports the math module, providing mathematical functions like entropy calculations.
+- import "pe": By importing the PE module the YARA rule gains access to a set of specialized functions and structures that can inspect and analyze the details of PE files. This makes the rule more precise when it comes to detecting characteristics in Windows executables.
+- import "math": Imports the math module, providing mathematical functions like entropy calculations.
 
 **Rule Meta:**
-- `copyright = "Kaspersky Lab"`: The rule was authored or copyrighted by Kaspersky Lab.
-- `description = "Generic detection for samples that enumerate files with encrypted resource called 101"`: The rule aims to detect samples that list files and have an encrypted resource with identifier "101".
-- `reference = "https://securelist.com/from-shamoon-to-stonedrill/77725/"`: Provides a URL for additional context or information about the rule.
-- `hash`: Two hashes are given, probably as examples of known malicious files that match this rule.
-- `version = "1.4"`: The version number of the YARA rule.
+- copyright = "Kaspersky Lab": The rule was authored or copyrighted by Kaspersky Lab.
+- description = "Generic detection for samples that enumerate files with encrypted resource called 101": The rule aims to detect samples that list files and have an encrypted resource with identifier "101".
+- reference = "https://securelist.com/from-shamoon-to-stonedrill/77725/": Provides a URL for additional context or information about the rule.
+- hash: Two hashes are given, probably as examples of known malicious files that match this rule.
+- version = "1.4": The version number of the YARA rule.
 
 **Strings Section:**
-- `$mz = "This program cannot be run in DOS mode."`: The ASCII string that typically appears in the DOS stub part of a PE file.
-- `$a1 = "FindFirstFile"`, `$a2 = "FindNextFile"`: Strings for Windows API functions used to enumerate files. The usage of FindFirstFileW and FindNextFileW API functions can be identified through string analysis.
-- `$a3 = "FindResource"`, `$a4 = "LoadResource"`: As already mentioned Stonedrill samples feature encrypted resources. These strings can be found through string analysis and they are related to Windows API functions used for handling resources within the executable.
+- $mz = "This program cannot be run in DOS mode.": The ASCII string that typically appears in the DOS stub part of a PE file.
+- $a1 = "FindFirstFile", $a2 = "FindNextFile": Strings for Windows API functions used to enumerate files. The usage of FindFirstFileW and FindNextFileW API functions can be identified through string analysis.
+- $a3 = "FindResource", $a4 = "LoadResource": As already mentioned Stonedrill samples feature encrypted resources. These strings can be found through string analysis and they are related to Windows API functions used for handling resources within the executable.
 
 **Rule Condition:**
-- `uint16(0) == 0x5A4D`: Checks if the first two bytes of the file are "MZ," indicating a Windows PE file.
-- `all of them`: All the strings $a1, $a2, $a3, $a4 must be present in the file.
-- `filesize < 700000`: The file size must be less than 700,000 bytes.
-- `pe.number_of_sections > 4`: The PE file must have more than four sections.
-- `pe.number_of_signatures == 0`: The file must not be digitally signed.
-- `pe.number_of_resources > 1 and pe.number_of_resources < 15`: The file must contain more than one but fewer than 15 resources.
-- `for any i in (0..pe.number_of_resources - 1): ((math.entropy(pe.resources[i].offset, pe.resources[i].length) > 7.8) and pe.resources[i].id == 101 and pe.resources[i].length > 20000 and pe.resources[i].language == 0 and not ($mz in (pe.resources[i].offset..pe.resources[i].offset + pe.resources[i].length)))`: Go through each resource in the file and check if the entropy of the resource data is more than 7.8 AND the resource identifier is 101 AND the resource length is greater than 20,000 bytes AND the language identifier of the resource is 0 AND the DOS stub string is not present in the resource. It's not required for all resources to match the condition; only one resource meeting all the criteria is sufficient for the overall YARA rule to be a match.
+- uint16(0) == 0x5A4D: Checks if the first two bytes of the file are "MZ," indicating a Windows PE file.
+- all of them: All the strings $a1, $a2, $a3, $a4 must be present in the file.
+- filesize < 700000: The file size must be less than 700,000 bytes.
+- pe.number_of_sections > 4: The PE file must have more than four sections.
+- pe.number_of_signatures == 0: The file must not be digitally signed.
+- pe.number_of_resources > 1 and pe.number_of_resources < 15: The file must contain more than one but fewer than 15 resources.
+- for any i in (0..pe.number_of_resources - 1): ((math.entropy(pe.resources[i].offset, pe.resources[i].length) > 7.8) and pe.resources[i].id == 101 and pe.resources[i].length > 20000 and pe.resources[i].language == 0 and not ($mz in (pe.resources[i].offset..pe.resources[i].offset + pe.resources[i].length))): Go through each resource in the file and check if the entropy of the resource data is more than 7.8 AND the resource identifier is 101 AND the resource length is greater than 20,000 bytes AND the language identifier of the resource is 0 AND the DOS stub string is not present in the resource. It's not required for all resources to match the condition; only one resource meeting all the criteria is sufficient for the overall YARA rule to be a match.
 
 ---
 
