@@ -908,5 +908,73 @@ index=main earliest=1690392405 latest=1690451745 source="WinEventLog:Security" u
 
 ---
 
+### Detecting Overpass-the-Hash {#detecting-overpass-the-hash}
+
+#### Overpass-the-Hash Overview
+
+**Overpass-the-Hash** (also known as **Pass-the-Key**) allows attackers to obtain Kerberos TGTs using stolen password hashes. This technique enables authentication via Kerberos rather than NTLM, using either NTLM hashes or AES keys as the basis for requesting a TGT.
+
+> 📌 Overpass-the-Hash is stealthier than Pass-the-Hash because it doesn't require elevated privileges on the host to request the TGT.
+
+![Mimikatz Hash Extraction](https://github.com/user-attachments/assets/d7ceeb8a-448d-4e24-a40f-37ad39722c70)
+
+*Mimikatz extracting NTLM hash*
+
+#### Overpass-the-Hash Attack Steps
+
+1. **Extract Hash**: Attacker uses Mimikatz to extract NTLM hash of logged-in user (requires local admin privileges)
+
+2. **Request TGT**: Attacker uses Rubeus to craft raw AS-REQ request for specified user to request a TGT ticket
+
+![Rubeus TGT Request](https://github.com/user-attachments/assets/2c5caa20-a34d-47ee-8971-b2e5875f063a)
+
+*Rubeus requesting TGT using RC4 hash*
+
+3. **Submit Ticket**: Attacker submits the requested ticket for the current logon session (same as Pass-the-Ticket)
+
+---
+
+#### Overpass-the-Hash Detection Opportunities
+
+| Tool | Detection Method |
+|------|-------------------|
+| **Mimikatz** | Same artifacts as Pass-the-Hash (Event 4624 LogonType 9 + Sysmon Event 10) |
+| **Rubeus** | Sends AS-REQ directly to DC, generates Event 4768 (TGT Request). May not trigger PtT detection unless TGT is used on another host |
+
+**Rubeus Detection Strategy:**
+- Communication with DC (TCP/UDP port 88) from unusual processes
+- Rubeus directly sends AS-REQ to Domain Controller, generating Event ID 4768
+
+> 📌 Overpass-the-Hash using Rubeus can be detected by monitoring network connections to port 88 from processes other than lsass.exe
+
+---
+
+#### Detecting Overpass-the-Hash With Splunk
+
+**Timeframe:** earliest=1690443407 latest=1690443544
+
+```spl
+index=main earliest=1690443407 latest=1690443544 source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" (EventCode=3 dest_port=88 Image!=*lsass.exe) OR EventCode=1
+| eventstats values(process) as process by process_id
+| where EventCode=3
+| stats count by _time, Computer, dest_ip, dest_port, Image, process
+| fields - count
+```
+
+![Overpass Detection](https://github.com/user-attachments/assets/8a6bbb8e-bf49-4c7c-baee-75a75db3b26c)
+
+*Detecting network connections to port 88*
+
+**Search Breakdown:**
+
+1. **Filter**: Sysmon EventCode=3 (network connection) to dest_port=88, excluding lsass.exe
+2. **EventStats**: Get process names by process_id
+3. **Filter**: Only network events
+4. **Stats**: Display time, computer, dest IP/port, image, process
+
+> 📌 **Key Detection**: Network connections to Kerberos port (88) from processes other than lsass.exe indicates potential Overpass-the-Hash!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
