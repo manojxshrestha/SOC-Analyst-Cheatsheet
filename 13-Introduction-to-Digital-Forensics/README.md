@@ -4,7 +4,7 @@
 
 ---
 
-## 0. Overview {#0-overview}
+## 0. Overview
 
 > 📌 **Digital Forensics** - Core forensic concepts and tools for investigating digital evidence in Windows environments.
 
@@ -53,11 +53,11 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
 
 ---
 
-## 1. Introduction to Digital Forensics {#1-introduction-to-digital-forensics}
+## 1. Introduction to Digital Forensics
 
 > 📌 **Digital Forensics** - The collection, preservation, analysis, and presentation of digital evidence to investigate cyber incidents.
 
-### Overview {#1-1-overview}
+### Overview
 
 It is essential to clarify that this module does not claim to be an all-encompassing or exhaustive program on Digital Forensics. This module provides a robust foundation for SOC analysts, enabling them to confidently tackle key Digital Forensics tasks. The primary focus of the module will be the analysis of malicious activity within Windows-based environments.
 
@@ -156,7 +156,7 @@ When we talk about the Security Operations Center (SOC), we're discussing the fr
 
 ---
 
-## 2. Windows Forensics Overview {#2-windows-forensics-overview}
+## 2. Windows Forensics Overview
 
 > 📌 **Windows Forensics** - Key artifacts and forensic procedures in Windows environments.
 
@@ -293,11 +293,11 @@ Web browser forensics analyzes remnants left by web browsers to understand user 
 
 ---
 
-## 3. Evidence Acquisition Techniques & Tools {#3-evidence-acquisition-techniques--tools}
+## 3. Evidence Acquisition Techniques & Tools
 
 > 📌 **Evidence Acquisition** - Critical phase involving collection of digital artifacts from various sources.
 
-### Overview {#3-1-overview}
+### Overview
 
 Evidence acquisition is a critical phase in digital forensics, involving the collection of digital artifacts and data from various sources to preserve potential evidence for analysis. This process requires specialized tools and techniques to ensure integrity, authenticity, and admissibility.
 
@@ -581,7 +581,7 @@ Deferred file count: 17. Copying locked files...
 
 ---
 
-## 4. Memory Forensics {#4-memory-forensics}
+## 4. Memory Forensics}
 
 > 📌 **Memory Forensics** - Analysis of volatile RAM data to uncover malware, processes, and indicators of compromise.
 
@@ -887,11 +887,11 @@ info@netlock.net
 
 ---
 
-## 5. Disk Forensics {#5-disk-forensics}
+## 5. Disk Forensics}
 
 > 📌 **Disk Forensics** - Examination and analysis of disk images for evidence of malicious activity.
 
-### Overview {#5-1-overview}
+### Overview}
 
 Having covered memory forensics, let's shift our attention to disk forensics (disk image examination and analysis).
 
@@ -984,7 +984,7 @@ Having covered memory forensics, let's shift our attention to disk forensics (di
 
 ---
 
-## 6. Rapid Triage Examination & Analysis Tools {#6-rapid-triage-examination--analysis-tools}
+## 6. Rapid Triage Examination & Analysis Tools}
 
 > 📌 **Rapid Triage** - Essential tools for quick forensic examination and analysis.
 
@@ -1521,13 +1521,13 @@ API Monitor captures and displays API calls made by applications. This is valuab
 
 ---
 
-# 🎯 Practical Digital Forensics Scenario {#7-practical-digital-forensics-scenario}
+# 🎯 Practical Digital Forensics Scenario}
 
 ## SOC Analyst Cheatsheet - Module 13/15 - Section 7
 
 ---
 
-## 0. Overview {#7-0-overview}
+## 0. Overview}
 
 > 📌 **Practical Digital Forensics** - This section covers hands-on memory dump analysis, disk forensics, and rapid triage artifact examination using industry-standard tools like Volatility, Autopsy, and Chainsaw.
 
@@ -1555,13 +1555,13 @@ You belong to the digital forensics team and are assigned to investigate an inci
 
 ---
 
-## 1. Memory Analysis with Volatility v3 {#7-1-memory-analysis-with-volatility-v3}
+## 1. Memory Analysis with Volatility v3}
 
 > 📌 Memory forensics allows analysts to examine the state of a system at the time of memory acquisition, revealing running processes, loaded DLLs, network connections, and artifacts that may not be visible on disk.
 
 The affected system's memory dump resides in `C:\Users\johndoe\Desktop\memdump\PhysicalMemory.raw`.
 
-### 1.1 Identifying the Memory Dump Profile {#7-1-1-identifying-the-memory-dump-profile}
+### 1.1 Identifying the Memory Dump Profile}
 
 Before analyzing, we need to identify the operating system and kernel details of the Windows memory sample:
 
@@ -1584,7 +1584,7 @@ python vol.py -q -f ../memdump/PhysicalMemory.raw windows.info
 
 ---
 
-### 1.2 Identifying Injected Code {#7-1-2-identifying-injected-code}
+### 1.2 Identifying Injected Code}
 
 > 🔴 **PAGE_EXECUTE_READWRITE** is a strong indicator of potential code injection. Legitimate applications typically separate code execution from data storage.
 
@@ -1612,7 +1612,7 @@ In essence, while not every instance of PAGE_EXECUTE_READWRITE is malicious, its
 
 ---
 
-### 1.3 Identifying Running Processes {#7-1-3-identifying-running-processes}
+### 1.3 Identifying Running Processes}
 
 List all processes present in the memory image:
 
@@ -1805,7 +1805,7 @@ python vol.py -q -f ../memdump/PhysicalMemory.raw windows.netscan
 
 ---
 
-## 2. Disk Image & Rapid Triage Analysis {#7-2-disk-image--rapid-triage-analysis}
+## 2. Disk Image & Rapid Triage Analysis}
 
 ### 2.1 Searching for Keywords with Autopsy
 
@@ -2299,7 +2299,7 @@ Since the MFT entry was overwritten, search pagefile.sys for the file's content 
 
 ---
 
-## 3. Timeline Construction {#7-3-timeline-construction}
+## 3. Timeline Construction}
 
 ### 3.1 Building the Execution Timeline
 
@@ -2337,7 +2337,7 @@ Here are the real actions taken by the attacker (from ground truth):
 
 ---
 
-## 4. Summary {#7-4-summary}
+## 4. Summary}
 
 ### Key Findings
 
@@ -2433,7 +2433,7 @@ EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
 
 ---
 
-## 8. Interview Questions {#8-interview-questions}
+## 8. Interview Questions}
 
 ### Q1: What is the difference between volatile and non-volatile data?
 
@@ -2477,7 +2477,7 @@ EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
 
 ---
 
-## 9. Additional Resources {#9-additional-resources}
+## 9. Additional Resources}
 
 ### Tools
 - **FTK Imager** - Disk imaging and mounting
