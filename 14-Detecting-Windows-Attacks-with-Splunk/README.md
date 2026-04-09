@@ -1788,5 +1788,70 @@ index="cobaltstrike_beacon" sourcetype="bro:conn:json" orig_bytes=0 dest_ip IN (
 
 ---
 
+### Detecting Kerberos Brute Force Attacks {#detecting-kerberos-brute-force-attacks}
+
+#### Kerberos Brute Force Overview
+
+Attackers perform **Kerberos user enumeration** by sending AS-REQ (Authentication Service Request) messages to the KDC (Key Distribution Center).
+
+> 📌 By analyzing KDC responses, attackers determine which usernames are valid.
+
+**KDC Responses:**
+
+| Response | Indicates |
+|----------|-----------|
+| TGT or KRB5KDC_ERR_PREAUTH_REQUIRED | Valid user account |
+| KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN | Invalid user account |
+
+#### Kerberos Traffic Analysis
+
+![Kerberos Brute Force](https://github.com/user-attachments/assets/94f49798-3256-4aa8-8ba1-2b826ad24364)
+
+*Network capture showing Kerberos brute force*
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/kerberos_bruteforce` |
+| Splunk Index | `kerberos_bruteforce` |
+| Sourcetype | `bro:kerberos:json` |
+
+---
+
+#### Detecting Kerberos Brute Force With Splunk & Zeek
+
+```spl
+index="kerberos_bruteforce" sourcetype="bro:kerberos:json"
+error_msg!=KDC_ERR_PREAUTH_REQUIRED
+success="false" request_type=AS
+| bin _time span=5m
+| stats count dc(client) as "Unique users" values(error_msg) as "Error messages" by _time, id.orig_h, id.resp_h
+| where count>30
+```
+
+![Kerberos BF Detection](https://github.com/user-attachments/assets/c67b5c44-f511-4667-82b8-a8d9f1d5856f)
+
+*Detecting Kerberos brute force*
+
+**Search Breakdown:**
+
+1. **Filter**: Exclude preauth required errors, filter failed AS requests
+2. **Bin**: Group into 5-minute intervals
+3. **Stats**: Count total attempts, unique users, and error types
+4. **Filter**: Show only >30 attempts
+
+> 📌 **Key Detection**: >30 failed Kerberos AS requests in 5 minutes indicates brute force attack!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
