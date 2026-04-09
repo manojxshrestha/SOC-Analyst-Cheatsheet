@@ -1153,6 +1153,18 @@ The MFT file record contains various attributes including $STANDARD_INFORMATION,
 PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT' --csv C:\Users\johndoe\Desktop\forensic_data\mft_analysis\ --csvf MFT.csv
 ```
 
+**Output:**
+```
+File type: Mft
+Processed C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT in 3.5882 seconds
+C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT: FILE records found: 93,615 (Free records: 287) File size: 91.8MB
+CSV output will be saved to C:\Users\johndoe\Desktop\forensic_data\mft_analysis\MFT.csv
+```
+
+![Timeline Explorer MFT Zone ID](https://github.com/user-attachments/assets/b7917fa7-6cfb-48a5-8f94-25b8e88936c9)
+
+*Timeline Explorer showing MFT.csv with entry number 93866 for 'uninstall.exe'. Zone ID contents include ZoneId=3, ReferrerUrl and HostUrl.*
+
 ---
 
 ### USN Journal Analysis
@@ -1187,9 +1199,21 @@ By applying a filter on the Entry Number 93866, which corresponds to the Entry I
 
 *Timeline Explorer showing file entries with timestamps, entry number 93866, and update reasons.*
 
-![Timeline Explorer MFT Zone ID](https://github.com/user-attachments/assets/b7917fa7-6cfb-48a5-8f94-25b8e88936c9)
+---
 
-*Timeline Explorer showing MFT.csv with entry number 93866 for 'uninstall.exe' with Zone ID contents.*
+### Windows Event Logs Investigation
+
+Probing into Windows Event Logs is paramount in digital forensics and incident response. These logs are repositories of invaluable data, chronicling system activities, user behaviors, and security incidents on a Windows machine.
+
+When KAPE is executed, it duplicates the original event logs, ensuring their pristine state is preserved as evidence. The KAPE Output directory houses these event logs in: `<KAPE_output_folder>\Windows\System32\winevt\logs`
+
+![Windows Event Logs Directory](https://github.com/user-attachments/assets/5db53840-9faf-4349-8e34-532f48b170d6)
+
+*File Explorer showing logs folder with event log files like Application.evtx and Microsoft-Windows-Client-Licensing-Platform*
+
+This directory is populated with .evtx files, encapsulating a myriad of Windows event logs, including Security, Application, System, and Sysmon (if activated).
+
+> 📌 The analysis of Windows Event Logs has been addressed in the modules titled "Windows Event Logs & Finding Evil" and "YARA & Sigma for SOC Analysts".
 
 ---
 
@@ -1206,6 +1230,10 @@ PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe -h
 ![EvtxECmd help output](https://github.com/user-attachments/assets/2d81df11-a9e2-4f07-a744-c81472c71986)
 
 *EvtxeCmd help screen showing options for processing EVTX files.*
+
+![EvtxECmd Help Detailed](https://github.com/user-attachments/assets/317086d6-3f69-46af-bffb-a15aecdf9467)
+
+*EvtxeCmd help screen showing options for processing EVTX files, converting logs to CSV/JSON, and including/excluding event IDs.*
 
 **Examples:**
 ```powershell
@@ -1368,11 +1396,27 @@ Now we can easily analyse the output in Timeline Explorer. Let's load both files
 
 *Timeline Explorer showing PECmd output with columns for Source Created, Executable Name, Files Loaded, Directories, Run Count.*
 
-The second output file is the timeline file, which shows the executable details sorted by the run time.
-
 ![Timeline Explorer PECmd Timeline](https://github.com/user-attachments/assets/ebe8e9b2-fbf6-4d5f-a211-5ffe40fd4433)
 
-*Timeline Explorer showing PECmd timeline output with Run Time and Executable Name.*
+*Timeline Explorer showing PECmd output with columns for Line, Tag, Run Time, and Executable Name.*
+
+#### PECmd Output - Directories Referenced
+
+![PECmd Directories](https://github.com/user-attachments/assets/e160f609-1b32-4a9e-a017-ee399208cbad)
+
+*23 directories referenced by DISCORD.EXE including paths in AppData and System32*
+
+#### PECmd Output - Files Referenced
+
+![PECmd Files](https://github.com/user-attachments/assets/24402a92-41c0-4971-8c59-c1c62eae4266)
+
+*76 files referenced including NTDLL.DLL and Discord setup files*
+
+#### Suspicious Activity in Referenced Files
+
+![PECmd Suspicious Files](https://github.com/user-attachments/assets/d83f0a1c-0ea5-4246-a8be-01ce700afb7b)
+
+*Suspicious file paths: DISCORDSETUP.EXE and INSTALL.BAT in Temp directory*
 
 ---
 
