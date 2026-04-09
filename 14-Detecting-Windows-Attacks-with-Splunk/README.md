@@ -1307,5 +1307,127 @@ index=main earliest=1690562367 latest=1690562556 source="XmlWinEventLog:Microsof
 
 ---
 
+### Detecting DCSync/DCShadow {#detecting-dcsyncdcshadow}
+
+#### DCSync Overview
+
+**DCSync** is a technique to extract password hashes from Active Directory Domain Controllers by abusing the Replication Directory Changes permission. Domain Controllers have this permission to read all object attributes including password hashes.
+
+> 📌 Members of Administrators, Domain Admins, Enterprise Admin groups, or computer accounts on DCs can execute DCSync.
+
+![DCSync Attack](https://github.com/user-attachments/assets/90938e89-4e2d-40c5-a2dd-230741ad09d0)
+
+*Mimikatz performing DCSync on KRBTGT*
+
+#### DCSync Attack Steps
+
+1. **Gain Access**: Attacker gains administrative access or escalates privileges to request replication data
+
+2. **Request Replication**: Attacker uses Mimikatz's DRSGetNCChanges interface to mimic a legitimate DC
+
+3. **Extract Hashes**: Attacker obtains password hashes (KRBTGT, Administrators, etc.)
+
+4. **Use Hashes**: Attacker crafts Golden/Silver Tickets or performs Pass-the-Hash/Overpass-the-Hash
+
+---
+
+#### DCSync Detection Opportunities
+
+DS-Replication-Get-Changes operations are recorded with **Event ID 4662**. This requires enabling Audit Policy:
+
+```
+Computer Configuration → Windows Settings → Security Settings → Advanced Audit Policy Configuration → DS Access
+```
+
+![Event 4662 Configuration](https://github.com/user-attachments/assets/511b3390-e9c0-4c6f-9260-1e0740310350)
+
+*Event 4662 audit configuration*
+
+**Detection Key**: Look for property GUID `{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}` (DS-Replication-Get-Changes)
+
+> 📌 Event 4662 contains only GUIDs - need to look for "Replicating Directory Changes" in Message
+
+---
+
+#### Detecting DCSync With Splunk
+
+**Timeframe:** earliest=1690544278 latest=1690544280
+
+```spl
+index=main earliest=1690544278 latest=1690544280 EventCode=4662 Message="*Replicating Directory Changes*"
+| rex field=Message "(?P<property>Replicating Directory Changes.*)"
+| table _time, user, object_file_name, Object_Server, property
+```
+
+![DCSync Detection](https://github.com/user-attachments/assets/bd12f805-9236-4e38-8eb4-010e03bd97e2)
+
+*Detecting DCSync replication events*
+
+---
+
+#### DCShadow Overview
+
+**DCShadow** is an advanced technique to modify Active Directory objects without producing standard security logs. It uses the Directory Replicator permission to register a rogue DC and make unauthorized changes.
+
+> 📌 DCShadow is stealthy because it doesn't produce typical security event logs.
+
+![DCShadow Operation](https://github.com/user-attachments/assets/6c211b1c-e58e-4871-a7c3-7211f73595d5)
+
+*Mimikatz DCShadow token operation*
+
+#### DCShadow Attack Steps
+
+1. **Gain Access**: Attacker gains administrative privileges (Domain Admin or local DC admin) or KRBTGT hash
+
+2. **Register Rogue DC**: Attacker registers a rogue domain controller using Directory Replicator permission
+
+3. **Modify AD Objects**: Attacker changes AD objects (e.g., add user to Domain Admins)
+
+![DCShadow Push](https://github.com/user-attachments/assets/c0b3950a-478d-4abf-bad2-873820680283)
+
+*DCShadow pushing changes*
+
+4. **Replicate**: Rogue DC replicates changes to legitimate DCs
+
+---
+
+#### DCShadow Detection Opportunities
+
+To emulate a DC, DCShadow must:
+- Add a new nTDSDSA object
+- Append global catalog ServicePrincipalName to computer object
+
+**Event ID 4742** (Computer account was changed) logs SPN changes.
+
+> 📌 Monitor Event 4742 for unusual ServicePrincipalName additions
+
+---
+
+#### Detecting DCShadow With Splunk
+
+**Timeframe:** earliest=1690623888 latest=1690623890
+
+```spl
+index=main earliest=1690623888 latest=1690623890 EventCode=4742 
+| rex field=Message "(?P<gcspn>XX\/[a-zA-Z0-9\.\-\/]+)" 
+| table _time, ComputerName, Security_ID, Account_Name, user, gcspn 
+| search gcspn=*
+```
+
+![DCShadow Detection](https://github.com/user-attachments/assets/911333ab-479c-4c87-b578-ec8bf76c92ee)
+
+*Detecting DCShadow via Event 4742*
+
+**Search Breakdown:**
+
+1. **Filter**: EventCode=4742 (Computer account changed)
+2. **Extract**: Use regex to find GC SPN patterns in Message
+3. **Filter**: Only show results with gcspn (SPN present)
+4. **Table**: Display relevant fields
+
+> 📌 **Key Detection**: Event 4742 with ServicePrincipalName changes indicate potential DCShadow registration!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
