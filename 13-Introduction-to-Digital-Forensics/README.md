@@ -37,13 +37,14 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
 
 0. [Overview](#0-overview)
 1. [Introduction to Digital Forensics](#1-introduction-to-digital-forensics)
-2. [Evidence Acquisition Techniques & Tools](#2-evidence-acquisition-techniques--tools)
-3. [Memory Forensics](#3-memory-forensics)
-4. [Disk Forensics](#4-disk-forensics)
-5. [Rapid Triage Examination & Analysis Tools](#5-rapid-triage-examination--analysis-tools)
-6. [Practical Digital Forensics Scenario](#6-practical-digital-forensics-scenario)
-7. [Interview Questions](#7-interview-questions)
-8. [Additional Resources](#8-additional-resources)
+2. [Windows Forensics Overview](#2-windows-forensics-overview)
+3. [Evidence Acquisition Techniques & Tools](#3-evidence-acquisition-techniques--tools)
+4. [Memory Forensics](#4-memory-forensics)
+5. [Disk Forensics](#5-disk-forensics)
+6. [Rapid Triage Examination & Analysis Tools](#6-rapid-triage-examination--analysis-tools)
+7. [Practical Digital Forensics Scenario](#7-practical-digital-forensics-scenario)
+8. [Interview Questions](#8-interview-questions)
+9. [Additional Resources](#9-additional-resources)
 
 ---
 
@@ -284,6 +285,182 @@ Web browser forensics analyzes remnants left by web browsers to understand user 
 | **User Context** | User identifiers for activity attribution |
 | **Malware Detection** | Identify unusual/unauthorized applications |
 | **Incident Response** | Rapid insights into recent activities |
+
+---
+
+## 3. Evidence Acquisition Techniques & Tools {#3-evidence-acquisition-techniques--tools}
+
+> 📌 **Evidence Acquisition** - Critical phase involving collection of digital artifacts from various sources.
+
+### Overview
+
+Evidence acquisition is a critical phase in digital forensics, involving the collection of digital artifacts and data from various sources to preserve potential evidence for analysis. This process requires specialized tools and techniques to ensure integrity, authenticity, and admissibility.
+
+**Three Main Categories:**
+1. Forensic Imaging
+2. Extracting Host-based Evidence & Rapid Triage
+3. Extracting Network Evidence
+
+---
+
+### Forensic Imaging
+
+Forensic imaging is a fundamental process that involves creating an exact, bit-by-bit copy of digital storage media. This process is crucial for preserving the original state of data and ensuring admissibility in legal proceedings.
+
+#### Forensic Imaging Tools
+
+| Tool | Description |
+|------|-------------|
+| **FTK Imager** | Developed by AccessData/Exterro. Creates perfect copies of computer disks, view contents without altering data |
+| **AFF4 Imager** | Free, open-source. Compatible with numerous file systems. Can extract files by creation time |
+| **DD** | Command-line utility on Unix-based systems |
+| **DCFLDD** | Enhanced version of DD with forensics features (hashing) |
+| **Virtualization Tools** | Evidence from virtual environments via halting/snapshot |
+
+---
+
+### Example 1: Forensic Imaging with FTK Imager
+
+Steps to create a disk image:
+
+1. **Select File → Create Disk Image**
+2. **Choose Media Source:** Physical Drive or Logical Drive
+3. **Select Drive** (e.g., PHYSICALDRIVE0)
+4. **Specify Destination** for the image
+5. **Choose Image Type:** Raw, SMART, E01, or AFF
+6. **Input Evidence Details:** Case Number, Evidence Number, Unique Description
+7. **Set Destination Folder and Filename** (adjust fragmentation/compression if needed)
+8. **Click Start** to begin imaging
+9. **Verify Image** (if selected) - compares MD5/SHA1 hashes
+
+> 📌 FTK Imager provides verification that calculates and compares MD5/SHA1 hashes to ensure image integrity.
+
+---
+
+### Example 2: Mounting a Disk Image with Arsenal Image Mounter
+
+1. Launch Arsenal Image Mounter with administrative rights
+2. Click **Mount disk image** button
+3. Navigate to and select the `.VMDK` file
+4. Choose to mount as **read-only** or **read-write**
+
+> 🔴 **Critical:** Always mount disk images as **read-only** to preserve original evidence integrity.
+
+Once mounted, the image appears as a drive (e.g., `D:\`) and can be browsed like a physical drive.
+
+---
+
+### Extracting Host-based Evidence & Rapid Triage
+
+#### Volatile vs Non-Volatile Data
+
+**Volatile Data** - Information that disappears after logoffs or power shutdowns:
+- Active system memory (RAM)
+- Captured using tools like FTK Imager, WinPmem, DumpIt
+
+**Non-Volatile Data** - Remains on hard drive through shutdowns:
+- Registry
+- Windows Event Logs
+- Prefetch, Amcache
+- Application-specific artifacts
+
+#### Memory Acquisition Tools
+
+| Tool | Description |
+|------|-------------|
+| **WinPmem** | Default open-source memory acquisition for Windows |
+| **DumpIt** | Simplistic utility for Windows/Linux memory dumps |
+| **MemDump** | Free command-line RAM capture utility |
+| **Belkasoft RAM Capturer** | Captures RAM even with anti-debugging protection |
+| **Magnet RAM Capture** | Free, simple way to capture volatile memory |
+| **LiME (Linux Memory Extractor)** | Loadable Kernel Module for Linux memory acquisition |
+
+##### Example: Acquiring Memory with WinPmem
+
+```cmd
+C:\Users\X\Downloads> winpmem_mini_x64_rc2.exe memdump.raw
+```
+
+##### Example: Acquiring VM Memory
+
+1. Open the running VM's options
+2. **Suspend** the running VM
+3. Locate the `.vmem` file inside the VM's directory
+
+---
+
+### Rapid Triage with KAPE
+
+> 📌 **KAPE (Kroll Artifact Parser and Extractor)** - One of the best rapid artifact parsing and extraction solutions.
+
+KAPE operates based on **Targets** and **Modules**:
+- **Targets:** Specific artifacts to extract from an image/system (duplicated to output directory)
+- **Modules:** Programs run on collected data for processing
+
+#### KAPE Modes
+
+| Mode | File | Description |
+|------|------|-------------|
+| **GUI** | `gkape.exe` | Visual interface |
+| **CLI** | `kape.exe` | Command-line interface |
+
+#### Target Configurations
+
+| Target | Description |
+|--------|-------------|
+| **!SANS_Triage** | Compound collection for DFIR investigation |
+| **RegistryHivesSystem** | System-related registry hives |
+| **KapeTriage** | Multiple targets combined for faster collection |
+
+Example compound target includes: Antivirus, EventLogs, EvidenceOfExecution, Amcache
+
+#### KAPE Command Example
+
+```powershell
+KAPE.exe --tsource D: --tdest C:\investigation\image --target !SANS_Triage
+```
+
+**Output:**
+- Found 639 files copied in ~4 seconds
+- Collects: $MFT, $LogFile, $UsnJrnl, $Secure, $Boot
+- Windows event logs in System32 subfolders
+- Users and Windows directories
+
+---
+
+### Velociraptor for Remote Collection
+
+**Velociraptor** - Potent tool for gathering host-based information using VQL queries.
+
+#### Using Velociraptor for KAPE Artifacts
+
+1. **Initiate a new Hunt**
+2. **Select Windows.KapeFiles.Targets** artifact
+3. **Configure** collection (e.g., _SANS_Triage)
+4. **Launch** the hunt
+5. **Download** results
+
+#### Remote Memory Dump with Velociraptor
+
+1. Start new Hunt
+2. Select **Windows.Memory.Acquisition** artifact
+3. Download resulting archive
+4. Extract `PhysicalMemory.raw` containing the memory dump
+
+---
+
+### Extracting Network Evidence
+
+**Network Evidence Categories:**
+
+| Category | Tools/Description |
+|----------|-------------------|
+| **Traffic Capture** | Wireshark, tcpdump - snapshot of network conversations |
+| **IDS/IPS Data** | Detection and blocking of malicious activities |
+| **Traffic Flow** | NetFlow, sFlow - high-level overview of traffic patterns |
+| **Firewall Logs** | Application identification, user detection, threat blocking |
+
+> 📌 Network evidence analysis covered in: Intro to Network Traffic Analysis, Intermediate Network Traffic Analysis, Working with IDS/IPS, Detecting Windows Attacks with Splunk.
 
 ---
 
