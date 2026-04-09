@@ -39,9 +39,10 @@ This module covers:
 ## Table of Contents
 
 1. [Introduction to YARA & Sigma](#1-introduction-to-yara--sigma)
-2. [Leveraging YARA](#2-leveraging-yara)
-3. [Leveraging Sigma](#3-leveraging-sigma)
-4. [Skills Assessment](#4-skills-assessment)
+2. [YARA and YARA Rules](#2-yara-and-yara-rules)
+3. [Developing YARA Rules](#3-developing-yara-rules)
+4. [Leveraging Sigma](#4-leveraging-sigma)
+5. [Skills Assessment](#5-skills-assessment)
 
 ---
 
@@ -390,7 +391,27 @@ rule UPX_packed_executable {
 
 ### Automated YARA Rule Development with yarGen
 
-> 📌 **yarGen** automatically generates YARA rules based on strings found in malicious files while avoiding common goodware strings.
+> 📌 **yarGen** automatically generates YARA rules based on strings found in malicious files while avoiding common goodware strings. It uses a database of goodware strings to filter out common benign strings.
+
+#### Step 1: String Analysis on dharma_sample.exe
+
+```bash
+strings dharma_sample.exe
+```
+
+**Key strings found:**
+```
+!This program cannot be run in DOS mode.
+Rich
+.text
+.GetProcAddress
+LoadLibraryA
+KERNEL32.dll
+RSDS%~m
+C:\crysis\Release\PDB\payload.pdb
+```
+
+> 📌 Unique string `C:\crysis\Release\PDB\payload.pdb` can be used for YARA rule!
 
 #### Setup yarGen
 
