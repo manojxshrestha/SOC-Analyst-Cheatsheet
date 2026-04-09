@@ -1594,5 +1594,69 @@ To update an existing app:
 
 ---
 
+## 3. Leveraging Zeek Logs {#3-leveraging-zeek-logs}
+
+### Detecting RDP Brute Force Attacks {#detecting-rdp-brute-force-attacks}
+
+#### RDP Brute Force Overview
+
+**Remote Desktop Protocol (RDP)** brute force is a favorite attack vector for attackers to gain initial network access. Attackers systematically guess passwords until finding the correct one.
+
+> 📌 Many users have weak or default passwords that are easily guessed.
+
+#### RDP Traffic Analysis
+
+RDP traffic can be identified in network captures:
+
+![RDP Traffic](https://github.com/user-attachments/assets/6f623544-b881-4a43-8b7b-127bdc77915d)
+
+*Network capture showing RDP session*
+
+---
+
+#### Accessing Target System
+
+Connect via RDP using:
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/rdp_bruteforce` |
+| Splunk Index | `rdp_bruteforce` |
+| Sourcetype | `bro:rdp:json` |
+
+---
+
+#### Detecting RDP Brute Force With Splunk & Zeek
+
+**Search:**
+
+```spl
+index="rdp_bruteforce" sourcetype="bro:rdp:json"
+| bin _time span=5m
+| stats count values(cookie) by _time, id.orig_h, id.resp_h
+| where count>30
+```
+
+![RDP Brute Force Detection](https://github.com/user-attachments/assets/c65915f8-29fb-4d1a-901a-aa3e8b9c59c7)
+
+*Detecting RDP brute force via Zeek logs*
+
+**Search Breakdown:**
+
+1. **Filter**: Index and sourcetype for Zeek RDP logs
+2. **Bin**: Group events into 5-minute intervals
+3. **Stats**: Count attempts by time, source IP, destination IP
+4. **Filter**: Show only entries with >30 attempts
+
+> 📌 **Key Detection**: >30 RDP connection attempts in 5 minutes from same source IP indicates brute force attack!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
