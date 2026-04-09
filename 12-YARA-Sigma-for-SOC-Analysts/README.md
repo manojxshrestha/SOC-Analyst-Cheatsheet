@@ -39,8 +39,9 @@ This module covers:
 1. [Introduction to YARA & Sigma](#1-introduction-to-yara--sigma)
 2. [YARA and YARA Rules](#2-yara-and-yara-rules)
 3. [Developing YARA Rules](#3-developing-yara-rules)
-4. [Leveraging Sigma](#4-leveraging-sigma)
-5. [Skills Assessment](#5-skills-assessment)
+4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition)
+5. [Leveraging Sigma](#5-leveraging-sigma)
+6. [Skills Assessment](#6-skills-assessment)
 
 ---
 
@@ -1022,12 +1023,6 @@ rule susp_file_enumerator_with_encrypted_resource_101 {
 
 ---
 
-## 5. Leveraging Sigma
-
-*Coming soon...*
-
----
-
 ## 4. Hunting Evil with YARA (Windows Edition)
 
 > 📌 This section covers using YARA on Windows systems for identifying threats on disk, in memory, and ETW data.
@@ -1402,7 +1397,13 @@ Reply from 104.17.244.81: bytes=32 time=14ms TTL=56
 
 ---
 
-## 5. Skills Assessment
+## 5. Leveraging Sigma
+
+*Coming soon...*
+
+---
+
+## 6. Skills Assessment
 
 *Coming soon...*
 
