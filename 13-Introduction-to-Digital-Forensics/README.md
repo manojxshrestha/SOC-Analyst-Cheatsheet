@@ -581,7 +581,7 @@ Deferred file count: 17. Copying locked files...
 
 ---
 
-## 4. Memory Forensics}
+## 4. Memory Forensics
 
 > 📌 **Memory Forensics** - Analysis of volatile RAM data to uncover malware, processes, and indicators of compromise.
 
@@ -887,7 +887,7 @@ info@netlock.net
 
 ---
 
-## 5. Disk Forensics}
+## 5. Disk Forensics
 
 > 📌 **Disk Forensics** - Examination and analysis of disk images for evidence of malicious activity.
 
@@ -984,7 +984,7 @@ Having covered memory forensics, let's shift our attention to disk forensics (di
 
 ---
 
-## 6. Rapid Triage Examination & Analysis Tools}
+## 6. Rapid Triage Examination & Analysis Tools
 
 > 📌 **Rapid Triage** - Essential tools for quick forensic examination and analysis.
 
@@ -1527,7 +1527,7 @@ API Monitor captures and displays API calls made by applications. This is valuab
 
 ---
 
-## 0. Overview}
+## 0. Overview
 
 > 📌 **Practical Digital Forensics** - This section covers hands-on memory dump analysis, disk forensics, and rapid triage artifact examination using industry-standard tools like Volatility, Autopsy, and Chainsaw.
 
@@ -1555,7 +1555,7 @@ You belong to the digital forensics team and are assigned to investigate an inci
 
 ---
 
-## 1. Memory Analysis with Volatility v3}
+## 1. Memory Analysis with Volatility v3
 
 > 📌 Memory forensics allows analysts to examine the state of a system at the time of memory acquisition, revealing running processes, loaded DLLs, network connections, and artifacts that may not be visible on disk.
 
@@ -1805,7 +1805,7 @@ python vol.py -q -f ../memdump/PhysicalMemory.raw windows.netscan
 
 ---
 
-## 2. Disk Image & Rapid Triage Analysis}
+## 2. Disk Image & Rapid Triage Analysis
 
 ### 2.1 Searching for Keywords with Autopsy
 
@@ -2299,7 +2299,7 @@ Since the MFT entry was overwritten, search pagefile.sys for the file's content 
 
 ---
 
-## 3. Timeline Construction}
+## 3. Timeline Construction
 
 ### 3.1 Building the Execution Timeline
 
@@ -2337,7 +2337,7 @@ Here are the real actions taken by the attacker (from ground truth):
 
 ---
 
-## 4. Summary}
+## 4. Summary
 
 ### Key Findings
 
@@ -2433,7 +2433,7 @@ EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
 
 ---
 
-## 8. Interview Questions}
+## 8. Interview Questions
 
 ### Q1: What is the difference between volatile and non-volatile data?
 
@@ -2477,7 +2477,7 @@ EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
 
 ---
 
-## 9. Additional Resources}
+## 9. Additional Resources
 
 ### Tools
 - **FTK Imager** - Disk imaging and mounting
