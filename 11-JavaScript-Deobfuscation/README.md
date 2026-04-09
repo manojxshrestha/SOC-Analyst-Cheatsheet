@@ -45,8 +45,9 @@ This module covers the fundamentals of JavaScript Deobfuscation:
 4. [Advanced Obfuscation](#4-advanced-obfuscation)
 5. [Deobfuscation](#5-deobfuscation)
 6. [Code Analysis](#6-code-analysis)
-7. [HTTP Requests](#7-http-requests)
-8. [Skills Assessment](#8-skills-assessment)
+7. [Decoding](#7-decoding)
+8. [HTTP Requests](#8-http-requests)
+9. [Skills Assessment](#9-skills-assessment)
 
 ---
 
@@ -795,7 +796,159 @@ curl -s http://SERVER_IP:PORT/serial.php -X POST
 
 ---
 
-## 8. Skills Assessment
+## 9. Decoding
+
+> 📌 After analyzing the server response, we got an encoded block of text. This section covers common encoding methods.
+
+### Example: Encoded Response
+
+```bash
+curl http://SERVER_IP:PORT/serial.php -X POST -d "param1=sample"
+```
+
+**Response:**
+```
+ZG8gdGhlIGV4ZXJjaXNlLCBkb24ndCBjb3B5IGFuZCBwYXN0ZSA7KQo=
+```
+
+> 📌 This is Base64 encoded text!
+
+---
+
+### Common Encoding Methods
+
+| Method | Description | Characters |
+|--------|-------------|-------------|
+| **Base64** | Binary to ASCII | a-z, A-Z, 0-9, +, /, = |
+| **Hex** | ASCII to hex | 0-9, a-f |
+| **Rot13** | Caesar cipher (shift 13) | A-Z, a-z |
+
+---
+
+### Base64 Encoding
+
+> 📌 **Base64** - Encodes any data into alpha-numeric characters. Used to reduce special characters.
+
+**Characteristics:**
+- Only uses: a-z, A-Z, 0-9, +, /
+- Padding: `=` characters
+- Length must be multiple of 4
+
+#### Base64 Encode
+
+```bash
+echo "https://www.hackthebox.eu/" | base64
+```
+
+**Output:**
+```
+aHR0cHM6Ly93d3cuaGFja3RoZWJveC5ldS8K
+```
+
+#### Base64 Decode
+
+```bash
+echo "aHR0cHM6Ly93d3cuaGFja3RoZWJveC5ldS8K" | base64 -d
+```
+
+**Output:**
+```
+https://www.hackthebox.eu/
+```
+
+---
+
+### Hex Encoding
+
+> 📌 **Hex** - Encodes each character into its ASCII hex value.
+
+**Characteristics:**
+- Uses only: 0-9, a-f
+- Each character = 2 hex digits
+
+#### Hex Encode
+
+```bash
+echo "https://www.hackthebox.eu/" | xxd -p
+```
+
+**Output:**
+```
+68747470733a2f2f7777772e6861636b746865626f782e65752f0a
+```
+
+#### Hex Decode
+
+```bash
+echo "68747470733a2f2f7777772e6861636b746865626f782e65752f0a" | xxd -p -r
+```
+
+**Output:**
+```
+https://www.hackthebox.eu/
+```
+
+---
+
+### Rot13 Encoding
+
+> 📌 **Rot13** - Caesar cipher shifting each letter by 13 positions.
+
+**Characteristics:**
+- Each letter maps to another letter
+- `http://www` becomes `uggc://jjj`
+- Reversible (encode = decode)
+
+#### Rot13 Encode
+
+```bash
+echo "https://www.hackthebox.eu/" | tr 'A-Za-z' 'N-ZA-Mn-za-m'
+```
+
+**Output:**
+```
+uggcf://jjj.unpxgurobk.rh/
+```
+
+#### Rot13 Decode
+
+```bash
+echo "uggcf://jjj.unpxgurobk.rh/" | tr 'A-Za-z' 'N-ZA-Mn-za-m'
+```
+
+**Output:**
+```
+https://www.hackthebox.eu/
+```
+
+---
+
+### Other Encoding Methods
+
+> 📌 There are hundreds of encoding methods. Tools can help identify encoding type.
+
+**Tools:**
+- **Cipher Identifier** - Identifies encoding type automatically
+- **CyberChef** - Multi-purpose encoding/decoding tool
+
+**Tips:**
+1. Identify encoding type by looking at character patterns
+2. Use online tools to decode
+3. Try different methods if one doesn't work
+
+---
+
+### Encoding vs Encryption
+
+| Aspect | Encoding | Encryption |
+|--------|----------|------------|
+| **Key** | No key required | Requires key |
+| **Reversibility** | Always reversible | Needs key to decrypt |
+| **Security** | Low (obfuscation only) | High |
+
+---
+
+## 10. Skills Assessment
 
 *Coming soon...*
 
