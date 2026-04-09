@@ -325,13 +325,38 @@ Steps to create a disk image:
 
 1. **Select File → Create Disk Image**
 2. **Choose Media Source:** Physical Drive or Logical Drive
+
+![FTK Imager - Create Disk Image](https://github.com/user-attachments/assets/212e5f05-1169-4d52-9aa9-a7249db3eed9)
+
 3. **Select Drive** (e.g., PHYSICALDRIVE0)
+
+![FTK Imager - Select Source](https://github.com/user-attachments/assets/310d5155-2a53-4411-8a65-f534c15025a6)
+
 4. **Specify Destination** for the image
+
+![FTK Imager - Create Image](https://github.com/user-attachments/assets/374a4246-0f75-4e72-a823-32ca121acf54)
+
 5. **Choose Image Type:** Raw, SMART, E01, or AFF
+
+![FTK Imager - Select Image Type](https://github.com/user-attachments/assets/8cc98e9a-8a20-4508-b552-aec722c4546a)
+
 6. **Input Evidence Details:** Case Number, Evidence Number, Unique Description
+
+![FTK Imager - Evidence Item Information](https://github.com/user-attachments/assets/59d38824-2a25-4b7c-8c8d-59c19c0ebd32)
+
 7. **Set Destination Folder and Filename** (adjust fragmentation/compression if needed)
+
+![FTK Imager - Select Image Destination](https://github.com/user-attachments/assets/cfae5614-d310-4083-a627-ba94aec6cfe9)
+
 8. **Click Start** to begin imaging
+
+![FTK Imager - Creating Image Progress](https://github.com/user-attachments/assets/c9e2667f-9c61-4177-b4d6-ea8c9a204331)
+
 9. **Verify Image** (if selected) - compares MD5/SHA1 hashes
+
+![FTK Imager - Verification Progress](https://github.com/user-attachments/assets/a6a6899c-2517-4823-83a3-88955fb4eac6)
+
+![FTK Imager - Verification Results](https://github.com/user-attachments/assets/fb4eeac8-e29f-427a-b8d1-c1a1f8b255a)
 
 > 📌 FTK Imager provides verification that calculates and compares MD5/SHA1 hashes to ensure image integrity.
 
@@ -344,9 +369,13 @@ Steps to create a disk image:
 3. Navigate to and select the `.VMDK` file
 4. Choose to mount as **read-only** or **read-write**
 
+![Arsenal Image Mounter - Mount VM](https://github.com/user-attachments/assets/64e6c0eb-b559-4bd1-900e-ef5e468f181c)
+
 > 🔴 **Critical:** Always mount disk images as **read-only** to preserve original evidence integrity.
 
 Once mounted, the image appears as a drive (e.g., `D:\`) and can be browsed like a physical drive.
+
+![File Explorer - Mounted Image](https://github.com/user-attachments/assets/1d372c39-cd32-4efd-9f09-dd29c93f8502)
 
 ---
 
@@ -381,11 +410,17 @@ Once mounted, the image appears as a drive (e.g., `D:\`) and can be browsed like
 C:\Users\X\Downloads> winpmem_mini_x64_rc2.exe memdump.raw
 ```
 
+![WinPmem Memory Dump](https://github.com/user-attachments/assets/d7f84e90-3b0b-4e23-b7db-2aa27abf68bd)
+
 ##### Example: Acquiring VM Memory
 
 1. Open the running VM's options
 2. **Suspend** the running VM
 3. Locate the `.vmem` file inside the VM's directory
+
+![VMware Suspend VM](https://github.com/user-attachments/assets/7120464e-e1e4-4fc5-bb41-4811aa18f7b1)
+
+![VMEM File Location](https://github.com/user-attachments/assets/9a324682-6390-4c83-9e62-f1e30dabd1b0)
 
 ---
 
@@ -397,12 +432,22 @@ KAPE operates based on **Targets** and **Modules**:
 - **Targets:** Specific artifacts to extract from an image/system (duplicated to output directory)
 - **Modules:** Programs run on collected data for processing
 
+![KAPE Flowchart](https://github.com/user-attachments/assets/d4f69059-427c-43c2-9a0c-b7b63d380761)
+
+![KAPE Workflow](https://github.com/user-attachments/assets/77f1a536-da66-49b3-86bb-c494137dfcee)
+
 #### KAPE Modes
 
 | Mode | File | Description |
 |------|------|-------------|
 | **GUI** | `gkape.exe` | Visual interface |
 | **CLI** | `kape.exe` | Command-line interface |
+
+![KAPE Files](https://github.com/user-attachments/assets/17e69376-ee00-4691-a2b6-a3aeb2aceee6)
+
+#### KAPE GUI Interface
+
+![KAPE GUI](https://github.com/user-attachments/assets/c2d0cccc-1b8d-4763-a0ea-29608e1e4c7c)
 
 #### Target Configurations
 
@@ -412,7 +457,13 @@ KAPE operates based on **Targets** and **Modules**:
 | **RegistryHivesSystem** | System-related registry hives |
 | **KapeTriage** | Multiple targets combined for faster collection |
 
+![KAPE Target Config](https://github.com/user-attachments/assets/a1a8dc7b-07dc-43b8-8dc3-8aa828bd961e)
+
 Example compound target includes: Antivirus, EventLogs, EvidenceOfExecution, Amcache
+
+![KAPE Registry Target](https://github.com/user-attachments/assets/bafe8941-4de3-4014-8c38-5319733f6ed4)
+
+![KAPE Compound Target](https://github.com/user-attachments/assets/1278ce30-2d0d-4256-847c-55f497369c83)
 
 #### KAPE Command Example
 
@@ -420,11 +471,43 @@ Example compound target includes: Antivirus, EventLogs, EvidenceOfExecution, Amc
 KAPE.exe --tsource D: --tdest C:\investigation\image --target !SANS_Triage
 ```
 
+**KAPE Output:**
+
+```
+KAPE version 1.3.0.2, Author: Eric Zimmerman, Contact: https://www.kroll.com/kape (kape@kroll.com)
+
+KAPE directory: C:\htb\dfir_module\data\kape\KAPE
+Command line:   --tsource D: --tdest C:\htb\dfir_module\data\investigation\image --target !SANS_Triage --gui
+
+System info: Machine name: REDACTED, 64-bit: True, User: REDACTED OS: Windows10 (10.0.22621)
+
+Using Target operations
+Found 18 targets. Expanding targets to file list...
+Target ApplicationEvents with Id 2da16dbf-ea47-448e-a00f-fc442c3109ba already processed. Skipping!
+...
+Found 639 files in 4.032 seconds. Beginning copy...
+  Deferring D:\Windows\System32\LogFiles\WMI\RtBackup\EtwRTDefenderApiLogger.etl due to UnauthorizedAccessException...
+  Deferring D:\$MFT due to UnauthorizedAccessException...
+  ...
+Deferred file count: 17. Copying locked files...
+  Copied deferred file D:\Windows\System32\LogFiles\WMI\RtBackup\EtwRTDefenderApiLogger.etl to C:\htb\dfir_module\data\investigation\image\D\Windows\System32\LogFiles\WMI\RtBackup\EtwRTDefenderApiLogger.etl. Hashing source file...
+  Copied deferred file D:\$MFT to C:\htb\dfir_module\data\investigation\image\D\$MFT. Hashing source file...
+  ...
+```
+
 **Output:**
 - Found 639 files copied in ~4 seconds
 - Collects: $MFT, $LogFile, $UsnJrnl, $Secure, $Boot
 - Windows event logs in System32 subfolders
 - Users and Windows directories
+
+![KAPE Execute](https://github.com/user-attachments/assets/b84dc1d8-718c-49d0-9703-abf4a31336f3)
+
+#### KAPE Output
+
+![KAPE Output Directory](https://github.com/user-attachments/assets/8bd01fbe-3899-42ce-afc4-dcf004d09737)
+
+![KAPE Event Logs](https://github.com/user-attachments/assets/36952500-ed3d-4f3b-bbf8-0b34a3a4a454)
 
 ---
 
@@ -435,17 +518,46 @@ KAPE.exe --tsource D: --tdest C:\investigation\image --target !SANS_Triage
 #### Using Velociraptor for KAPE Artifacts
 
 1. **Initiate a new Hunt**
+
+![Velociraptor - New Hunt](https://github.com/user-attachments/assets/d6e9a25d-be42-4438-a13b-e9eb28076fa6)
+
 2. **Select Windows.KapeFiles.Targets** artifact
+
+![Velociraptor - Configure Hunt](https://github.com/user-attachments/assets/6b0f1a4f-0308-4959-8ef5-81069e9d8e13)
+
 3. **Configure** collection (e.g., _SANS_Triage)
+
+![Velociraptor - Select Artifact](https://github.com/user-attachments/assets/ecce0f3d-a65b-4a02-9943-fe430df523c2)
+
+![Velociraptor - Artifact Parameters](https://github.com/user-attachments/assets/e24dd340-1379-4d83-91e1-f6e9a0fe1baa)
+
+![Velociraptor - Configure Target](https://github.com/user-attachments/assets/01a308da-6fbc-42fa-a5c9-717ac2b8c01f)
+
 4. **Launch** the hunt
+
+![Velociraptor - Launch Hunt](https://github.com/user-attachments/assets/fc447edb-0ed1-410b-9499-5d7aeb3690c8)
+
 5. **Download** results
+
+![Velociraptor - Download Results](https://github.com/user-attachments/assets/69e91f41-92f0-423a-9112-4f89fc5bcc05)
+
+#### Velociraptor Output
+
+![Velociraptor - Output Directory](https://github.com/user-attachments/assets/52a4cdab-915c-41da-9c81-987629fb26c1)
+
+![Velociraptor - Collected Files](https://github.com/user-attachments/assets/61d33a42-390c-4ccf-b09c-71276f00f845)
 
 #### Remote Memory Dump with Velociraptor
 
 1. Start new Hunt
 2. Select **Windows.Memory.Acquisition** artifact
+
+![Velociraptor - Memory Acquisition](https://github.com/user-attachments/assets/e7613e3d-1717-4191-a5ef-f4661c4d5d13)
+
 3. Download resulting archive
 4. Extract `PhysicalMemory.raw` containing the memory dump
+
+![Velociraptor - Memory Hunt Results](https://github.com/user-attachments/assets/f76d4f8c-44d2-4a24-9d88-f7d6ab4d8207)
 
 ---
 
