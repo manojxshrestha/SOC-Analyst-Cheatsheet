@@ -1060,10 +1060,10 @@ If we scroll almost to the bottom, we will notice another seemingly unique strin
 
 #### Linux Alternative - hexdump
 
-On a Linux machine, the hexdump utility can be used to identify the hex bytes:
+On a Linux machine, the hexdump utility could have been used to identify the aforementioned hex bytes as follows.
 
 ```bash
-hexdump dharma_sample.exe -C | grep crysis -n3
+remnux@remnux:~$ hexdump dharma_sample.exe -C | grep crysis -n3
 ```
 
 **Output:**
@@ -1078,7 +1078,7 @@ hexdump dharma_sample.exe -C | grep crysis -n3
 ```
 
 ```bash
-hexdump dharma_sample.exe -C | grep sssssbsss -n3
+remnux@remnux:~$ hexdump dharma_sample.exe -C | grep sssssbsss -n3
 ```
 
 **Output:**
@@ -1091,8 +1091,6 @@ hexdump dharma_sample.exe -C | grep sssssbsss -n3
 5743-00016c30  5c 00 00 00 5c 00 00 00  5c 00 00 00 5c 00 00 00  |\...\...\...\...|
 5744-00016c40  22 00 00 00 20 00 22 00  00 00 00 00 5c 00 00 00  |"... .".....\...|
 ```
-
-#### Creating YARA Rule with Hex Strings
 
 Let's incorporate all identified hex bytes into a rule:
 
