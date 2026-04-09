@@ -665,5 +665,248 @@ index=main earliest=1690392745 latest=1690393283 source="WinEventLog:Security" E
 
 ---
 
+### Detecting Pass-the-Hash {#detecting-pass-the-hash}
+
+#### Pass-the-Hash Overview
+
+**Pass-the-Hash (PtH)** is a technique used by attackers to authenticate to a networked system using the NTLM hash of a user's password instead of the plaintext password. This attack exploits how Windows stores password hashes in memory, enabling adversaries with administrative access to capture the hash and reuse it for lateral movement.
+
+> 📌 Pass-the-Hash allows attackers to move laterally within the network without knowing the actual password.
+
+![Mimikatz Password Hash](https://github.com/user-attachments/assets/9f6c3892-2398-4792-aba1-2df4307dd963)
+
+*Mimikatz output showing NTLM hash extraction*
+
+#### Pass-the-Hash Attack Steps
+
+1. **Extract NTLM Hash**: Attacker uses tools like Mimikatz to extract the NTLM hash of a user currently logged onto the compromised system (requires local admin privileges)
+
+![Mimikatz Pass-the-Hash](https://github.com/user-attachments/assets/2573a0aa-f0a8-4d38-a46b-f1844cbdaacc)
+
+*Mimikatz performing pass-the-hash impersonation*
+
+2. **Authenticate with Hash**: Using the NTLM hash, attacker authenticates as the targeted user on other systems without knowing the password
+
+3. **Lateral Movement**: Attacker uses the authenticated session to move laterally within the network
+
+![Lateral Movement](https://github.com/user-attachments/assets/6f566124-be34-4c8a-a7bc-5679517da6d1)
+
+*Accessing remote system with stolen credentials*
+
+---
+
+#### Windows Access Tokens & Alternate Credentials
+
+An **access token** is a data structure that defines the security context of a process or thread. It contains information about the user's identity and privileges. When a user logs on, the system generates an access token that is assigned to all processes executed on behalf of that user.
+
+**Alternate Credentials** allow users to supply different login credentials for specific actions without altering the primary login session. The `runas` command is commonly used for this purpose.
+
+![runas Example](https://github.com/user-attachments/assets/815e6d77-b04c-4602-ab31-c9e48cd36896)
+
+*Using runas to execute commands as different user*
+
+The `/netonly` flag indicates credentials are for remote access only. Even when `whoami` returns the original username, spawned processes can access remote resources with the alternate credentials.
+
+![runas netonly](https://github.com/user-attachments/assets/940adcdd-4fca-4bcf-929a-87a901e1981a)
+
+*Using runas /netonly for remote access*
+
+Each access token references a **LogonSession** generated at user logon. This contains Username, Domain, and AuthenticationID (NTHash/LMHash). When accessing remote resources, the LogonSession credentials are used.
+
+![LogonSession Diagram](https://github.com/user-attachments/assets/04f70388-a096-459b-a1cb-01ac7ad68981)
+
+*Process access token and LogonSession flow*
+
+---
+
+#### Pass-the-Hash Detection Opportunities
+
+From the Windows Event Log perspective, the following logs are generated:
+
+| Scenario | Event ID | Logon Type |
+|----------|----------|------------|
+| runas without /netonly | 4624 | 2 (Interactive) |
+| runas with /netonly | 4624 | 9 (NewCredentials) |
+
+![Event 4624 LogonType 2](https://github.com/user-attachments/assets/2b5ac258-ace7-4680-9c04-c9ff1ebd4568)
+
+*Security events showing interactive logon*
+
+![Event 4624 LogonType 9](https://github.com/attachments/assets/09c3d91b-4ec6-4f8c-8dd6-a56264b4caeb)
+
+*Security events showing NewCredentials logon*
+
+> 📌 **Simple Detection**: Event ID 4624 with LogonType 9 (NewCredentials) - but may have false positives from legitimate runas usage
+
+**Enhanced Detection**: The key difference between runas /netonly and Pass-the-Hash is that Mimikatz accesses LSASS process memory to modify LogonSession credential materials. Correlate:
+- Event 4624 LogonType 9 with Sysmon Event Code 10 (Process Access) targeting lsass.exe
+
+---
+
+#### Detecting Pass-the-Hash With Splunk
+
+##### Method 1: Basic Detection - LogonType 9
+
+**Timeframe:** earliest=1690450708 latest=1690451116
+
+```spl
+index=main earliest=1690450708 latest=1690451116 source="WinEventLog:Security" EventCode=4624 Logon_Type=9 Logon_Process=seclogo
+| table _time, ComputerName, EventCode, user, Network_Account_Domain, Network_Account_Name, Logon_Type, Logon_Process
+```
+
+![LogonType 9 Detection](https://github.com/user-attachments/assets/1c2a5b3c-83dc-4bd9-8b17-e17ae33e7ae8)
+
+*Detecting NewCredentials logon events*
+
+---
+
+##### Method 2: Enhanced Detection - LSASS Access + LogonType 9
+
+**Timeframe:** earliest=1690450689 latest=1690451116
+
+```spl
+index=main earliest=1690450689 latest=1690451116 (source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=10 TargetImage="C:\\Windows\\system32\\lsass.exe" SourceImage!="C:\\ProgramData\\Microsoft\\Windows Defender\\platform\\*\\MsMpEng.exe") OR (source="WinEventLog:Security" EventCode=4624 Logon_Type=9 Logon_Process=seclogo)
+| sort _time, RecordNumber
+| transaction host maxspan=1m endswith=(EventCode=4624) startswith=(EventCode=10)
+| stats count by _time, Computer, SourceImage, SourceProcessId, Network_Account_Domain, Network_Account_Name, Logon_Type, Logon_Process
+| fields - count
+```
+
+![Enhanced Detection](https://github.com/user-attachments/assets/6f071dc8-f9b8-431f-ba81-276015a1239e)
+
+*Correlating LSASS access with NewCredentials logon*
+
+**Search Breakdown:**
+
+1. **Sysmon Filter**: EventCode=10 (Process Access) targeting lsass.exe, excluding Windows Defender
+2. **Security Filter**: EventCode=4624 with LogonType=9 and Logon_Process=seclogo
+3. **Sort**: Order by time and record number
+4. **Transaction**: Group events within 1 minute, ending with logon event
+5. **Stats**: Aggregate and display relevant fields
+
+> 📌 **Key Detection**: Correlating lsass.exe process access (Sysmon 10) with LogonType 9 events identifies Pass-the-Hash attacks!
+
+---
+
+### Detecting Pass-the-Ticket {#detecting-pass-the-ticket}
+
+#### Pass-the-Ticket Overview
+
+**Pass-the-Ticket (PtT)** is a lateral movement technique that abuses Kerberos TGT (Ticket Granting Ticket) and TGS (Ticket Granting Service) tickets. Instead of using NTLM hashes, PtT leverages Kerberos tickets to authenticate to other systems without knowing the user's passwords.
+
+> 📌 PtT allows attackers to move laterally across multiple systems using valid Kerberos tickets extracted from memory.
+
+![Rubeus Ticket Monitoring](https://github.com/user-attachments/assets/2a520da7-1feb-4f2e-97e0-e840b429f543)
+
+*Rubeus monitoring for new TGTs*
+
+#### Pass-the-Ticket Attack Steps
+
+1. **Gain Access**: Attacker gains administrative access to a system through initial compromise or privilege escalation
+
+2. **Extract Tickets**: Attacker uses tools like Mimikatz or Rubeus to extract valid TGT or TGS tickets from the compromised system's memory
+
+![Rubeus PTT](https://github.com/user-attachments/assets/8220cf02-54e6-46fd-9050-b64f5697408d)
+
+*Rubeus passing a ticket*
+
+3. **Import Ticket**: Attacker submits the extracted ticket for the current logon session
+
+![klist Output](https://github.com/user-attachments/assets/a19f0044-b0d4-4bc4-b260-7b585385652c)
+
+*Cached Kerberos ticket after pass-the-ticket*
+
+4. **Access Resources**: Attacker can now authenticate to other systems without plaintext passwords
+
+---
+
+#### Kerberos Authentication Process
+
+Kerberos is a network authentication protocol used in Windows Active Directory environments:
+
+1. **Request TGT**: Client requests TGT from KDC (Key Distribution Center)
+2. **Receive TGT**: KDC verifies identity and issues TGT encrypted with user's secret key
+3. **Request TGS**: Client requests service ticket (TGS) for target service
+4. **Receive TGS**: KDC issues TGS encrypted with service account's secret key
+5. **Present TGS**: Client presents TGS to server for authentication
+
+![Kerberos Process](https://github.com/user-attachments/assets/148a77b9-41b2-47a1-bbce-bd13d50ce655)
+
+*Kerberos authentication process diagram*
+
+---
+
+#### Related Windows Security Events
+
+| Event ID | Description |
+|----------|-------------|
+| 4648 | Explicit Credential Logon Attempt |
+| 4624 | Successful Logon |
+| 4672 | Special Logon (admin privileges) |
+| 4768 | Kerberos TGT Request |
+| 4769 | Kerberos Service Ticket Request |
+| 4770 | Kerberos Service Ticket Renewed |
+
+![Kerberos Events](https://github.com/user-attachments/assets/b1a4d776-0b87-4c8a-bfcd-7cabd71aeda2)
+
+*Log entries showing Kerberos authentication events*
+
+---
+
+#### Pass-the-Ticket Detection Opportunities
+
+Detecting PtT is challenging because attackers use valid Kerberos tickets. The key distinction is that during PtT, the Kerberos authentication process is partial:
+
+- Attacker imports a TGT ticket into a logon session
+- Requests a TGS ticket for a remote service
+- From DC perspective, the imported TGT was never requested from attacker's system (no Event ID 4768)
+
+![PtT Process](https://github.com/user-attachments/assets/b6041d04-25e6-47a0-aa1a-85290e48969f)
+
+*Kerberos process with imported TGT*
+
+**Detection Approaches:**
+
+1. **Missing TGT Request**: Look for Event ID 4769 (TGS Request) or 4770 (Ticket Renewed) WITHOUT prior Event ID 4768 (TGT Request) from same system
+
+2. **Host/Service ID Mismatches**: Look for mismatches between Service and Host IDs (Event 4769) and actual Source/Destination IPs (Event ID 3)
+
+3. **Pre-Authentication Failures**: Review Event ID 4771 for mismatches between Pre-Authentication type and Failure Code (e.g., type 2 with failure 0x18)
+
+> 📌 These detection opportunities should be enhanced with behavior-based detection - context is vital to reduce false positives.
+
+---
+
+#### Detecting Pass-the-Ticket With Splunk
+
+**Timeframe:** earliest=1690451665 latest=1690451745
+
+```spl
+index=main earliest=1690392405 latest=1690451745 source="WinEventLog:Security" user!=*$ EventCode IN (4768,4769,4770) 
+| rex field=user "(?<username>[^@]+)"
+| rex field=src_ip "(\:\:ffff\:)?(?<src_ip_4>[0-9\.]+)"
+| transaction username, src_ip_4 maxspan=10h keepevicted=true startswith=(EventCode=4768)
+| where closed_txn=0
+| search NOT user="*$@*"
+| table _time, ComputerName, username, src_ip_4, service_name, category
+```
+
+![PtT Detection](https://github.com/user-attachments/assets/888dfe3e-e666-421d-a4ff-d70b04e9166f)
+
+*Detecting TGS requests without prior TGT*
+
+**Search Breakdown:**
+
+1. **Filter Events**: EventCode IN (4768, 4769, 4770), exclude machine accounts (user!=*$)
+2. **Extract Username**: Regex to get username from user field
+3. **Extract IP**: Handle IPv4-mapped IPv6 addresses
+4. **Transaction**: Group by username and IP, start with TGT request (4768), max 10 hours
+5. **Filter**: Only open transactions (no ending event)
+6. **Table**: Display relevant fields
+
+> 📌 **Key Detection**: Open transactions with TGS (4769) or ticket renewal (4770) but NO TGT request (4768) indicates Pass-the-Ticket!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
