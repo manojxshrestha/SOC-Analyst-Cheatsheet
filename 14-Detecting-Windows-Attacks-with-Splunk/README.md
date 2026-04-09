@@ -260,5 +260,78 @@ index=main earliest=1690195896 latest=1690285475 source="WinEventLog:SilkService
 
 ---
 
+### Detecting Password Spraying {#detecting-password-spraying}
+
+#### Password Spraying Overview
+
+Unlike traditional brute-force attacks, where an attacker tries numerous passwords for a single user account, **password spraying** distributes the attack across multiple accounts using a limited set of commonly used or easily guessable passwords.
+
+> 📌 The primary goal is to evade account lockout policies typically instituted by organizations. These policies usually lock an account after a specified number of unsuccessful login attempts to thwart brute-force attacks on individual accounts.
+
+**However, password spraying lowers the chance of triggering account lockouts**, as each user account receives only a few password attempts, making the attack less noticeable.
+
+![Password Spraying Tool](https://github.com/user-attachments/assets/3fbaab8e-a7d6-4fba-8bfe-7b96753d3ddb)
+
+*Spray 2.1 password spraying tool by Jacob Wilkin*
+
+---
+
+#### Password Spraying Detection Opportunities
+
+Detecting password spraying through Windows logs involves the analysis and monitoring of specific event logs to identify patterns and anomalies indicative of such an attack.
+
+> 📌 **Common Pattern**: Multiple failed logon attempts with Event ID 4625 - Failed Logon from different user accounts but originating from the same source IP address within a short time frame.
+
+#### Event Logs for Password Spraying Detection
+
+| Event ID | Description | Error Code | Meaning |
+|----------|-------------|------------|---------|
+| 4625 | Failed Logon | Various | Failed logon attempt |
+| 4768 | Kerberos TGT Request | 0x6 | Kerberos Invalid Users |
+| 4768 | Kerberos TGT Request | 0x12 | Kerberos Disabled Users |
+| 4776 | NTLM Authentication | 0xC0000064 | NTLM Invalid Users |
+| 4776 | NTLM Authentication | 0xC000006A | NTLM Wrong Password |
+| 4648 | Explicit Credentials | - | Logon using explicit credentials |
+| 4771 | Kerberos Pre-Auth | - | Kerberos Pre-Authentication Failed |
+
+---
+
+### Detecting Password Spraying With Splunk
+
+**Timeframe:** earliest=1690280680 latest=1690289489
+
+```spl
+index=main earliest=1690280680 latest=1690289489 source="WinEventLog:Security" EventCode=4625
+| bin span=15m _time
+| stats values(user) as Users, dc(user) as dc_user by src, Source_Network_Address, dest, EventCode, Failure_Reason
+```
+
+![Password Spraying Detection](https://github.com/user-attachments/assets/6260ec5e-bdb7-4b75-b68f-386d616cd5f9)
+
+*Splunk search results showing password spraying from KALI (10.10.0.201)*
+
+#### Search Breakdown
+
+1. **Filtering by Index, Source, and EventCode**: Select events from `WinEventLog:Security` where EventCode is **4625** (Failed Logon)
+
+2. **Time Range Filter**: Restrict to Unix timestamps 1690280680 to 1690289489
+
+3. **Time Binning**: Use `bin span=15m` to create 15-minute time buckets
+
+4. **Statistics**: Aggregate by:
+   - `src` - Source computer
+   - `Source_Network_Address` - Source IP
+   - `dest` - Destination computer
+   - `EventCode` - Event type
+   - `Failure_Reason` - Why logon failed
+   
+   Calculate:
+   - `values(user) as Users` - All attempted usernames
+   - `dc(user) as dc_user` - Distinct count of users (key indicator!)
+
+> 📌 **Key Detection**: High dc_user (distinct user count) from single IP indicates password spraying!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
