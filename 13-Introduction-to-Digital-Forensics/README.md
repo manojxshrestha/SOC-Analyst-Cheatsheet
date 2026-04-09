@@ -4,7 +4,7 @@
 
 ---
 
-## 0. Overview
+## 0. Overview {#0-overview}
 
 > 📌 **Digital Forensics** - Core forensic concepts and tools for investigating digital evidence in Windows environments.
 
@@ -35,21 +35,21 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
 
 ## Table of Contents
 
-0. [Overview](#0-overview)
-1. [Introduction to Digital Forensics](#1-introduction-to-digital-forensics)
-2. [Windows Forensics Overview](#2-windows-forensics-overview)
-3. [Evidence Acquisition Techniques & Tools](#3-evidence-acquisition-techniques--tools)
-4. [Memory Forensics](#4-memory-forensics)
-5. [Disk Forensics](#5-disk-forensics)
-6. [Rapid Triage Examination & Analysis Tools](#6-rapid-triage-examination--analysis-tools)
+0. [Overview](#0-overview) - Module introduction and overview
+1. [Introduction to Digital Forensics](#1-introduction-to-digital-forensics) - What is digital forensics, key concepts, forensic process
+2. [Windows Forensics Overview](#2-windows-forensics-overview) - NTFS, Windows Event Logs, Execution Artifacts, Persistence
+3. [Evidence Acquisition Techniques & Tools](#3-evidence-acquisition-techniques--tools) - FTK Imager, KAPE, Velociraptor, Memory Acquisition
+4. [Memory Forensics](#4-memory-forensics) - Volatility, Memory analysis, Rootkit detection
+5. [Disk Forensics](#5-disk-forensics) - Autopsy, Disk analysis, File recovery
+6. [Rapid Triage Examination & Analysis Tools](#6-rapid-triage-examination--analysis-tools) - Eric Zimmerman tools, MFTECmd, EvtxECmd, RegRipper, PECmd
 7. [Practical Digital Forensics Scenario](#7-practical-digital-forensics-scenario)
-   - [7.0 Overview](#7-0-overview)
-   - [7.1 Memory Analysis with Volatility v3](#7-1-memory-analysis-with-volatility-v3)
-   - [7.2 Disk Image & Rapid Triage Analysis](#7-2-disk-image--rapid-triage-analysis)
-   - [7.3 Timeline Construction](#7-3-timeline-construction)
-   - [7.4 Summary](#7-4-summary)
-8. [Interview Questions](#8-interview-questions)
-9. [Additional Resources](#9-additional-resources)
+   - [7.0 Overview](#7-0-overview) - Scenario description and evidence locations
+   - [7.1 Memory Analysis with Volatility v3](#7-1-memory-analysis-with-volatility-v3) - Process analysis, injected code, DLLs, network artifacts
+   - [7.2 Disk Image & Rapid Triage Analysis](#7-2-disk-image--rapid-triage-analysis) - Autopsy, Chrome cache, Cobalt Strike, Autoruns, MFT, SRUM, Event logs
+   - [7.3 Timeline Construction](#7-3-timeline-construction) - Building execution timeline
+   - [7.4 Summary](#7-4-summary) - Key findings and conclusions
+8. [Interview Questions](#8-interview-questions) - Common digital forensics interview questions
+9. [Additional Resources](#9-additional-resources) - Tools, references, further learning
 
 ---
 
@@ -57,7 +57,7 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
 
 > 📌 **Digital Forensics** - The collection, preservation, analysis, and presentation of digital evidence to investigate cyber incidents.
 
-### Overview
+### Overview {#1-1-overview}
 
 It is essential to clarify that this module does not claim to be an all-encompassing or exhaustive program on Digital Forensics. This module provides a robust foundation for SOC analysts, enabling them to confidently tackle key Digital Forensics tasks. The primary focus of the module will be the analysis of malicious activity within Windows-based environments.
 
