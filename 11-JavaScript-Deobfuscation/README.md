@@ -48,6 +48,7 @@ This module covers the fundamentals of JavaScript Deobfuscation:
 7. [Decoding](#7-decoding)
 8. [HTTP Requests](#8-http-requests)
 9. [Note / Skills Assessment](#9-note--skills-assessment)
+10. [Additional Resources](#additional-resources)
 
 ---
 
@@ -990,53 +991,18 @@ Decode the secret key and send a POST request with the decoded key.
 
 ---
 
-### Summary
+### Additional Resources
 
-Congratulations on completing the JavaScript Deobfuscation module! Here's what we learned:
-
-| Step | Topic | Description |
-|------|-------|-------------|
-| 1 | **HTML Source Code** | Uncovered HTML and located JavaScript code |
-| 2 | **Obfuscation** | Learned various obfuscation techniques (minification, packing, encoding) |
-| 3 | **Deobfuscation** | Beautified and deobfuscated minified/obfuscated code |
-| 4 | **Code Analysis** | Analyzed deobfuscated code to understand functionality |
-| 5 | **HTTP Requests** | Replicated JavaScript functionality using cURL |
-| 6 | **Decoding** | Learned Base64, Hex, and Rot13 encoding/decoding |
-
----
-
-### Key Takeaways
-
-> 📌 **What we learned:**
-1. **Locating JavaScript** - Find JS in HTML source, external files, DevTools
-2. **Understanding Obfuscation** - Minification, packing, encoding techniques
-3. **Deobfuscation Tools** - Prettier, Beautifier.io, UnPacker
-4. **Code Analysis** - Understanding XMLHttpRequest, HTTP methods
-5. **Replication** - Using cURL to replicate JavaScript functionality
-6. **Decoding** - Base64, Hex, Rot13 encoding/decoding
-
----
-
-### Tools Reference
-
-| Purpose | Tool | URL |
-|---------|------|-----|
-| **Obfuscation** | beautifytools.com | javascript-obfuscator |
-| **Obfuscation** | obfuscator.io | JavaScript obfuscator with Base64 |
-| **Beautify** | prettier.io | Code formatter |
-| **Beautify** | beautifier.io | Code beautifier |
+| Resource | Description | URL |
+|----------|-------------|-----|
+| **Obfuscation Tools** | beautifytools.com | JavaScript obfuscator |
+| **Obfuscation Tools** | obfuscator.io | JavaScript obfuscator with Base64 |
+| **Beautify Tools** | prettier.io | Code formatter |
+| **Beautify Tools** | beautifier.io | Code beautifier |
 | **Deobfuscate** | UnPacker | matthewfl.com/unPacker |
 | **Test JS** | JSConsole | jsconsole.com |
 | **Encoding** | CyberChef | gchq.github.io/CyberChef |
-
----
-
-### Next Steps
-
-> 📌 To continue learning:
-- Explore **Secure Coding 101** module for advanced reverse engineering
-- Practice with more JavaScript samples
-- Learn about **SSRF** and **IDOR** vulnerabilities through JS analysis
+| **Secure Coding Module** | Advanced reverse engineering | HTB Academy |
 
 ---
 
