@@ -4,7 +4,7 @@
 
 ---
 
-## 0. Overview
+## 0. Overview {#0-overview}
 
 > 📌 **YARA & Sigma** - Essential detection rules for SOC analysts to hunt threats on disk, processes, memory, and SIEM.
 
@@ -52,7 +52,7 @@ This module covers:
 
 ---
 
-## 1. Introduction to YARA & Sigma
+## 1. Introduction to YARA & Sigma {#1-introduction-to-yara--sigma}
 
 > 📌 **YARA and Sigma** are essential tools for SOC analysts to enhance threat detection and incident response capabilities.
 
@@ -151,7 +151,7 @@ Both YARA and Sigma help locate and identify:
 
 ---
 
-## 2. Leveraging YARA
+## 2. Leveraging YARA {#2-leveraging-yara}
 
 > 📌 **YARA** is a powerful pattern-matching tool used for identifying and classifying files based on specific patterns, characteristics, or content.
 
@@ -339,7 +339,7 @@ YARA provides:
 
 ---
 
-## 3. Developing YARA Rules
+## 3. Developing YARA Rules {#3-developing-yara-rules}
 
 > 📌 This section covers manual and automated YARA rule development.
 
@@ -1022,7 +1022,7 @@ rule susp_file_enumerator_with_encrypted_resource_101 {
 
 ---
 
-## 4. Hunting Evil with YARA (Windows Edition)
+## 4. Hunting Evil with YARA (Windows Edition) {#4-hunting-evil-with-yara-windows-edition}
 
 > 📌 This section covers using YARA on Windows systems for identifying threats on disk, in memory, and ETW data.
 
