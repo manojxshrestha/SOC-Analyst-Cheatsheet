@@ -21,7 +21,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 | **11** | JavaScript Deobfuscation | Malicious script analysis | Deobfuscation techniques, analyzing obfuscated JavaScript |
 | **12** | [YARA & Sigma for SOC Analysts](./12-YARA-Sigma-for-SOC-Analysts/) ✅ | Detection rule writing | YARA rules, Sigma rules, sigmac, Chainsaw, Splunk queries, threat intelligence integration |
 | **13** | [Introduction to Digital Forensics](./13-Introduction-to-Digital-Forensics/) | Core forensics concepts and tools | FTK Imager, KAPE, Velociraptor, Volatility, memory forensics, disk forensics, timeline analysis, MFT, USN Journal, Registry, Prefetch, ShimCache, Amcache, BAM, SRUM |
-| **14** | Detecting Windows Attacks with Splunk | Advanced Windows detection | Splunk queries for Windows attacks, MITRE ATT&CK coverage |
+| **14** | [Detecting Windows Attacks with Splunk](./14-Detecting-Windows-Attacks-with-Splunk/) | Advanced Windows detection | Splunk queries for Windows attacks, MITRE ATT&CK coverage |
 | **15** | Security Incident Reporting | Incident documentation | Report writing, stakeholder communication, lessons learned |
 
 ---
