@@ -333,5 +333,108 @@ index=main earliest=1690280680 latest=1690289489 source="WinEventLog:Security" E
 
 ---
 
+### Detecting Responder-like Attacks {#detecting-responder-like-attacks}
+
+#### LLMNR/NBT-NS/mDNS Poisoning Overview
+
+**LLMNR (Link-Local Multicast Name Resolution)** and **NBT-NS (NetBIOS Name Service)** poisoning, also referred to as NBNS spoofing, are network-level attacks that exploit inefficiencies in these name resolution protocols.
+
+Both LLMNR and NBT-NS are used to resolve hostnames to IP addresses on local networks when the fully qualified domain name (FQDN) resolution fails. However, their lack of built-in security mechanisms renders them susceptible to spoofing and poisoning attacks.
+
+> 📌 Typically, attackers employ the **Responder** tool to execute LLMNR, NBT-NS, or mDNS poisoning.
+
+#### Attack Steps
+
+1. A victim device sends a name resolution query for a mistyped hostname (e.g., `fileshrae`)
+2. DNS fails to resolve the mistyped hostname
+3. The victim device sends a name resolution query for the mistyped hostname using LLMNR/NBT-NS
+4. The attacker's host responds to the LLMNR (UDP 5355)/NBT-NS (UDP 137) traffic, pretending to know the identity of the requested host
+
+![LLMNR/NBT-NS Attack](https://github.com/user-attachments/assets/049c04a3-44b7-48d2-996a-993129a0d2a2)
+
+*DNS resolution process showing LLMNR/NBT-NS/mDNS fallback*
+
+> 📌 The result of a successful attack is the acquisition of the victim's **NetNTLM hash**, which can be either cracked or relayed in an attempt to gain access to systems where these credentials are valid.
+
+---
+
+#### Responder Detection Opportunities
+
+Detecting LLMNR, NBT-NS, and mDNS poisoning can be challenging. However, organizations can mitigate the risk by implementing the following measures:
+
+1. **Network Monitoring**: Deploy solutions to detect unusual LLMNR and NBT-NS traffic patterns, such as an elevated volume of name resolution requests from a single source
+
+2. **Honeypot Approach**: Name resolution for non-existent hosts should fail. If an attacker is present and spoofing LLMNR/NBT-NS/mDNS responses, name resolution will succeed.
+
+![LLMNR Detection Script](https://github.com/user-attachments/assets/3be4edbb-7609-421e-8efb-a82491eb7bc6)
+
+*PowerShell script for detecting LLMNR/NBT-NS spoofing*
+
+#### Creating LLMNR Detection Event Log
+
+```powershell
+PS C:\Users\Administrator> New-EventLog -LogName Application -Source LLMNRDetection
+```
+
+```powershell
+PS C:\Users\Administrator> Write-EventLog -LogName Application -Source LLMNRDetection -EventId 19001 -Message $msg -EntryType Warning
+```
+
+---
+
+### Detecting Responder-like Attacks With Splunk
+
+#### Method 1: LLMNR Detection Event Log
+
+**Timeframe:** earliest=1690290078 latest=1690291207
+
+```spl
+index=main earliest=1690290078 latest=1690291207 SourceName=LLMNRDetection
+| table _time, ComputerName, SourceName, Message
+```
+
+![LLMNR Detection Splunk](https://github.com/user-attachments/assets/be22ffe9-6e77-40fb-85c8-682889a0b020)
+
+*Splunk results showing LLMNR server IPs*
+
+#### Method 2: Sysmon Event ID 22 (DNS Queries)
+
+**Sysmon Event ID 22** can also be utilized to track DNS queries associated with non-existent/mistyped file shares.
+
+**Timeframe:** earliest=1690290078 latest=1690291207
+
+```spl
+index=main earliest=1690290078 latest=1690291207 EventCode=22 
+| table _time, Computer, user, Image, QueryName, QueryResults
+```
+
+![Sysmon DNS Queries](https://github.com/user-attachments/assets/7f121fe0-e171-4cba-b69c-a9cde96ba1cd)
+
+*Log entry showing mistyped file share query "myfileshar3"*
+
+> 📌 Look for QueryName patterns like "fileshar*" with QueryResults pointing to attacker IP
+
+---
+
+#### Method 3: Event 4648 (Explicit Credentials)
+
+**Event 4648** can be used to detect explicit logons to rogue file shares which attackers might use to gather legitimate user credentials.
+
+**Timeframe:** earliest=1690290814 latest=1690291207
+
+```spl
+index=main earliest=1690290814 latest=1690291207 EventCode IN (4648) 
+| table _time, EventCode, source, name, user, Target_Server_Name, Message
+| sort 0 _time
+```
+
+![Event 4648 Detection](https://github.com/user-attachments/assets/1fd6888d-b203-4415-a5c4-f61591c23a29)
+
+*Splunk results showing explicit credentials logon to target server*
+
+> 📌 **Key Detection**: Event 4648 shows when a user explicitly provides credentials to access a resource - look for unusual Target_Server_Name values
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
