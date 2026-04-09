@@ -1555,15 +1555,6 @@ You belong to the digital forensics team and are assigned to investigate an inci
 
 ---
 
-## Table of Contents
-
-1. [Memory Analysis with Volatility v3](#1-memory-analysis-with-volatility-v3)
-2. [Disk Image & Rapid Triage Analysis](#2-disk-image--rapid-triage-analysis)
-3. [Timeline Construction](#3-timeline-construction)
-4. [Summary](#4-summary)
-
----
-
 ## 1. Memory Analysis with Volatility v3 {#7-1-memory-analysis-with-volatility-v3}
 
 > 📌 Memory forensics allows analysts to examine the state of a system at the time of memory acquisition, revealing running processes, loaded DLLs, network connections, and artifacts that may not be visible on disk.
