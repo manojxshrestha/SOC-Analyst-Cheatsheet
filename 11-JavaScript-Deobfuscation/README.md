@@ -44,8 +44,9 @@ This module covers the fundamentals of JavaScript Deobfuscation:
 3. [Basic Obfuscation](#3-basic-obfuscation)
 4. [Advanced Obfuscation](#4-advanced-obfuscation)
 5. [Deobfuscation](#5-deobfuscation)
-6. [HTTP Requests](#6-http-requests)
-7. [Skills Assessment](#7-skills-assessment)
+6. [Code Analysis](#6-code-analysis)
+7. [HTTP Requests](#7-http-requests)
+8. [Skills Assessment](#8-skills-assessment)
 
 ---
 
@@ -591,7 +592,106 @@ function generateSerial() {
 
 ---
 
-## 6. HTTP Requests
+## 6. Code Analysis
+
+> 📌 Now that we've deobfuscated the code, let's analyze it to understand its functionality.
+
+### Deobfuscated Code
+
+After deobfuscation, we get:
+
+```javascript
+'use strict';
+function generateSerial() {
+  var xhr = new XMLHttpRequest;
+  var url = "/serial.php";
+  xhr.open("POST", url, true);
+  xhr.send(null);
+};
+```
+
+> 📌 The `secret.js` file contains only one function: `generateSerial`
+
+---
+
+### Understanding the Code
+
+#### HTTP Request Object
+
+```javascript
+var xhr = new XMLHttpRequest;
+```
+
+- **XMLHttpRequest** is a JavaScript object used to handle web requests
+- It allows sending HTTP requests asynchronously
+
+#### URL Definition
+
+```javascript
+var url = "/serial.php";
+```
+
+- Points to `/serial.php` on the same domain
+- No external domain specified
+
+#### Opening the Request
+
+```javascript
+xhr.open("POST", url, true);
+```
+
+- `xhr.open(method, url, async)` - Opens an HTTP request
+- **Method:** POST
+- **URL:** /serial.php
+- **Async:** true
+
+#### Sending the Request
+
+```javascript
+xhr.send(null);
+```
+
+- Sends the request
+- `null` = no POST data included
+
+---
+
+### What Does This Code Do?
+
+> 📌 The `generateSerial` function simply sends an **empty POST request** to `/serial.php`
+
+**Function Flow:**
+1. Create XMLHttpRequest object
+2. Define target URL (`/serial.php`)
+3. Open POST request
+4. Send empty request
+
+---
+
+### Why Was This Code Created?
+
+- The developers may have planned to call this function when a "Generate Serial" button is clicked
+- Since no HTML elements for generating serials were found, the function was likely reserved for future use
+- This is common in development - code is prepared but not yet connected to the UI
+
+---
+
+### Security Implications
+
+> 📌 Analyzing deobfuscated code helps uncover:
+- Hidden functionality
+- Unreleased features
+- Potential vulnerabilities
+- Server-side handling
+
+**Next Steps:**
+1. Replicate functionality with cURL
+2. Check if server handles the request
+3. Look for bugs/vulnerabilities in unreleased features
+
+---
+
+## 8. HTTP Requests
 
 > 📌 In the previous section, we found that `secret.js` sends a POST request to `/serial.php`. In this section, we'll replicate this using cURL.
 
@@ -695,7 +795,7 @@ curl -s http://SERVER_IP:PORT/serial.php -X POST
 
 ---
 
-## 7. Skills Assessment
+## 8. Skills Assessment
 
 *Coming soon...*
 
