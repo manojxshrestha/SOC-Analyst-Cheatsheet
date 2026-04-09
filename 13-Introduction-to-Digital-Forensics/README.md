@@ -48,8 +48,8 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
    - [7.2 Disk Image & Rapid Triage Analysis](#2-disk-image--rapid-triage-analysis) - Autopsy, Chrome cache, Cobalt Strike, Autoruns, MFT, SRUM, Event logs
    - [7.3 Timeline Construction](#3-timeline-construction) - Building execution timeline
    - [7.4 Summary](#4-summary) - Key findings and conclusions
-8. [Interview Questions](#8-interview-questions) - Common digital forensics interview questions
-9. [Additional Resources](#9-additional-resources) - Tools, references, further learning
+8. [Interview Questions](#8-interview-questions) - 20+ common digital forensics interview questions with answers
+9. [Additional Resources](#9-additional-resources) - Books, websites, communities, CTI sources, tool documentation
 
 ---
 
@@ -2439,37 +2439,55 @@ EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
 
 **Answer:** Volatile data is information that disappears when a system is powered off, such as RAM contents, running processes, and network connections. Non-volatile data persists on storage devices like hard drives, including files, logs, and registry data.
 
+---
+
 ### Q2: What is the order of volatility and why is it important?
 
 **Answer:** The order of volatility (from most to least volatile): CPU registers → Cache → RAM → Network connections → Running processes → Disk → Remote logs. Following this order ensures critical evidence isn't lost during acquisition.
+
+---
 
 ### Q3: How do you analyze a memory dump?
 
 **Answer:** Use Volatility framework to: 1) Identify the memory profile, 2) List processes (pslist/psscan), 3) Find injected code (malfind), 4) Analyze network connections (netscan), 5) Examine DLLs (dlllist), 6) Check handles and registry hives.
 
+---
+
 ### Q4: What is timestomping?
 
 **Answer:** Timestomping is a forensic anti-evasion technique where attackers modify file timestamps (MAC times) to make malicious files appear legitimate or blend in with normal system files.
+
+---
 
 ### Q5: How do you detect persistence mechanisms?
 
 **Answer:** Check registry Run keys, scheduled tasks, services, startup folders, WMI event consumers, and DLL search order hijacking. Tools like Autoruns, RegRipper, and KAPE can help identify these.
 
+---
+
 ### Q6: What is the difference between MFT $STANDARD_INFORMATION and $FILE_NAME timestamps?
 
 **Answer:** $STANDARD_INFORMATION can be modified by user-space applications and is what Windows Explorer displays. $FILE_NAME timestamps can only be modified by the kernel and represent the actual file creation time.
+
+---
 
 ### Q7: What is the USN Journal?
 
 **Answer:** USN (Update Sequence Number) Journal is an NTFS feature that logs all changes to files and directories including creation, deletion, modification, and renaming. It's valuable for timeline analysis.
 
+---
+
 ### Q8: How do you analyze Windows Event Logs?
 
 **Answer:** Use tools like EvtxECmd to parse EVTX files to CSV/JSON, then correlate events by timestamp, Event ID, user, and source IP. Key Event IDs: 4624/4625 (logon), 4688 (process creation), 7045 (service install).
 
+---
+
 ### Q9: What is KAPE and when would you use it?
 
 **Answer:** KAPE (Kroll Artifact Parser and Extractor) is a rapid triage tool that collects and parses forensic artifacts. Use it when you need quick evidence collection during time-sensitive investigations.
+
+---
 
 ### Q10: How do you build a forensic timeline?
 
@@ -2477,26 +2495,109 @@ EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
 
 ---
 
+### Q11: What are the key artifacts in Windows forensics?
+
+**Answer:** MFT (Master File Table), USN Journal, Registry Hives (SYSTEM, SAM, SECURITY, SOFTWARE, NTUSER), Prefetch files, Amcache, ShimCache, Event Logs, LNK files, Browser artifacts.
+
+---
+
+### Q12: Explain the difference between memory forensics and disk forensics.
+
+**Answer:** Memory forensics analyzes volatile RAM data to find running processes, injected code, network connections, and artifacts not visible on disk. Disk forensics analyzes non-volatile storage for files, deleted data, file metadata, and persistent artifacts.
+
+---
+
+### Q13: What is DLL injection and how do you detect it?
+
+**Answer:** DLL injection is a technique where malicious code loads a DLL into a legitimate process's memory. Detect by using Volatility's malfind plugin to identify suspicious memory regions with execute permissions, or check for unsigned DLLs loaded by processes.
+
+---
+
+### Q14: What is the purpose of forensic imaging?
+
+**Answer:** Forensic imaging creates an exact bit-by-bit copy of a storage device, preserving all data including deleted files and hidden partitions. It maintains evidence integrity through hash verification and ensures admissibility in legal proceedings.
+
+---
+
+### Q15: How do you handle encrypted evidence?
+
+**Answer:** Identify encryption type, search for keys in memory (Volatility), check for keyfiles, look for passwords in browser saved data or password managers, and document all attempts. If decryption is impossible, analyze encrypted artifacts' metadata and context.
+
+---
+
+### Q16: What is the Diamond Model of intrusion analysis?
+
+**Answer:** A model with 4 core features: Adversary (threat actor), Capability (attack tools/skills), Victim (target), Infrastructure (C2, tools). Used to systematically analyze and understand intrusions.
+
+---
+
+### Q17: How do you prioritize forensic analysis?
+
+**Answer:** Focus on: volatile data first (memory), then timeline-critical artifacts (Event Logs, Prefetch), then persistence mechanisms (Registry, Scheduled Tasks), then secondary artifacts (browser history, downloads).
+
+---
+
+### Q18: What tools do you use for Windows registry forensics?
+
+**Answer:** RegRipper for automated parsing, Registry Explorer for GUI browsing, Autopsy for registry hive analysis, and KAPE for bulk collection. Key hives: SYSTEM, SOFTWARE, SAM, SECURITY, NTUSER.DAT.
+
+---
+
+### Q19: How do you detect lateral movement in forensics?
+
+**Answer:** Look for: remote service creation (Event ID 7045), WMI/PowerShell remote execution (Event ID 4104), RDP connections (Event ID 4624), SMB lateral movement, and process injection across systems.
+
+---
+
+### Q20: What is the difference between live acquisition and post-mortem forensics?
+
+**Answer:** Live acquisition captures volatile data from a running system (memory, processes). Post-mortem analysis examines captured images (memory dump, disk image) after the system is shut down or isolated.
+
+---
+
 ## 9. Additional Resources
 
-### Tools
-- **FTK Imager** - Disk imaging and mounting
-- **KAPE** - Rapid artifact collection
-- **Velociraptor** - Endpoint forensics
-- **Volatility** - Memory forensics
-- **Autopsy** - Disk analysis
-- **Eric Zimmerman Tools** - Registry, MFT, Event Log parsing
+### Books
+- "The Practice of Network Security Monitoring" - Richard Bejtlich
+- "Digital Forensics" - Jason Geffner
+- "Incident Response & Computer Forensics" - Jason Lutt
+- "Blue Team Field Manual" - Alan White & Chris Gates
+- "Windows Registry Forensics" - Harlan Carvey
+- "Mastering Windows Memory Forensics" - Jonas Zaddach & Dinu Ziv
 
-### References
-- SANS Digital Forensics Blog
-- The DFIR Report
-- MITRE ATT&CK
-- Windows Registry Forensics (SANS)
+### Websites
+- [MITRE ATT&CK](https://attack.mitre.org)
+- [The DFIR Report](https://thedfirreport.com/)
+- [SANS Digital Forensics](https://www.sans.org/security-resources/)
+- [NIST SP 800-61](https://csrc.nist.gov/publications/detail/sp/800-61/rev-2/final)
+- [CISA Resources](https://www.cisa.gov/resources-tools/resources)
+- [Red Canary Blog](https://redcanary.com/blog/)
+- [Volatility Labs](https://volatility-labs.blogspot.com/)
+- [Forensic Focus](https://www.forensicfocus.com/)
 
-### Further Learning
-- Advanced Memory Forensics
-- Malware Analysis Fundamentals
-- Log Analysis with Splunk/Elastic
+### Communities
+- r/dfir (Reddit)
+- r/sysadmin (Reddit)
+- Twitter/X security researchers
+- SANS Digital Forensics
+- FIRST (Forum of Incident Response)
+- SANS ISAC (Information Sharing and Analysis Center)
+
+### CTI Sources
+- CISA Alerts (cisa.gov/alerts)
+- MITRE ATT&CK Navigator
+- ThreatFox (abuse.ch)
+- AlienVault OTX (otx.alienvault.com)
+- VirusTotal
+- Hybrid Analysis
+- ANY.RUN
+
+### Tool Documentation
+- [Volatility Documentation](https://volatility3.readthedocs.io/)
+- [KAPE Documentation](https://docs.kroll.com/kape/)
+- [Eric Zimmerman Tools](https://ericzimmerman.github.io/)
+- [Autopsy Documentation](https://sleuthkit.org/autopsy/docs.php)
+- [Velociraptor Docs](https://docs.velociraptor.app/)
 
 ---
 
