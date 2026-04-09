@@ -1516,5 +1516,926 @@ API Monitor captures and displays API calls made by applications. This is valuab
 
 ---
 
-*Module 13/15 - Introduction to Digital Forensics*
+# 🎯 Practical Digital Forensics Scenario
+
+## SOC Analyst Cheatsheet - Module 13/15 - Section 7
+
+---
+
+## 0. Overview
+
+> 📌 **Practical Digital Forensics** - This section covers hands-on memory dump analysis, disk forensics, and rapid triage artifact examination using industry-standard tools like Volatility, Autopsy, and Chainsaw.
+
+### Scenario Description
+
+You belong to the digital forensics team and are assigned to investigate an incident related to a Windows system using:
+- Memory dump
+- Full disk image
+- Rapid triage artifacts
+
+### Evidence Locations
+
+| Evidence Type | Location |
+|---------------|----------|
+| **Memory Dump** | `C:\Users\johndoe\Desktop\memdump\PhysicalMemory.raw` |
+| **Rapid Triage** | `C:\Users\johndoe\Desktop\kapefiles`, `C:\Users\johndoe\Desktop\files` |
+| **Full Disk Image** | `C:\Users\johndoe\Desktop\fulldisk.raw.001` |
+| **Parsed Disk Data** | `C:\Users\johndoe\Desktop\MalwareAttack` |
+
+### Notes
+
+> 📌 When analyzing with Autopsy, access the case from `C:\Users\johndoe\Desktop\MalwareAttack`.
+
+> 📌 During an investigation, it's imperative to examine artifacts or evidence on a specialized system tailored for forensic tasks. However, for the sake of expediency, the analysis is conducted within the impacted system itself.
+
+---
+
+## Table of Contents
+
+1. [Memory Analysis with Volatility v3](#1-memory-analysis-with-volatility-v3)
+2. [Disk Image & Rapid Triage Analysis](#2-disk-image--rapid-triage-analysis)
+3. [Timeline Construction](#3-timeline-construction)
+4. [Summary](#4-summary)
+
+---
+
+## 1. Memory Analysis with Volatility v3
+
+> 📌 Memory forensics allows analysts to examine the state of a system at the time of memory acquisition, revealing running processes, loaded DLLs, network connections, and artifacts that may not be visible on disk.
+
+The affected system's memory dump resides in `C:\Users\johndoe\Desktop\memdump\PhysicalMemory.raw`.
+
+### 1.1 Identifying the Memory Dump Profile
+
+Before analyzing, we need to identify the operating system and kernel details of the Windows memory sample:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.info
+```
+
+**Key Output:**
+
+| Variable | Value |
+|---------|-------|
+| Kernel Base | 0xf80150019000 |
+| Is64Bit | True |
+| SystemTime | 2023-08-10 09:35:40 |
+| NtProductType | NtProductWinNt |
+| NtMajorVersion | 10 |
+| NtMinorVersion | 0 |
+| KeNumberProcessors | 2 |
+| NtSystemRoot | C:\Windows |
+
+---
+
+### 1.2 Identifying Injected Code
+
+> 🔴 **PAGE_EXECUTE_READWRITE** is a strong indicator of potential code injection. Legitimate applications typically separate code execution from data storage.
+
+Use Volatility's `malfind` plugin to list process memory ranges that potentially contain injected code:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.malfind
+```
+
+**Suspicious Findings:**
+
+| PID | Process | Start VPN | End VPN | Protection |
+|----|----------|----------|---------|------------|
+| 3648 | rundll32.exe | 0x1f2d8c20000 | 0x1f2d8c6dfff | PAGE_EXECUTE_READWRITE |
+| 6744 | powershell.exe | 0x1db40f50000 | 0x1db40f9dfff | PAGE_EXECUTE_READWRITE |
+| 5468 | rundll32.exe | 0x13c60d40000 | 0x13c60d8dfff | PAGE_EXECUTE_READWRITE |
+
+> 📌 When a process allocates a memory page with **PAGE_EXECUTE_READWRITE** permissions, it's essentially requesting the ability to both execute and write to that memory region. In layman's terms, the process is saying, "I want to be able to run code from here, but I also want the flexibility to change what that code is on the fly."
+
+Now, why does that raise eyebrows? Well, legitimate applications typically segregate the tasks of code execution and data writing. They'll have specific regions of memory for running code (executable) and separate regions where data is written or modified. This separation is a fundamental security principle, ensuring that data isn't inadvertently executed or that executable regions aren't tampered with unexpectedly.
+
+However, many types of malware, especially those that employ code injection techniques, require the ability to write their payload into memory and then execute it. By allocating memory with PAGE_EXECUTE_READWRITE permissions, they can write and subsequently execute malicious code within the same memory region, making their malicious activities more streamlined and efficient.
+
+In essence, while not every instance of PAGE_EXECUTE_READWRITE is malicious, its presence is a strong indicator of potential malfeasance, and it's something we, as vigilant security analysts, should scrutinize closely.
+
+---
+
+### 1.3 Identifying Running Processes
+
+List all processes present in the memory image:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.pslist
+```
+
+**Key Processes Identified:**
+
+| PID | PPID | ImageFileName | CreateTime |
+|----|------|--------------|------------|
+| 3648 | 7148 | rundll32.exe | 2023-08-10 09:15:14 |
+| 6744 | 908 | powershell.exe | 2023-08-10 09:21:16 |
+| 7820 | 632 | Velociraptor.e | 2023-08-10 09:11:16 |
+| 7148 | 588 | explorer.exe | 2023-08-10 00:30:56 |
+
+---
+
+### 1.4 Process Tree Analysis
+
+View processes organized by parent process ID:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.pstree
+```
+
+**Process Tree Summary:**
+
+```
+4       0       System
+* 304   4       smss.exe
+* 632   492     services.exe
+** 7820 632     Velociraptor.e
+*** 4040        7820    winpmem_mini_x
+* 660   492     lsass.exe
+* 7148 588     explorer.exe
+** 3648 7148    rundll32.exe
+** 892  7148    chrome.exe
+* 6744 908     powershell.exe
+* 5468 7512    rundll32.exe
+```
+
+> 📌 The process tree shows **PID 3648 (rundll32.exe)** was spawned by **explorer.exe (PID 7148)**, and **PID 6744 (powershell.exe)** was spawned by **PID 908** (likely cmd.exe).
+
+---
+
+### 1.5 Identifying Process Command Lines
+
+Use `windows.cmdline` to see what arguments each process was started with:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.cmdline
+```
+
+**Suspicious Command Line Identified:**
+```
+3648    rundll32.exe    "C:\Windows\System32\rundll32.exe" payload.dll,StartW
+```
+
+> 📌 Process **3648 (rundll32.exe)** executing `payload.dll` is a strong indicator of malicious activity.
+
+**Additional Suspicious PowerShell Command:**
+```
+6744    powershell.exe    "PowerShell.exe" -nop -w hidden -encodedcommand JABzAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAEkATwAuAE0AZQBtAG8AcgB5AFMAdAByAGUAYQBtACgALABbAEMAbwBuAHYAZQByAHQAXQA6ADoARgByAG8AbQBCAGEAcwBlADYANABTAHQAcgBpAG4AZwAoACIASAA0AHMASQBBAEEAQQ... (base64 encoded)
+```
+
+> 🔴 **Base64 encoded PowerShell command detected!** This is a common obfuscation technique used by attackers to hide malicious commands.
+
+---
+
+### 1.6 Dumping Process Memory & Leveraging YARA
+
+Extract all memory resident pages from the suspicious process:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.memmap --pid 3648 --dump
+```
+
+**Memory Pages Extracted (sample):**
+
+| Physical Address | Virtual Address | Size | File |
+|-----------------|---------------|------|------|
+| 0xf8016d0e9000 | 0x2077d000 | 0x3000 | pid.3648.dmp |
+| 0xf8016d0ec000 | 0x20700000 | 0xd000 | pid.3648.dmp |
+| 0xf8016d0f9000 | 0x7d827000 | 0x1000 | pid.3648.dmp |
+
+> 📌 The dumped file can be found at `C:\Users\johndoe\Desktop\pid.3648.dmp`.
+
+#### YARA Scanning
+
+Scan the process dump using YARA rules from the signature-base repository:
+
+```powershell
+$rules = Get-ChildItem C:\Users\johndoe\Desktop\yara-4.3.2-2150-win64\rules | Select-Object -Property Name
+foreach ($rule in $rules) {
+    C:\Users\johndoe\Desktop\yara-4.3.2-2150-win64\yara64.exe `
+        C:\Users\johndoe\Desktop\yara-4.3.2-2150-win64\rules\$($rule.Name) `
+        C:\Users\johndoe\Desktop\pid.3648.dmp
+}
+```
+
+**YARA Hits Related to Cobalt Strike:**
+
+- HKTL_CobaltStrike_Beacon_Strings
+- HKTL_CobaltStrike_Beacon_4_2_Decrypt
+- HKTL_Win_CobaltStrike
+- CobaltStrike_Sleep_Decoder_Indicator
+- WiltedTulip_ReflectiveLoader
+
+> 🔴 **Cobalt Strike framework detected!** This is a commercial red team tool frequently used by attackers.
+
+---
+
+### 1.7 Identifying Loaded DLLs
+
+Use `windows.dlllist` to see DLLs associated with a specific process:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.dlllist --pid 3648
+```
+
+**Critical Finding:**
+```
+3648    rundll32.exe    0x6bac0000      0x4f000 payload.dll     E:\payload.dll     2023-08-10 09:15:14.000000
+```
+
+> 📌 The presence of **`E:\payload.dll`** indicates the DLL may have originated from an external USB drive or mounted ISO file.
+
+**Other Key DLLs Loaded:**
+- `rundll32.exe` (C:\Windows\System32\rundll32.exe)
+- `KERNEL32.DLL` (C:\Windows\System32\KERNEL32.DLL)
+- `WININET.dll` (C:\Windows\System32\WININET.dll) - Network functionality
+- `ws2_32.dll` (C:\Windows\System32\WS2_32.dll) - Network sockets
+
+---
+
+### 1.8 Identifying Handles
+
+Use `windows.handles` to identify files and registry entries accessed by the suspicious process:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.handles --pid 3648
+```
+
+> 📌 When a process needs to read from or write to a file, it doesn't directly interact with the file's data on the disk. Instead, the process requests the operating system to open the file, and in return, the OS provides a file handle. This handle is essentially a ticket that grants the process permission to perform operations on that file.
+
+**Key Findings:**
+
+| Type | Handle | Name |
+|------|--------|------|
+| File | 0x5b4 | `\Device\HarddiskVolume3\Users\johndoe\Desktop` |
+| Key | 0xf0 | `MACHINE\SYSTEM\CONTROLSET001\CONTROL\SESSION MANAGER` |
+| Key | 0x174 | `USER\SOFTWARE\MICROSOFT\WINDOWS\CURRENTVERSION\INTERNET SETTINGS\5.0\CACHE\EXTENSIBLE CACHE` |
+| Mutant | 0x48 | `SM0:3648:304:WilStaging_02` |
+| ALPC Port | 0x4c | `BaseNamedObjects` |
+
+> 📌 The process has interactions with files on the **Desktop**, which warrants closer examination.
+
+---
+
+### 1.9 Network Artifacts
+
+Use `windows.netstat` to analyze network connections within the memory image:
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.netstat
+```
+
+**Suspicious Connections:**
+
+| Proto | LocalAddr | LocalPort | ForeignAddr | ForeignPort | State | PID | Process | Created |
+|-------|----------|----------|------------|-------------|-------|-----|---------|---------|
+| TCPv4 | 192.168.152.134 | 52810 | 44.214.212.249 | 80 | LAST_ACK | 3648 | rundll32.exe | 2023-08-10 09:33:36 |
+| TCPv4 | 192.168.152.134 | 53118 | 44.214.212.249 | 80 | ESTABLISHED | 3648 | rundll32.exe | 2023-08-10 09:35:41 |
+
+#### Extended Network Analysis (netscan)
+
+```bash
+python vol.py -q -f ../memdump/PhysicalMemory.raw windows.netscan
+```
+
+**Additional Suspicious Connections:**
+
+| Proto | LocalAddr | LocalPort | ForeignAddr | ForeignPort | State | PID | Process |
+|-------|----------|----------|------------|-------------|-------|-----|--------|
+| TCPv4 | 192.168.152.134 | 53116 | 44.214.212.249 | 80 | CLOSED | 6744 | powershell.exe |
+| TCPv4 | 192.168.152.134 | 53115 | 44.214.212.249 | 80 | CLOSED | 5468 | rundll32.exe |
+
+> 🔴 The suspicious process (PID 3648) is communicating with **44.214.212.249** over port 80.
+
+---
+
+## 2. Disk Image & Rapid Triage Analysis
+
+### 2.1 Searching for Keywords with Autopsy
+
+Open Autopsy and access the case from `C:\Users\johndoe\Desktop\MalwareAttack`.
+
+Search for the `payload.dll` keyword, prioritizing results by creation time.
+
+![Autopsy Search Results](https://github.com/user-attachments/assets/0bbd8475-2222-4d5b-813f-2a9aaeedad9d)
+
+*Forensic software displaying search results for 'payload.dll' with file details and locations.*
+
+> 📌 Among the 29 findings, **Finance08062023.iso** in the Downloads directory should be of interest.
+
+### 2.2 Extracting Files
+
+Extract the suspicious file for subsequent scrutiny by right-clicking and selecting **Extract File(s)**.
+
+![Context Menu Options](https://github.com/user-attachments/assets/b63bb2c0-c618-43b4-a6d0-99b7b16f93ed)
+
+*Forensic software displaying context menu options for 'payload.dll' file.*
+
+### 2.3 Chrome Cache Analysis
+
+Given the file's presence in the Downloads folder and a corresponding Chrome cache file (`f_000003`) pointing to similar strings, it's plausible that the ISO file was fetched via a browser.
+
+![Chrome Cache](https://github.com/user-attachments/assets/80bb985e-c7a4-4985-a18a-e8a10209f541)
+
+*Forensic software displaying metadata for file f_000003, including name, type, and timestamps.*
+
+---
+
+### 2.4 Identifying Web Download Information
+
+Access the **Downloads** directory to locate the file's **Zone.Identifier** information from the Alternate Data Stream (ADS):
+
+![Zone.Identifier Data](https://github.com/user-attachments/assets/c430db80-d0a4-4582-a17e-d6cb22ea5794)
+
+*File listing showing names, modified times, sizes, and locations for various files in a directory.*
+
+This identifier reveals the file's internet origin from the **HostUrl**:
+```
+http://letsgohunt[.]site/download/Finance08062023.iso
+```
+
+![Zone Transfer](https://github.com/user-attachments/assets/1eaa381c-42c2-4d60-987b-240d21d2ace1)
+
+*Text metadata showing ZoneTransfer details and host URL for Finance08062023.iso.*
+
+---
+
+### 2.5 Web Downloads Artifacts
+
+Autopsy's Web Downloads artifacts confirm the source:
+```
+Finance08062023.iso from letsgohunt[.]site
+```
+
+![Web Downloads](https://github.com/user-attachments/assets/1f753473-2108-4bac-badb-2a15ce7d2cb8)
+
+*Forensic software displaying web downloads with file names, URLs, and access dates.*
+
+---
+
+### 2.6 Mounted ISO Analysis
+
+Upon mounting the extracted ISO file, it contains:
+- `payload.dll`
+- Shortcut file that leverages `rundll32.exe` to activate `payload.dll`
+
+![ISO Contents](https://github.com/user-attachments/assets/f8dacb46-07a0-41e7-9c62-14342f0aa7c5)
+
+*File explorer showing 'documents' shortcut properties with target location in System32.*
+
+---
+
+### 2.7 Extracting Cobalt Strike Beacon Configuration
+
+Use **CobaltStrikeParser** to extract the beacon configuration:
+
+```bash
+python parse_beacon_config.py E:\payload.dll
+```
+
+**Beacon Configuration:**
+
+| Setting | Value |
+|---------|-------|
+| **BeaconType** | HTTP |
+| **Port** | 80 |
+| **SleepTime** | 60000 |
+| **MaxGetSize** | 1048576 |
+| **Jitter** | 0 |
+| **PublicKey_MD5** | 1a5779a38fe8b146455e5bf476e39812 |
+| **C2Server** | letsgohunt.site,/load |
+| **UserAgent** | Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0; MASP) |
+| **HttpPostUri** | /submit.php |
+| **HttpGet_Verb** | GET |
+| **HttpPost_Verb** | POST |
+| **Spawnto_x86** | %windir%\syswow64\rundll32.exe |
+| **Spawnto_x64** | %windir%\sysnative\rundll32.exe |
+| **CryptoScheme** | 0 |
+| **bStageCleanup** | False |
+| **bProcInject_StartRWX** | True |
+
+---
+
+### 2.8 Identifying Persistence with Autoruns
+
+Analyze the autoruns data to identify persistence mechanisms:
+
+**Registry Path:** `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+**Image Path:** `C:\ProgramData\svchost.exe`
+**Timestamp:** Thu Aug 10 11:25:51 2023
+
+![Autoruns](https://github.com/user-attachments/assets/7e34249b-6ece-49f2-8cb7-9f126b337e50)
+
+*Autoruns interface displaying startup entries with descriptions, publishers, and image paths.*
+
+> 📌 A suspicious executable `photo443.exe` was also identified in the Startup folder.
+
+---
+
+### 2.9 File Hash Analysis
+
+Calculate SHA256 hash:
+
+```powershell
+Get-FileHash -Algorithm SHA256 "C:\Users\johndoe\Desktop\...\photo443.exe"
+```
+
+**Hash:**
+```
+E986DAA66F2E8E4C47E8EAA874FCD4DCAB8045F1F727DAF7AC15843101385194
+```
+
+Submit this hash to VirusTotal for analysis:
+
+![VirusTotal Full Results](https://github.com/user-attachments/assets/be614eed-2861-4edd-a1b3-1b8537764470)
+
+*VirusTotal detection summary showing malware family classification.*
+
+![VirusTotal Summary](https://github.com/user-attachments/assets/843dcba7-2dad-4c57-8671-deab7bd5e7e5)
+
+*VirusTotal summary showing 51/71 detection ratio.*
+
+![VirusTotal Details](https://github.com/user-attachments/assets/ef1dc6a7-6baa-486e-a514-b1c780d8866f)
+
+*Detailed analysis of photo443.exe showing detection names and threat labels.*
+
+---
+
+### 2.10 Scheduled Tasks Analysis
+
+Navigate to the **Scheduled Tasks** tab to uncover additional persistence mechanisms:
+
+![Scheduled Tasks](https://github.com/user-attachments/assets/5ba3ddfa-178d-40c4-8847-4aee8827c39a)
+
+*Autoruns interface displaying scheduled tasks with descriptions, publishers, and image paths.*
+
+---
+
+### 2.11 Analyzing MFT Data with Autopsy
+
+The autoruns revealed the path `C:\ProgramData\svchost.exe`. Let's examine this file in Autopsy:
+
+![svchost.exe](https://github.com/user-attachments/assets/edd52b31-cbac-4e1f-b11d-ed008b95a566)
+
+*File listing with svchost.exe, showing modified, change, access, and created times.*
+
+![MFT Metadata](https://github.com/user-attachments/assets/864c491e-9b1d-40ac-bc1d-4ecb284c641a)
+
+*Metadata for svchost.exe showing MFT entry, file modified, accessed, and created times.*
+
+> 📌 **Timestomping detected!** There's a discrepancy between the `$FILE_NAME` MFT Modified value and the `$STANDARD_INFORMATION` File Modified value.
+
+The `$STANDARD_INFORMATION` File Modified timestamp is what users typically see in file properties. However, `$FILE_NAME` MFT Modified holds the authentic timestamp.
+
+---
+
+### 2.12 Analyzing SRUM Data
+
+The malicious executable had an open handle to the Desktop folder. Let's examine `users.db`:
+
+![Desktop Files](https://github.com/user-attachments/assets/6bcd5173-a630-4ca4-bc9b-39f19a91626a)
+
+*File listing with names, modified times, access times, and sizes for files on the Desktop.*
+
+#### Notable SRUM Entries:
+
+![File Directory Tree](https://github.com/user-attachments/assets/82d619ed-db1e-4451-b25b-d45bbf335046)
+
+*File directory tree displaying folders like Program Files, Users, and Desktop.*
+
+Access **Data Artifacts** → **Run Programs** to analyze SRUDB.dat:
+
+![Data Artifacts](https://github.com/user-attachments/assets/398b04b4-3d30-4363-84fa-075d8bb2f1ff)
+
+*Data artifacts list with items like Chromium Extensions, Installed Programs, and Run Programs.*
+
+![SRUM Data](https://github.com/user-attachments/assets/45f987c0-fe94-4106-9b43-1ec2d3856544)
+
+*File listing with program names, usernames, and data usage details.*
+
+> 🔴 **430,526,981 bytes may have been exfiltrated!**
+
+---
+
+### 2.13 Analyzing Windows Event Logs with Chainsaw
+
+Use Chainsaw to analyze Windows Event Logs:
+
+```bash
+chainsaw_x86_64-pc-windows-msvc.exe hunt "..\kapefiles\auto\C%3A\Windows\System32\winevt\Logs" -s sigma/ --mapping mappings/sigma-event-logs-all.yml -r rules/ --csv --output output_csv
+```
+
+**Chainsaw Output:**
+
+```
+ ██████╗██╗  ██╗ █████╗ ██╗███╗   ██╗███████╗ █████╗ ██╗    ██╗
+██╔════╝██║  ██║██╔══██╗██║████╗  ██║██╔════╝██╔══██╗██║    ██║
+██║     ███████║███████╗██║██╔██╗ ██║███████╗███████║██║ █╗ ██║
+██║     ██╔══██║██╔══██╗██║██║╚██╗██║╚════██║██╔══██║██║███╗██║
+╚██████╗██║  ██║██║  ██║██║██║ ╚████║███████║██║  ██║╚███╔███╔╝
+ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝
+    By Countercept (@FranticTyping, @AlexKornitzer)
+
+[+] Loading detection rules from: rules/, sigma/
+[!] Loaded 2872 detection rules (329 not loaded)
+[+] Loading forensic artefacts from: ..\kapefiles\auto\C%3A\Windows\System32\winevt\Logs
+[+] Loaded 142 forensic artefacts (66.6 MB)
+[+] Hunting: [========================================] 142/142
+[+] Created account_tampering.csv
+[+] Created antivirus.csv
+[+] Created sigma.csv
+
+[+] 2212 Detections found on 1809 documents
+```
+
+**Detection Results:**
+- 2212 Detections found on 1809 documents
+
+#### Key Sigma Rules Triggered:
+
+| Detection | Description |
+|-----------|-------------|
+| **Cobalt Strike Load by rundll32** | Suspicious parent process detected |
+| **Cobalt Strike Named Pipe** | Covert communication via named pipes |
+| **UAC Bypass/Privilege Escalation** | fodhelper.exe abuse detected |
+| **Mimikatz Detection** | LSASS access detected |
+| **PowerShell Base64 Execution** | Encoded command execution |
+| **Suspicious LSASS Access** | Credential dumping attempt |
+| **Discovery_SMB_Shadow_Copy** | Volume shadow copy enumeration |
+
+![Cobalt Strike Load](https://github.com/user-attachments/assets/67a5e3d2-14f2-4a81-8686-954ac247d973)
+
+*Screenshot of a system log showing CobaltStrike load by Rundll32 with suspicious parent process.*
+
+![Named Pipe](https://github.com/user-attachments/assets/f98b1121-81a1-4d4b-bfb3-eed0e971b70d)
+
+*System log showing CobaltStrike named pipe event with rundll32.exe.*
+
+![Sigma Rule Hit 1](https://github.com/user-attachments/assets/8e147abe-a80a-4d8a-b00d-1a084815ecde)
+
+*Sigma detection rule matching suspicious PowerShell activity.*
+
+![Sigma Rule Hit 2](https://github.com/user-attachments/assets/cf9cb046-4c40-460f-9c50-121388388611)
+
+*Sigma detection rule matching service creation.*
+
+![PowerShell Execution](https://github.com/user-attachments/assets/02143ab0-e966-4d1d-984b-033b190975f5)
+
+*PowerShell encoded command execution detected.*
+
+![LSASS Access](https://github.com/user-attachments/assets/5dafaeb9-b577-4809-854d-536012af37e2)
+
+*Suspicious LSASS access detected (credential dumping).*
+
+#### Account Tampering
+
+![Account Tampering](https://github.com/user-attachments/assets/69288840-0c52-4dad-8b02-af372a16c294)
+
+*Spreadsheet showing account tampering logs with timestamps, event types, user details, and security paths.*
+
+![User Creation Event](https://github.com/user-attachments/assets/58c38b76-2aaf-4177-be9d-d9bd6188eaa8)
+
+*Event log showing new user creation.*
+
+![Privilege Escalation](https://github.com/user-attachments/assets/b70c9d20-6e16-4d65-b40e-cffcd7b4bdef)
+
+*Event log showing privilege escalation to Administrators group.*
+
+![Service Creation](https://github.com/user-attachments/assets/a871ee25-884b-4dfe-9a74-b43bd4744359)
+
+*Event log showing suspicious service creation.*
+
+![Process Injection](https://github.com/user-attachments/assets/7b2c15e8-e11a-4116-a650-be3e198dac8e)
+
+*Event log showing process injection detected.*
+
+![Suspicious File Creation](https://github.com/user-attachments/assets/d1c4e069-4834-4242-8ef0-02e13f7a92c5)
+
+*Event log showing suspicious file creation.*
+
+---
+
+### 2.14 Analyzing Prefetch Files with PECmd
+
+Analyze prefetch files to build execution history:
+
+```bash
+PECmd.exe -d "C:\Users\johndoe\Desktop\kapefiles\auto\C%3A\Windows\Prefetch" -q --csv C:\Users\johndoe\Desktop --csvf suspect_prefetch.csv
+```
+
+**Result:** 192 Prefetch files processed
+
+![Prefetch](https://github.com/user-attachments/assets/659f2471-9b8a-4f0d-a32e-3b6030b521a5)
+
+*Spreadsheet listing prefetch files with columns for source filename, run count, last run, and previous run times.*
+
+#### Notable Prefetch Files:
+| Filename | Run Count | Last Run | Previous Run |
+|---------|----------|---------|------------|
+| RUNDLL32.EXE-3A2B6F9E | 1 | 2023-08-10 09:15:14 | - |
+| PHOTO443.EXE-7A8F2E1D | 1 | 2023-08-10 09:28:13 | - |
+| ADVANCED-IP-SCANNE-8C7A3B2F | 1 | 2023-08-10 09:20:26 | - |
+| 8EA5559.EXE-1D9E8F7A | 1 | 2023-08-10 09:23:14 | - |
+
+---
+
+### 2.15 Analyzing USN Journal
+
+![USN Journal Full](https://github.com/user-attachments/assets/dccdeb58-42f3-4bbd-8830-00bcfa9235b6)
+
+*Full USN journal log with all file operations during incident.*
+
+### 2.15 Analyzing USN Journal (Continued)
+
+Analyze the USN journal to identify files created or deleted during the incident:
+
+```bash
+python usn.py -f C:\Users\johndoe\Desktop\kapefiles\ntfs\$Extend\$UsnJrnl:$J -o C:\Users\johndoe\Desktop\usn_output.csv -c
+```
+
+**Suspicious Activities Timeline (2023-08-10 09:00:00 - 10:00:00):**
+
+| Timestamp | Filename | Reason |
+|-----------|---------|--------|
+| 09:14:40 | Finance08062023.iso | FILE_CREATE |
+| 09:16:32 | temp.bat | FILE_CREATE |
+| 09:20:26 | advanced_ip_scanner.exe | FILE_CREATE |
+| 09:22:32 | svchost.exe | FILE_CREATE |
+| 09:23:14 | 8ea5559.exe | FILE_CREATE |
+| 09:25:48 | svchost.exe | FILE_CREATE |
+| 09:28:13 | photo443.exe | FILE_CREATE |
+| 09:24:23 | flag.txt | FILE_DELETE |
+
+**Full Timeline (Notable Events):**
+
+```
+2023-08-10 09:10:22.977907 LogFile_August_10_2023__11_10_22.txt     ARCHIVE FILE_CREATE
+2023-08-10 09:10:23.071596 SkypeApp0.txt                    ARCHIVE DATA_EXTEND FILE_CREATE
+2023-08-10 09:10:32.210068 connecttest[1].txt              ARCHIVE NOT_CONTENT_INDEXED FILE_CREATE
+2023-08-10 09:10:33.650255 GoogleUpdateSetup.exe          ARCHIVE FILE_DELETE CLOSE
+2023-08-10 09:10:39.363855 install-velociraptor.ps1     ARCHIVE DATA_OVERWRITE
+2023-08-10 09:11:12.698204 velociraptor.msi              ARCHIVE FILE_CREATE
+2023-08-10 09:11:13.385654 eded2.msi                 ARCHIVE FILE_CREATE CLOSE
+2023-08-10 09:11:13.823160 Velociraptor.exe            ARCHIVE FILE_CREATE
+2023-08-10 09:14:40.958673 Finance08062023.iso          ARCHIVE RENAME_NEW_NAME
+2023-08-10 09:16:32.942745 temp.bat                  ARCHIVE FILE_CREATE
+2023-08-10 09:20:26.465120 advanced_ip_scanner.exe     ARCHIVE FILE_CREATE
+2023-08-10 09:22:32.547132 svchost.exe               ARCHIVE FILE_CREATE
+2023-08-10 09:23:14.687719 8ea5559.exe             ARCHIVE FILE_CREATE
+2023-08-10 09:25:48.088921 svchost.exe               ARCHIVE NOT_CONTENT_INDEXED FILE_CREATE
+2023-08-10 09:28:13.944143 photo443.exe            ARCHIVE FILE_CREATE
+2023-08-10 09:32:50.968515 VERSION.txt              ARCHIVE FILE_CREATE
+```
+
+### Filtering USN Journal by Time
+
+To view the CSV using PowerShell in alignment with our timeline, we can execute:
+
+```powershell
+$time1 = [DateTime]::ParseExact("2023-08-10 09:00:00.000000", "yyyy-MM-dd HH:mm:ss.ffffff", $null)
+$time2 = [DateTime]::ParseExact("2023-08-10 10:00:00.000000", "yyyy-MM-dd HH:mm:ss.ffffff", $null)
+Import-Csv -Path C:\Users\johndoe\Desktop\usn_output.csv | Where-Object { $_.'FileName' -match '\.exe$|\.txt$|\.msi$|\.bat$|\.ps1$|\.iso$|\.lnk$' } | Where-Object { $_.timestamp -as [DateTime] -ge $time1 -and $_.timestamp -as [DateTime] -lt $time2 }
+```
+
+**Filtered Results:**
+
+| timestamp | filename | fileattr | reason |
+|-----------|----------|---------|---------|
+| 09:10:22.977907 | LogFile_August_10_2023__11_10_22.txt | ARCHIVE | FILE_CREATE |
+| 09:10:32.210068 | connecttest[1].txt | ARCHIVE NOT_CONTENT_INDEXED | FILE_CREATE |
+| 09:10:33.650255 | GoogleUpdateSetup.exe | ARCHIVE | FILE_DELETE CLOSE |
+| 09:10:39.363855 | install-velociraptor.ps1 | ARCHIVE | DATA_OVERWRITE |
+| 09:14:40.958673 | Finance08062023.iso | ARCHIVE | RENAME_NEW_NAME |
+
+![USN Journal](https://github.com/user-attachments/assets/dccdeb58-42f3-4bbd-8830-00bcfa9235b6)
+
+*Log of file operations with timestamps, filenames, and actions like data extend, file create, and stream change.*
+
+> 🔴 **flag.txt was deleted!** This is likely the attacker's attempt to destroy evidence.
+
+### Notable Activity During Incident
+
+![Notable Activity](https://github.com/user-attachments/assets/4d9946ba-04e5-4f99-8a0e-96cc8aa85540)
+
+*Raw event log showing file operations during the incident timeframe.*
+
+---
+
+### 2.16 Analyzing MFT for File Recovery
+
+Use MFTECmd to parse the MFT file:
+
+```bash
+MFTECmd.exe -f C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\MFTECmd.exe -f C:\Users\johndoe\Desktop\files\mft_data --csv C:\Users\johndoe\Desktop\ --csvf mft_csv.csv
+```
+
+**MFTECmd Output:**
+
+```
+MFTECmd version 1.2.2.1
+
+Author: Eric Zimmerman (saericzimmerman@gmail.com)
+https://github.com/EricZim
+
+Command line: -f C:\Users\johndoe\Desktop\files\mft_data --csv C:\Users\johndoe\Desktop\ --csvf mft_csv.csv
+
+Warning: Administrator privileges not found!
+
+File type: Mft
+
+Processed C:\Users\johndoe\Desktop\files\mft_data in 4.9248 seconds
+
+C:\Users\johndoe\Desktop\files\mft_data: FILE records found: 113,899 (Free records: 4,009) File size: 115.2MB
+CSV output will be saved to C:\Users\johndoe\Desktop\mft_csv.csv
+```
+
+CSV output will be saved to C:\Users\johndoe\Desktop\mft_csv.csv
+
+**Search for flag.txt:**
+```powershell
+Select-String -Path C:\Users\johndoe\Desktop\mft_csv.csv -Pattern "flag.txt"
+```
+
+**Search Result:**
+```
+Desktop\mft_csv.csv:143975:112346,4,False,104442,6,.\Users\johndoe\Desktop\reports,flag.txt,.txt,63,1,,False,False,False,True,False,False,Archive,DosWindows,2023-08-08 08:21:40.3050567
+```
+
+**flag.txt Location Found:**
+```
+\Users\johndoe\Desktop\reports\flag.txt
+```
+
+**MFT Entry Details:**
+```
+112346,4,False,104442,6,.\Users\johndoe\Desktop\reports,flag.txt,.txt,63,1,,False,False,False,True,False,False,Archive,DosWindows,2023-08-08 08:21:40.3050567,2023-08-08 08:23:43.3664676,2023-08-08 08:22:58.2111378,2023-08-08 08:23:43.3664676,2023-08-08 08:23:44.0401723,2023-08-08 08:23:43.3664676,2023-08-08 08:23:51.1904111,2023-08-08 08:23:43.3664676,31120880,232569553,2300,,,
+```
+
+The MFT entry shows the file was marked as **deleted**, but portions of its content were preserved in **pagefile.sys**.
+
+#### MFT Explorer Analysis
+
+![MFT Explorer](https://github.com/user-attachments/assets/e095955f-9b5f-4f3a-a0e2-0d97ebe66e74)
+
+*MFT Explorer showing file directory, file details, and hex data for selected files.*
+
+> 📌 When files are deleted from an NTFS file system volume, their MFT entries are marked as free and may be reused, but the data may remain on the disk until overwritten. That's why recovery isn't always possible.
+
+#### Recovering from pagefile.sys
+
+Since the MFT entry was overwritten, search pagefile.sys for the file's content using Autopsy:
+
+![pagefile.sys](https://github.com/user-attachments/assets/1cb26a20-5c64-4d57-8560-019bf562fb6a)
+
+*File details for pagefile.sys showing keyword preview, location, modified, change, access, and created times, size, and flags.*
+
+**Keyword Search in pagefile.sys:**
+- Search for "flag" or specific content known to be in the file
+
+![Flag Content](https://github.com/user-attachments/assets/f09408fb-1abd-4b88-bf9d-b8c127e06369)
+
+*Text viewer showing highlighted string '2023_Hello_you_found_our_flag' with additional encoded text.*
+
+**Flag Recovered:**
+```
+2023_Hello_you_found_our_flag
+```
+
+---
+
+## 3. Timeline Construction
+
+### 3.1 Building the Execution Timeline
+
+Using Autopsy (powered by Plaso), create a timeline:
+
+**Configuration:**
+- **Limit event types to:** Web Activity: All, Other: All
+- **Set Display Times in:** GMT / UTC
+- **Start:** Aug 10, 2023 9:13:00 AM
+- **End:** Aug 10, 2023 9:30:00 AM
+
+![Timeline Editor](https://github.com/user-attachments/assets/19bd91d2-cc5c-4607-bb01-dc7d456d31e0)
+
+*Timeline editor showing filters and event details during the incident window.*
+
+![Timeline View](https://github.com/user-attachments/assets/c30c673b-2d00-4c38-b16f-9623e04ae9e7)
+
+*Visual timeline showing process execution and file operations.*
+
+![Event Log](https://github.com/user-attachments/assets/20a20812-ac5b-4f79-9c9b-9796ca17c555)
+
+*Detailed event log showing program executions.*
+
+### 3.4 The Actual Attack Timeline
+
+Here are the real actions taken by the attacker (from ground truth):
+
+![Attack Timeline](https://github.com/user-attachments/assets/3189c0c6-f74c-4e4c-81f8-53f2c0e0d1f3)
+
+*Activity log showing user actions with timestamps, user IDs, process IDs, and activities like file uploads, downloads, and command executions.*
+
+![System Actions](https://github.com/user-attachments/assets/ca02ef84-8bb6-4aea-9533-444548274a30)
+
+*Activity log showing SYSTEM and johndoe actions with timestamps, process IDs, and activities like file uploads, command executions, and user additions.*
+
+---
+
+## 4. Summary
+
+### Key Findings
+
+| Finding | Details |
+|---------|---------|
+| **Initial Infection Vector** | Malicious ISO file (Finance08062023.iso) downloaded from letsgohunt[.]site |
+| **Malware Family** | Cobalt Strike beacon |
+| **C2 Server** | letsgohunt.site:80 |
+| **C2 Protocol** | HTTP with base64 metadata |
+| **Sleep Time** | 60 seconds |
+| **Persistence #1** | Registry Run key (HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run) → C:\ProgramData\svchost.exe |
+| **Persistence #2** | Startup folder → photo443.exe |
+| **Persistence #3** | Scheduled Tasks |
+| **Privilege Escalation** | New user "Admin" created and added to Administrators group |
+| **Data Exfiltration** | ~430MB from SRUDB.dat |
+| **Flag Recovered** | 2023_Hello_you_found_our_flag |
+| **Attack Timeline** | 09:14 - ISO downloaded, 09:15 - payload.dll executed, 09:21 - PowerShell executed, 09:22-09:28 - Additional malware deployed |
+
+### Tools Used
+
+| Tool | Purpose |
+|------|--------|
+| **Volatility 3** | Memory forensics and analysis |
+| **Autopsy** | Disk image and artifact analysis |
+| **Chainsaw** | Windows Event Log analysis with Sigma rules |
+| **PECmd** | Prefetch file analysis |
+| **MFTECmd** | MFT analysis |
+| **USN Journal Parser** | File system journal analysis |
+| **CobaltStrikeParser** | Beacon configuration extraction |
+| **YARA** | Process memory scanning |
+| **Virustotal** | File hash reputation checking |
+
+### Investigation Flow Diagram
+
+```mermaid
+flowchart TD
+    A[Start: Acquire Memory Dump] --> B[Volatility Analysis]
+    B --> C[Identify Suspicious Process]
+    C --> D[Extract Process Memory]
+    D --> E[YARA Scanning]
+    E --> F[Cobalt Strike Detected]
+    F --> G[Disk Forensics with Autopsy]
+    G --> H[Find Source File]
+    H --> I[Web Download Info]
+    I --> J[Extract Beacon Config]
+    J --> K[Identify Persistence]
+    K --> L[Event Log Analysis with Chainsaw]
+    L --> M[Build Timeline]
+    M --> N[Final Report]
+
+    style A fill:#cce5ff,color:#000
+    style F fill:#ffcccc,color:#000
+    style N fill:#e6ccff,color:#000
+```
+
+---
+
+## Volatility Cheatsheet
+
+| Command | Description |
+|---------|------------|
+| `vol.py -f <memdump> windows.info` | Identify memory profile |
+| `vol.py -f <memdump> windows.pslist` | List all processes |
+| `vol.py -f <memdump> windows.pstree` | Process tree |
+| `vol.py -f <memdump> windows.cmdline` | Process command lines |
+| `vol.py -f <memdump> windows.malfind` | Find injected code |
+| `vol.py -f <memdump> windows.dlllist --pid <PID>` | List DLLs for process |
+| `vol.py -f <memdump> windows.handles --pid <PID>` | List handles for process |
+| `vol.py -f <memdump> windows.netstat` | Network connections |
+| `vol.py -f <memdump> windows.netscan` | Extended network scan |
+| `vol.py -f <memdump> windows.memmap --pid <PID> --dump` | Dump process memory |
+
+---
+
+## KQL/SPL Query Reference
+
+### Detect Cobalt Strike Named Pipe
+```kql
+EventID=18 ImageLoaded=*rundll32.exe TargetImage=*\msiexec.exe OR TargetImage=*\dllhost.exe
+| where Details contains "pipe"
+```
+
+### Detect PowerShell Base64 Execution
+```kql
+EventID=4104 ScriptBlockText=*-enc* OR ScriptBlockText=*-encodedcommand*
+| extend decoded = base64_decode_utf8(ScriptBlockText)
+```
+
+### Detect Suspicious Service Creation
+```kql
+EventID=7045 ServiceName=*svchost.exe ImagePath=*Photo*
+```
+
+---
+
+*Module 13/15 - Practical Digital Forensics Scenario*
 *For learning and SOC career preparation*
