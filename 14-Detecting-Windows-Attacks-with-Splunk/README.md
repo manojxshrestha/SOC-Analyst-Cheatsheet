@@ -1732,5 +1732,61 @@ index="cobaltstrike_beacon" sourcetype="bro:http:json"
 
 ---
 
+### Detecting Nmap Port Scanning {#detecting-nmap-port-scanning}
+
+#### Port Scanning Overview
+
+**Nmap** is used to probe networked systems for open ports - the "gates" through which data passes.
+
+> 📌 Open ports are like unlocked doors that attackers can use to gain access.
+
+**How Nmap Works:**
+- Initiates TCP handshake with each port
+- Successful connection = port is open
+- Zero payload - only connection attempts
+- May grab service banners (version info)
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/cobaltstrike_beacon` |
+| Splunk Index | `cobaltstrike_beacon` |
+| Sourcetype | `bro:conn:json` |
+
+---
+
+#### Detecting Nmap Scanning With Splunk & Zeek
+
+```spl
+index="cobaltstrike_beacon" sourcetype="bro:conn:json" orig_bytes=0 dest_ip IN (192.168.0.0/16, 172.16.0.0/12, 10.0.0.0/8) 
+| bin span=5m _time 
+| stats dc(dest_port) as num_dest_port by _time, src_ip, dest_ip 
+| where num_dest_port >= 3
+```
+
+![Nmap Detection](https://github.com/user-attachments/assets/9ec5df3b-4339-427f-a5e2-990bd211eb33)
+
+*Detecting Nmap port scanning*
+
+**Search Breakdown:**
+
+1. **Filter**: Index, sourcetype, orig_bytes=0 (no data sent), private IP ranges
+2. **Bin**: Group into 5-minute intervals
+3. **Stats**: Count distinct destination ports (dc) per time/src/dest
+4. **Filter**: Show only >=3 ports accessed
+
+> 📌 **Key Detection**: >=3 distinct ports accessed in 5 minutes with zero bytes sent indicates port scanning!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
