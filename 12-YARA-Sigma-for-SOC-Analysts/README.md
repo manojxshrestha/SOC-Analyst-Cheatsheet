@@ -40,9 +40,10 @@ This module covers:
 1. [Introduction to YARA & Sigma](#1-introduction-to-yara--sigma) - Overview, Why SOC Analysts Need YARA & Sigma
 2. [Leveraging YARA](#2-leveraging-yara) - What is YARA, Rule Structure, Components, Reserved Keywords
 3. [Developing YARA Rules](#3-developing-yara-rules) - Manual Development, yarGen, Advanced Examples
-4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition) - Disk, Process, ETW Hunting
-5. [Leveraging Sigma](#5-leveraging-sigma) - *Coming soon*
-6. [Skills Assessment](#6-skills-assessment) - *Coming soon*
+4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition) - Disk, Process, ETW Hunting (Windows)
+5. [Hunting Evil with YARA](#5-hunting-evil-with-yara-linux-edition) - Memory Forensics with YARA & Volatility
+6. [Leveraging Sigma](#6-leveraging-sigma) - *Coming soon*
+7. [Skills Assessment](#7-skills-assessment) - *Coming soon*
 
 ### Quick Reference
 - [YARA Rule Structure](#yara-rule-structure)
@@ -1398,13 +1399,189 @@ Reply from 104.17.244.81: bytes=32 time=14ms TTL=56
 
 ---
 
-## 5. Leveraging Sigma
+## 5. Hunting Evil with YARA (Linux Edition) {#5-hunting-evil-with-yara-linux-edition}
+
+> 📌 This section covers using YARA for memory forensics on Linux systems when direct system access is not available.
+
+### Memory Image Scanning with YARA
+
+In real-world scenarios, Security Analysts often don't have direct access to potentially compromised systems. However, we can receive memory captures (memory dumps) from suspicious systems - like receiving a snapshot of everything happening at a particular moment.
+
+YARA extends the capabilities of memory forensics, allowing us to traverse memory content and hunt for telltale signs or compromise indicators.
+
+#### YARA Memory Scanning Process:
+
+1. **Create YARA Rules**: Develop bespoke rules or use existing ones targeting memory-based malware traits
+2. **Compile YARA Rules**: Use yarac tool to compile rules into binary format (.yrc extension) - optional but best practice
+3. **Obtain Memory Image**: Capture using tools like DumpIt, MemDump, Belkasoft RAM Capturer, Magnet RAM Capture, FTK Imager, LiME
+4. **Scan with YARA**: Use yara tool to scan memory images for matches
+
+> 📌 **Why Compile Rules?**
+> - Optimizes performance with large number of rules
+> - Provides some level of protection (binary format harder to reverse)
+
+### Example: WannaCry Memory Scan
+
+We have a memory snapshot `compromised_system.raw` from a system infected with WannaCry ransomware. Let's scan it with the `wannacry_artifacts_memory.yar` YARA rule.
+
+**Command:**
+```bash
+yara /home/htb-student/Rules/yara/wannacry_artifacts_memory.yar /home/htb-student/MemoryDumps/compromised_system.raw --print-strings
+```
+
+**Output:**
+```
+Ransomware_WannaCry /home/htb-student/MemoryDumps/compromised_system.raw
+0x4e140:$wannacry_payload_str1: tasksche.exe
+0x1cb9b24:$wannacry_payload_str1: tasksche.exe
+0xdb564d8:$wannacry_payload_str1: tasksche.exe
+0x13bac36c:$wannacry_payload_str1: tasksche.exe
+0x16a2ae44:$wannacry_payload_str1: tasksche.exe
+0x16ce55d8:$wannacry_payload_str1: tasksche.exe
+0x17bf1fe6:$wannacry_payload_str1: tasksche.exe
+0x17cb8002:$wannacry_payload_str1: tasksche.exe
+0x17cb80d0:$wannacry_payload_str1: tasksche.exe
+0x17cb80f8:$wannacry_payload_str1: tasksche.exe
+0x18a68f50:$wannacry_payload_str1: tasksche.exe
+0x18a9b4b8:$wannacry_payload_str1: tasksche.exe
+0x18dc15a8:$wannacry_payload_str1: tasksche.exe
+0x18df37d0:$wannacry_payload_str1: tasksche.exe
+0x19a4b522:$wannacry_payload_str1: tasksche.exe
+0x1aac0600:$wannacry_payload_str1: tasksche.exe
+0x1c07ed9a:$wannacry_payload_str1: tasksche.exe
+0x1c59cd32:$wannacry_payload_str1: tasksche.exe
+0x1d1593f0:$wannacry_payload_str1: tasksche.exe
+0x1d1c6fe2:$wannacry_payload_str1: tasksche.exe
+0x1d92632a:$wannacry_payload_str1: tasksche.exe
+0x1dd65c34:$wannacry_payload_str1: tasksche.exe
+0x1e607a1e:$wannacry_payload_str1: tasksche.exe
+0x1e607dca:$wannacry_payload_str1: tasksche.exe
+0x13bac3d7:$wannacry_payload_str2: www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+0x197ba5e0:$wannacry_payload_str2: www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+0x1a07cedf:$wannacry_payload_str2: www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+0x1a2cb300:$wannacry_payload_str2: www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+0x1b644cd8:$wannacry_payload_str2: www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+0x1d15945b:$wannacry_payload_str2: www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+0x1dd65c9f:$wannacry_payload_str2: www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com
+0x450b048:$wannacry_payload_str3: mssecsvc.exe
+0x5a7f3d4:$wannacry_payload_str3: mssecsvc.exe
+0xda1c350:$wannacry_payload_str3: mssecsvc.exe
+0x12481048:$wannacry_payload_str3: mssecsvc.exe
+0x17027910:$wannacry_payload_str3: mssecsvc.exe
+0x17f0dc18:$wannacry_payload_str3: mssecsvc.exe
+0x18c360cc:$wannacry_payload_str3: mssecsvc.exe
+0x1a2a02f0:$wannacry_payload_str3: mssecsvc.exe
+0x13945408:$wannacry_payload_str4: diskpart.exe
+0x19a28480:$wannacry_payload_str4: diskpart.exe
+```
+
+> 📌 **Key Findings:**
+> - **tasksche.exe**: WannaCry executable name (found at multiple memory addresses)
+> - **www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com**: Kill switch domain
+> - **mssecsvc.exe**: WannaCry service executable
+> - **diskpart.exe**: Used for disk encryption
+
+---
+
+### YARA with Volatility Framework
+
+Beyond standalone tools, integrating YARA with memory forensics frameworks like **Volatility** amplifies detection capabilities.
+
+Volatility is a powerful open-source memory forensics tool used to analyze memory images from various operating systems. YARA can be integrated as a plugin called **yarascan** for applying YARA rules to memory analysis.
+
+#### Single Pattern YARA Scanning
+
+Specify a YARA rule pattern directly in the command-line using the -U option. This is useful for specific patterns without creating a separate rules file.
+
+**WannaCry IOC**: `www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com`
+
+**Command:**
+```bash
+vol.py -f /home/htb-student/MemoryDumps/compromised_system.raw yarascan -U "www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com"
+```
+
+**Output:**
+```
+Volatility Foundation Volatility Framework 2.6.1
+Rule: r1
+Owner: Process svchost.exe Pid 1576
+0x004313d7  77 77 77 2e 69 75 71 65 72 66 73 6f 64 70 39 69   www.iuqerfsodp9i
+0x004313e7  66 6a 61 70 6f 73 64 66 6a 68 67 6f 73 75 72 69   fjaposdfjhgosuri
+0x004313f7  6a 66 61 65 77 72 77 65 72 67 77 65 61 2e 63 6f   jfaewrwergwea.co
+0x00431407  6d 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00   m...............
+Rule: r1
+Owner: Process svchost.exe Pid 1576
+0x0013dcd8  77 77 77 2e 69 75 71 65 72 66 73 6f 64 70 39 69   www.iuqerfsodp9i
+...
+```
+
+> 📌 **Key Finding:** Domain found in process svchost.exe (PID 1576) - confirms infection
+
+#### Multiple YARA Rule Scanning
+
+When we have multiple YARA rules, use the -y option followed by the rule file path.
+
+**YARA Rule File (wannacry_artifacts_memory.yar):**
+```yara
+rule Ransomware_WannaCry {
+
+    meta:
+        author = "Madhukar Raina"
+        version = "1.1"
+        description = "Simple rule to detect strings from WannaCry ransomware"
+        reference = "https://www.virustotal.com/gui/file/ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa/behavior"
+
+    strings:
+        $wannacry_payload_str1 = "tasksche.exe" fullword ascii
+        $wannacry_payload_str2 = "www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com" ascii
+        $wannacry_payload_str3 = "mssecsvc.exe" fullword ascii
+        $wannacry_payload_str4 = "diskpart.exe" fullword ascii
+        $wannacry_payload_str5 = "lhdfrgui.exe" fullword ascii
+
+    condition:
+        3 of them
+}
+```
+
+**Command:**
+```bash
+vol.py -f /home/htb-student/MemoryDumps/compromised_system.raw yarascan -y /home/htb-student/Rules/yara/wannacry_artifacts_memory.yar
+```
+
+**Output (key sections):**
+```
+Rule: Ransomware_WannaCry
+Owner: Process svchost.exe Pid 1576
+0x0043136c  74 61 73 6b 73 63 68 65 2e 65 78 65 00 00 00 00   tasksche.exe....
+0x004313cc  00 00 00 00 68 74 74 70 3a 2f 2f 77 77 77 2e 69   ....http://www.i
+0x004313dc  75 71 65 72 66 73 6f 64 70 39 69 66 6a 61 70 6f   uqerfsodp9ifjapo
+0x004313ec  73 64 66 6a 68 67 6f 73 75 72 69 6a 66 61 65 77   sdfjhgosurijfaew
+0x004313fc  72 77 65 72 67 77 65 61 2e 63 6f 6d 00 00 00 00   rwergwea.com....
+Rule: Ransomware_WannaCry
+Owner: Process svchost.exe Pid 1576
+0x004313d7  77 77 77 2e 69 75 71 65 72 66 73 6f 64 70 39 69   www.iuqerfsodp9i
+...
+Rule: Ransomware_WannaCry
+Owner: Process svchost.exe Pid 1576
+0x0040e048  6d 73 73 65 63 73 76 63 2e 65 78 65 00 00 00 00   mssecsvc.exe....
+...
+```
+
+> 📌 **Summary:**
+> - The yarascan plugin found WannaCry IOCs in process svchost.exe (PID 1576)
+> - Multiple strings matched across memory addresses
+> - **-U option**: Direct pattern search in command line
+> - **-y option**: Specify path to YARA rules file
+
+---
+
+## 6. Leveraging Sigma {#6-leveraging-sigma}
 
 *Coming soon...*
 
 ---
 
-## 6. Skills Assessment
+## 7. Skills Assessment {#7-skills-assessment}
 
 *Coming soon...*
 
