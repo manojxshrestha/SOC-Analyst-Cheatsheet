@@ -43,9 +43,10 @@ This module covers:
 4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition) - Disk, Process, ETW Hunting (Windows)
 5. [Hunting Evil with YARA](#5-hunting-evil-with-yara-linux-edition) - Memory Forensics with YARA & Volatility
 6. [Hunting Evil with YARA](#6-hunting-evil-with-yara-web-edition) - Online YARA Hunting with Unpac.me
-7. [Sigma and Sigma Rules](#7-sigma-and-sigma-rules) - Overview, Structure, Value Modifiers, Development
-8. [Leveraging Sigma](#8-leveraging-sigma) - *Coming soon*
-9. [Skills Assessment](#9-skills-assessment) - *Coming soon*
+7. [Sigma and Sigma Rules](#7-sigma-and-sigma-rules) - Overview, Structure, Value Modifiers
+8. [Developing Sigma Rules](#8-developing-sigma-rules) - Manual Development, sigmac, False Positives
+9. [Leveraging Sigma](#9-leveraging-sigma) - *Coming soon*
+10. [Skills Assessment](#10-skills-assessment) - *Coming soon*
 
 ### Quick Reference
 - [YARA Rule Structure](#yara-rule-structure)
@@ -1857,15 +1858,368 @@ condition: selection1 or selection2 or selection3
 
 ---
 
-## 8. Leveraging Sigma {#8-leveraging-sigma}
+## 8. Developing Sigma Rules {#8-developing-sigma-rules}
+
+> 📌 This section covers manual Sigma rule development with real-world examples.
+
+### Manually Developing a Sigma Rule
+
+In this section, we'll cover manual Sigma rule development.
+
+#### Example 1: LSASS Credential Dumping
+
+Let's use a sample named `shell.exe` (a renamed version of mimikatz) to understand the process of crafting a Sigma rule.
+
+**Running the malware:**
+```bash
+C:\Samples\YARASigma>shell.exe
+```
+
+**Output (mimikatz execution):**
+```
+  .#####.   mimikatz 2.2.0 (x64) #19041 Sep 19 2022 17:44:08
+ .## ^ ##.  "A La Vie, A L'Amour" - (oe.eo)
+ ## / \ ##  /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )
+ ## \ / ##       > https://blog.gentilkiwi.com/mimikatz
+ '## v ##'       Vincent LE TOUX             ( vincent.letoux@gmail.com )
+  '#####'        > https://pingcastle.com / https://mysmartlogon.com ***/
+
+mimikatz # privilege::debug
+Privilege '20' OK
+
+mimikatz # sekurlsa::logonpasswords
+---SNIP---
+Authentication Id : 0 ; 100080 (00000000:000186f0)
+Session           : Interactive from 1
+User Name         : htb-student
+Domain            : DESKTOP-VJF8GH8
+Logon Server      : DESKTOP-VJF8GH8
+Logon Time        : 8/25/2023 2:17:20 PM
+SID               : S-1-5-21-1412399592-1502967738-1150298762-1001
+        msv :
+         [00000003] Primary
+         * Username : htb-student
+         * Domain   : .
+         * NTLM     : 3c0e5d303ec84884ad5c3b7876a06ea6
+         * SHA1     : b2978f9abc2f356e45cb66ec39510b1ccca08a0e
+        wdigest :
+         * Username : htb-student
+         * Domain   : DESKTOP-VJF8GH8
+         * Password : HTB_@cademy_stdnt!
+---SNIP---
+```
+
+> 📌 The process created by shell.exe (mimikatz) tries to access the process memory of lsass.exe. Sysmon captured this activity in Event ID 10.
+
+#### Understanding the Key Fields
+
+Sysmon Event ID 10 triggers when a process accesses another process. The event log contains two important fields:
+- **TargetImage**: The process being accessed
+- **GrantedAccess**: Permission flags
+
+![Sysmon Event ID 10](https://github.com/user-attachments/assets/f2d1171f-2916-4c53-aeee-21bdd33fb76b)
+
+*Sysmon event showing shell.exe accessing lsass.exe with granted access 0x1010.*
+
+#### Why 0x1010 Matters
+
+The hex flag `0x1010` combines:
+- `PROCESS_VM_READ` (0x0010): Read access to virtual memory
+- `PROCESS_QUERY_INFORMATION` (0x0400): Query information from process
+
+> 📌 While 0x0410 is the most common for LSASS memory dumping, 0x1010 is also frequently observed during credential dumping attacks.
+
+#### Sigma Rule (Basic Version)
+
+```yaml
+title: LSASS Access with rare GrantedAccess flag 
+status: experimental
+description: This rule will detect when a process tries to access LSASS memory with suspicious access flag 0x1010
+date: 2023/07/08
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess|endswith: '0x1010'
+    condition: selection
+```
+
+> 📌 This rule is saved as `proc_access_win_lsass_access.yml` in the target system.
+
+---
+
+### Sigma Rule Breakdown
+
+📌 **title**: Concise overview of the rule's objective - detecting LSASS memory access with a particular access flag
+
+📌 **status**: `experimental` - rule is in testing phase, may need fine-tuning
+
+📌 **description**: Explains what the rule detects
+
+📌 **date**: 2023/07/08 - rule creation/update date
+
+📌 **tags**: 
+- `attack.credential_access` - MITRE ATT&CK tactic
+- `attack.t1003.001` - LSASS credential dumping technique
+
+📌 **logsource**:
+- `category: process_access` - targets Sysmon Event ID 10
+- `product: windows` - Windows-specific rule
+
+📌 **detection**:
+- `selection`: TargetImage ends with `\lsass.exe` AND GrantedAccess ends with `0x1010`
+- `condition`: selection must match
+
+---
+
+### Converting Sigma to SIEM Queries (sigmac)
+
+The **sigmac** tool transforms Sigma rules into SIEM queries.
+
+**Location:** `C:\Tools\sigma-0.21\tools`
+
+#### Converting to PowerShell (Get-WinEvent)
+
+```bash
+python sigmac -t powershell 'C:\Rules\sigma\proc_access_win_lsass_access.yml'
+```
+
+**Output:**
+```powershell
+Get-WinEvent | where {($_.ID -eq "10" -and $_.message -match "TargetImage.*.*\\lsass.exe" -and $_.message -match "GrantedAccess.*.*0x1010") } | select TimeCreated,Id,RecordId,ProcessId,MachineName,Message
+```
+
+#### Testing Against Event Log
+
+```powershell
+Get-WinEvent -Path C:\Events\YARASigma\lab_events.evtx | where {($_.ID -eq "10" -and $_.message -match "TargetImage.*.*\\lsass.exe" -and $_.message -match "GrantedAccess.*.*0x1010") } | select TimeCreated,Id,RecordId,ProcessId,MachineName,Message
+```
+
+**Result:**
+```
+TimeCreated : 7/9/2023 7:44:14 AM
+Id          : 10
+RecordId    : 7810
+ProcessId   : 3324
+MachineName : RDSEMVM01
+Message     : Process accessed:
+              RuleName:
+              UtcTime: 2023-07-09 14:44:14.260
+              SourceProcessGUID: {e7bf76b7-c7ba-64aa-0000-0010e8e9a602}
+              SourceProcessId: 1884
+              SourceThreadId: 7872
+              SourceImage: C:\htb\samples\shell.exe
+              TargetProcessGUID: {e7bf76b7-d7ec-6496-0000-001027d60000}
+              TargetProcessId: 668
+              TargetImage: C:\Windows\system32\lsass.exe
+              GrantedAccess: 0x1010
+              ...
+```
+
+> 📌 **Success!** The Sysmon Event ID 10 is successfully identified!
+
+---
+
+### Avoiding False Positives
+
+> 🔴 **Remember:** False positives are the enemy of effective security monitoring!
+
+#### Best Practices:
+1. **Cross-reference SourceImage** against known safe processes that interact with LSASS
+2. **Flag suspicious paths**: `\Temp\`, `\Users\Public\`, `\PerfLogs\`, `\AppData\`, `\htb\`
+3. **Monitor GrantedAccess suffixes**: 10, 30, 50, 70, 90, B0, D0, F0, 18, 38, 58, 78, 98, B8, D8, F8, 1A, 3A, 5A, 7A, 9A, BA, DA, FA, 0x14C2, FF
+
+#### Robust Sigma Rule
+
+```yaml
+title: LSASS Access From Program in Potentially Suspicious Folder
+id: fa34b441-961a-42fa-a100-ecc28c886725
+status: experimental
+description: Detects process access to LSASS memory with suspicious access flags and from a potentially suspicious folder
+references:
+    - https://docs.microsoft.com/en-us/windows/win32/procthread/process-security-and-access-rights
+    - https://web.archive.org/web/20230208123920/https://cyberwardog.blogspot.com/2017/03/chronicles-of-threat-hunter-hunting-for_22.html
+author: Florian Roth (Nextron Systems)
+date: 2021/11/27
+modified: 2023/05/05
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - attack.s0002
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess|endswith:
+            - '10'
+            - '30'
+            - '50'
+            - '70'
+            - '90'
+            - 'B0'
+            - 'D0'
+            - 'F0'
+            - '18'
+            - '38'
+            - '58'
+            - '78'
+            - '98'
+            - 'B8'
+            - 'D8'
+            - 'F8'
+            - '1A'
+            - '3A'
+            - '5A'
+            - '7A'
+            - '9A'
+            - 'BA'
+            - 'DA'
+            - 'FA'
+            - '0x14C2'
+            - 'FF'
+        SourceImage|contains:
+            - '\Temp\'
+            - '\Users\Public\'
+            - '\PerfLogs\'
+            - '\AppData\'
+            - '\htb\'
+    filter_optional_generic_appdata:
+        SourceImage|startswith: 'C:\Users\'
+        SourceImage|contains: '\AppData\Local\'
+        SourceImage|endswith:
+            - '\Microsoft VS Code\Code.exe'
+            - '\software_reporter_tool.exe'
+            - '\DropboxUpdate.exe'
+            - '\MBAMInstallerService.exe'
+            - '\WebexMTA.exe'
+            - '\WebEx\WebexHost.exe'
+            - '\JetBrains\Toolbox\bin\jetbrains-toolbox.exe'
+        GrantedAccess: '0x410'
+    filter_optional_dropbox_1:
+        SourceImage|startswith: 'C:\Windows\Temp\'
+        SourceImage|endswith: '.tmp\DropboxUpdate.exe'
+        GrantedAccess:
+            - '0x410'
+            - '0x1410'
+    filter_optional_nextron:
+        SourceImage|startswith:
+            - 'C:\Windows\Temp\asgard2-agent\'
+            - 'C:\Windows\Temp\asgard2-agent-sc\'
+        SourceImage|endswith:
+            - '\thor64.exe'
+            - '\thor.exe'
+            - '\aurora-agent-64.exe'
+            - '\aurora-agent.exe'
+        GrantedAccess:
+            - '0x1fffff'
+            - '0x1010'
+            - '0x101010'
+    condition: selection and not 1 of filter_optional_*
+fields:
+    - User
+    - SourceImage
+    - GrantedAccess
+falsepositives:
+    - Updaters and installers are typical false positives. Apply custom filters depending on your environment
+level: medium
+```
+
+> 📌 **Key Feature:** The condition `selection and not 1 of filter_optional_*` filters out false positives from known safe processes.
+
+---
+
+### Example 2: Multiple Failed Logins (Event 4776)
+
+According to Microsoft, **Event 4776** generates when credential validation occurs using NTLM authentication.
+
+> 📌 This event shows credential validation attempts (successful and failed) from Source Workstation.
+
+#### Event Details:
+- **Event ID**: 4776
+- **Error Code**: 0xC0000064 (user does not exist)
+- **TargetUserName**: Account being authenticated
+- **Workstation**: Source of authentication attempt
+
+![Event 4776 - Failure](https://github.com/user-attachments/assets/2e46af58-a1e0-4d42-a6d1-790258e323af)
+
+*Event 4776 showing credential validation attempt with error code 0xC0000064 for account NOUSER on workstation FS01.*
+
+![Event 4776 - Details](https://github.com/user-attachments/assets/de666af1-6068-4611-9235-072398c52cd3)
+
+*Event 4776 showing detailed view of failed login attempt.*
+
+#### Sigma Rule for Failed Logins
+
+```yaml
+title: Failed NTLM Logins with Different Accounts from Single Source System
+id: 6309ffc4-8fa2-47cf-96b8-a2f72e58e538
+related:
+    - id: e98374a6-e2d9-4076-9b5c-11bdb2569995
+      type: derived
+status: unsupported
+description: Detects suspicious failed logins with different user accounts from a single source system
+author: Florian Roth (Nextron Systems)
+date: 2017/01/10
+modified: 2023/02/24
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.t1078
+logsource:
+    product: windows
+    service: security
+detection:
+    selection2:
+        EventID: 4776
+        TargetUserName: '*'
+        Workstation: '*'
+    condition: selection2 | count(TargetUserName) by Workstation > 3
+falsepositives:
+    - Terminal servers
+    - Jump servers
+    - Other multiuser systems like Citrix server farms
+    - Workstations with frequently changing users
+level: medium
+```
+
+#### Rule Breakdown
+
+📌 **logsource**:
+- `product: windows` - Windows systems
+- `service: security` - Security event logs
+
+📌 **detection**:
+- `selection2`: EventID 4776 with any TargetUserName and Workstation
+- `condition`: Count TargetUserName by Workstation > 3 (more than 3 failed attempts)
+
+---
+
+### Sigma Rule Development Resources
+
+| Resource | Description |
+|----------|-------------|
+| [SigmaHQ Rule Creation Guide](https://github.com/SigmaHQ/sigma/wiki/Rule-Creation-Guide) | Official rule development guide |
+| [Sigma Specification](https://github.com/SigmaHQ/sigma-specification) | Technical specification |
+| [Tech-EN Sigma Articles](https://tech-en.netlify.app/articles/en510480/) | Multi-part tutorial series |
+
+---
+
+## 9. Leveraging Sigma {#9-leveraging-sigma}
 
 *Coming soon...*
 
 ---
 
-## 9. Skills Assessment {#9-skills-assessment}
+## 10. Skills Assessment {#10-skills-assessment}
 
-## 8. Skills Assessment {#8-skills-assessment}
+## 9. Skills Assessment {#9-skills-assessment}
 
 ---
 
