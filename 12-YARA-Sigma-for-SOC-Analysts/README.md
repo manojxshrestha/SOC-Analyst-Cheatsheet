@@ -289,8 +289,8 @@ condition:
 ```
 
 > 📌 **uint16(0)** - Extracts first 2 bytes of file
-> - `0x5A4D` = ASCII "MZ" (PE executable)
-> - `0x4D5A` = ASCII "ZM" (reverse PE)
+> - 0x5A4D = ASCII "MZ" (PE executable)
+> - 0x4D5A = ASCII "ZM" (reverse PE)
 
 ---
 
@@ -312,8 +312,8 @@ condition:
 ### Advanced Features
 
 YARA provides:
-- **Modifiers** - `fullword`, `ascii`, `nocase`, `wide`, `xor`, `base64`
-- **Logical Operators** - `and`, `or`, `not`
+- **Modifiers** - fullword, ascii, nocase, wide, xor, base64
+- **Logical Operators** - and, or, not
 - **External Modules** - Enhanced detection capabilities
 - **uint16/uint32** - Integer extraction at offset
 - **Filesize** - Check file size conditions
@@ -451,9 +451,9 @@ python3 yarGen.py -m /home/htb-student/temp -o htb_sample.yar
 
 **Command Breakdown:**
 
-- `python3 yarGen.py`: Execute the yarGen Python script
-- `-m /home/htb-student/temp`: This option specifies the source directory where the sample files (e.g., malware or suspicious files) are located. The script will analyze these samples to generate YARA rules.
-- `-o htb_sample.yar`: This option indicates the output file name for the generated YARA rules. In this case, the YARA rules will be saved to a file named htb_sample.yar.
+- python3 yarGen.py: Execute the yarGen Python script
+- -m /home/htb-student/temp: This option specifies the source directory where the sample files (e.g., malware or suspicious files) are located. The script will analyze these samples to generate YARA rules.
+- -o htb_sample.yar: This option indicates the output file name for the generated YARA rules. In this case, the YARA rules will be saved to a file named htb_sample.yar.
 
 **Output Example:**
 ```
@@ -530,9 +530,9 @@ python3 yarGen.py -m /home/htb-student/temp -o htb_sample.yar
 ```
 
 > 📌 **yarGen Database Loading** - yarGen loads multiple goodware databases to filter out common benign strings:
-> - `good-strings-part*.db` - Goodware string databases
-> - `good-imphashes-part*.db` - Goodware import hash databases
-> - `good-exports-part*.db` - Goodware export databases
+> - good-strings-part*.db - Goodware string databases
+> - good-imphashes-part*.db - Goodware import hash databases
+> - good-exports-part*.db - Goodware export databases
 > - Total entries loaded can exceed 12 million strings!
 
 #### Generated Rule Example
@@ -573,8 +573,8 @@ rule dharma_sample {
 ```
 
 > 📌 **Key Points:**
-> - `$x1` is an exclusive string (likely unique to malware) - matched with `1 of ($x*)`
-> - `$s2` to `$s20` are supplementary strings - matched with `4 of them`
+> - $x1 is an exclusive string (likely unique to malware) - matched with 1 of ($x*)
+> - $s2 to $s20 are supplementary strings - matched with 4 of them
 > - The rule requires the file to be a valid PE (`uint16(0) == 0x5a4d`) and smaller than 300KB
 
 #### Testing YARA Rule
@@ -1103,9 +1103,9 @@ rule ransomware_dharma {
 ```
 
 > 📌 **Key Points:**
-> - `$string_pdb` uses hex notation `{ 43...62 }` to match the UTF-8 encoded path string
-> - `$string_ssss` uses hex bytes to match the ASCII repeated "s" pattern
-> - `condition: all of them` requires both strings to be found for a match
+> - $string_pdb uses hex notation { 43...62 } to match the UTF-8 encoded path string
+> - $string_ssss uses hex bytes to match the ASCII repeated "s" pattern
+> - condition: all of them requires both strings to be found for a match
 
 #### Scanning Filesystem with YARA
 
@@ -1136,11 +1136,11 @@ ransomware_dharma C:\Samples\YARASigma\\pdf_reader.exe
 
 **Command Breakdown:**
 
-- `yara64.exe`: The YARA64 executable for 64-bit systems
-- `-s C:\Rules\yara\dharma_ransomware.yar`: Specifies the YARA rules file
-- `C:\Samples\YARASigma`: Directory to scan
-- `-r`: Recursive scanning (subdirectories included)
-- `2>nul`: Suppresses error messages
+- yara64.exe: The YARA64 executable for 64-bit systems
+- -s C:\Rules\yara\dharma_ransomware.yar: Specifies the YARA rules file
+- C:\Samples\YARASigma: Directory to scan
+- -r: Recursive scanning (subdirectories included)
+- 2>nul: Suppresses error messages
 
 > 📌 **Detection Results:** pdf_reader.exe, microsoft.com, check_updates.exe, and KB5027505.exe are detected in addition to dharma_sample.exe.
 
@@ -1173,8 +1173,8 @@ rule meterpreter_reverse_tcp_shellcode {
 ```
 
 > 📌 **Key Points:**
-> - `$s1` uses wildcards (`?`) to match variable bytes
-> - `$s2` uses `??` for any byte at that position
+> - $s1 uses wildcards (?) to match variable bytes
+> - $s2 uses ?? for any byte at that position
 > - Rule requires 5 of 7 strings to match
 
 #### Running the Malware Sample
@@ -1324,13 +1324,13 @@ SilkETW.exe -t user -pn Microsoft-Windows-DNS-Client -l Always -ot file -p C:\So
 ```
 
 **Command Breakdown:**
-- `-t user`: User-mode event tracing
-- `-pn Microsoft-Windows-PowerShell`: Target PowerShell events
-- `-ot file`: Save to file
-- `-p ./etw_ps_logs.json`: Output JSON file
-- `-l verbose`: Detailed logging
-- `-y C:\Rules\yara`: Enable YARA scanning
-- `-yo Matches`: Display only matches
+- -t user: User-mode event tracing
+- -pn Microsoft-Windows-PowerShell: Target PowerShell events
+- -ot file: Save to file
+- -p ./etw_ps_logs.json: Output JSON file
+- -l verbose: Detailed logging
+- -y C:\Rules\yara: Enable YARA scanning
+- -yo Matches: Display only matches
 
 **YARA Rule (etw_powershell_hello.yar):**
 ```yara
@@ -1393,7 +1393,7 @@ Reply from 104.17.244.81: bytes=32 time=14ms TTL=56
 > 📌 **Key Points:**
 > - Detects hardcoded WannaCry kill switch domain in DNS queries
 > - Real-time C2 domain detection capability
-> - `-yo Matches` reduces noise by showing only detections
+> - -yo Matches reduces noise by showing only detections
 
 ---
 
