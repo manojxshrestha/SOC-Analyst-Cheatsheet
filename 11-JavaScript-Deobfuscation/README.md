@@ -44,7 +44,8 @@ This module covers the fundamentals of JavaScript Deobfuscation:
 3. [Basic Obfuscation](#3-basic-obfuscation)
 4. [Advanced Obfuscation](#4-advanced-obfuscation)
 5. [Deobfuscation](#5-deobfuscation)
-6. [Skills Assessment](#6-skills-assessment)
+6. [HTTP Requests](#6-http-requests)
+7. [Skills Assessment](#7-skills-assessment)
 
 ---
 
@@ -590,7 +591,111 @@ function generateSerial() {
 
 ---
 
-## 6. Skills Assessment
+## 6. HTTP Requests
+
+> 📌 In the previous section, we found that `secret.js` sends a POST request to `/serial.php`. In this section, we'll replicate this using cURL.
+
+### Introduction to cURL
+
+> 📌 **cURL** - Command-line tool for transferring data with URLs. Available on Linux, macOS, and Windows.
+
+### Basic GET Request
+
+```bash
+curl http://example.com
+```
+
+**Example:**
+```bash
+curl http://SERVER_IP:PORT/
+```
+
+**Output:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secret Serial Generator</title>
+    ...
+    <h1>Secret Serial Generator</h1>
+    <p>This page generates secret serials!</p>
+</body>
+</html>
+```
+
+> 📌 This returns the same HTML we saw in the page source.
+
+---
+
+### POST Request
+
+**Basic POST request:**
+```bash
+curl -X POST http://example.com
+```
+
+**With -s flag (silent mode):**
+```bash
+curl -s http://SERVER_IP:PORT/ -X POST
+```
+
+> 🔴 **Tip:** The `-s` flag reduces clutter by hiding progress meter and error messages.
+
+---
+
+### POST Request with Data
+
+**Sending POST data:**
+```bash
+curl -s http://example.com -X POST -d "param1=value"
+```
+
+**Example:**
+```bash
+curl -s http://SERVER_IP:PORT/ -X POST -d "param1=sample"
+```
+
+> 📌 The `-d` flag sends data as POST parameters.
+
+---
+
+### Common cURL Flags
+
+| Flag | Description |
+|------|-------------|
+| `-s` | Silent mode (no progress) |
+| `-X` | Specify HTTP method |
+| `-d` | Send POST data |
+| `-H` | Add custom headers |
+| `-o` | Output to file |
+| `-L` | Follow redirects |
+| `-v` | Verbose output |
+
+---
+
+### Practical Example
+
+After deobfuscating `secret.js`, we found it sends an empty POST request to `/serial.php`:
+
+```javascript
+function generateSerial() {
+  var xhr = new XMLHttpRequest;
+  var url = "/serial.php";
+  xhr.open("POST", url, true);
+  xhr.send(null);
+};
+```
+
+**Replicating with cURL:**
+```bash
+curl -s http://SERVER_IP:PORT/serial.php -X POST
+```
+
+> 📌 This replicates what the JavaScript code does!
+
+---
+
+## 7. Skills Assessment
 
 *Coming soon...*
 
