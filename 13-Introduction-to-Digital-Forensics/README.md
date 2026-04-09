@@ -749,6 +749,12 @@ manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.
 
 Shows files accessed by a process.
 
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/Win7-2515534d.vmem --profile=Win7SP1x64 handles -p 1512 --object-type=Process
+```
+
+Shows processes accessed by a process (e.g., tasksche.exe accessed by Ransomware.wan PID 1512).
+
 ---
 
 ### Identifying Windows Services
@@ -815,6 +821,63 @@ The `psscan` plugin scans memory pool tags to find processes that may have been 
 
 ```bash
 manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/rootkit.vmem psscan
+```
+
+#### pslist vs psscan
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/rootkit.vmem pslist
+```
+
+The `pslist` plugin follows the EPROCESS linked list. In this output, we cannot see `test.exe` which was hidden by a rootkit.
+
+However, `psscan` uses pool tag scanning and can find hidden processes:
+
+```bash
+manojxshrestha@htb[/htb]$ vol.py -f /home/htb-student/MemoryDumps/rootkit.vmem psscan
+```
+
+Output shows processes including hidden ones:
+```
+Offset(V)  Name                    PID   PPID   Thds     Hnds   Sess  Wow64 Start                          Exit
+...
+0x81f6a650 taskhsvc.exe           2340   2248      2       60      0      0 2023-06-24 07:29:22 UTC+0000
+```
+
+---
+
+### Memory Analysis Using Strings
+
+Analyzing strings in memory dumps is a valuable technique. Strings often contain human-readable information like file paths, IP addresses, and passwords.
+
+#### Identifying IPv4 Addresses
+
+```bash
+manojxshrestha@htb[/htb]$ strings /home/htb-student/MemoryDumps/Win7-2515534d.vmem | grep -E "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"
+```
+
+**Sample Output:**
+```
+127.192.0.0/10
+212.83.154.33
+directory server at 10.10.10.1:52860
+127.192.0.0/10
+0.0.0.0
+192.168.182.254
+```
+
+#### Identifying Email Addresses
+
+```bash
+manojxshrestha@htb[/htb]$ strings /home/htb-student/MemoryDumps/Win7-2515534d.vmem | grep -oE "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}\b"
+```
+
+**Sample Output:**
+```
+CPS-requests@verisign.com
+silver-certs@saunalahti.fi
+joe@freebsd.org
+info@netlock.net
 ```
 
 ---
