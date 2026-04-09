@@ -891,7 +891,7 @@ info@netlock.net
 
 > 📌 **Disk Forensics** - Examination and analysis of disk images for evidence of malicious activity.
 
-### Overview}
+### Overview
 
 Having covered memory forensics, let's shift our attention to disk forensics (disk image examination and analysis).
 
@@ -1521,7 +1521,7 @@ API Monitor captures and displays API calls made by applications. This is valuab
 
 ---
 
-# 🎯 Practical Digital Forensics Scenario}
+# 🎯 Practical Digital Forensics Scenario
 
 ## SOC Analyst Cheatsheet - Module 13/15 - Section 7
 
@@ -1561,7 +1561,7 @@ You belong to the digital forensics team and are assigned to investigate an inci
 
 The affected system's memory dump resides in `C:\Users\johndoe\Desktop\memdump\PhysicalMemory.raw`.
 
-### 1.1 Identifying the Memory Dump Profile}
+### 1.1 Identifying the Memory Dump Profile
 
 Before analyzing, we need to identify the operating system and kernel details of the Windows memory sample:
 
@@ -1584,7 +1584,7 @@ python vol.py -q -f ../memdump/PhysicalMemory.raw windows.info
 
 ---
 
-### 1.2 Identifying Injected Code}
+### 1.2 Identifying Injected Code
 
 > 🔴 **PAGE_EXECUTE_READWRITE** is a strong indicator of potential code injection. Legitimate applications typically separate code execution from data storage.
 
@@ -1612,7 +1612,7 @@ In essence, while not every instance of PAGE_EXECUTE_READWRITE is malicious, its
 
 ---
 
-### 1.3 Identifying Running Processes}
+### 1.3 Identifying Running Processes
 
 List all processes present in the memory image:
 
