@@ -438,3 +438,232 @@ index=main earliest=1690290814 latest=1690291207 EventCode IN (4648)
 
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
+
+---
+
+### Detecting Kerberoasting/AS-REProasting {#detecting-kerberoastingas-reproasting}
+
+#### Kerberoasting Overview
+
+**Kerberoasting** is a technique targeting service accounts in Active Directory environments to extract and crack their password hashes. The attack exploits the way Kerberos service tickets are encrypted and the use of weak or easily crackable passwords for service accounts.
+
+> 📌 Once an attacker successfully cracks the password hashes, they can gain unauthorized access to the targeted service accounts and potentially move laterally within the network.
+
+![Rubeus Kerberoasting](https://github.com/user-attachments/assets/f69bf157-ac46-4573-a5f8-9025e0d6a93c)
+
+*Rubeus kerberoast module identifying service account "iis_svc"*
+
+#### Kerberoasting Attack Steps
+
+1. **Identify Target Service Accounts**: Attacker enumerates AD to identify service accounts with SPNs (Service Principal Names)
+
+2. **Request TGS Tickets**: Attacker requests TGS tickets from KDC - these contain encrypted service account password hashes
+
+3. **Offline Brute-Force**: Attacker uses Hashcat or John the Ripper to crack the encrypted password hashes
+
+---
+
+#### Benign Service Access Process & Related Events
+
+When a user connects to MSSQL using a service account with SPN:
+
+1. **TGT Request**: Client requests TGT from KDC
+2. **TGT Issue**: KDC verifies identity and issues TGT
+3. **Service Ticket Request**: Client requests TGS for MSSQL SPN
+4. **Service Ticket Issue**: KDC issues TGS encrypted with service account's secret key
+5. **Client Connection**: Client presents TGS to MSSQL server
+6. **MSSQL Server Validates**: Server decrypts TGS and grants access
+
+![Kerberos Process](https://github.com/user-attachments/assets/4e812dc3-03ac-42b5-856f-f8f679816cee)
+
+*Kerberos authentication process diagram*
+
+#### Kerberos Events Generated
+
+| Event ID | Description |
+|----------|-------------|
+| 4768 | Kerberos TGT Request |
+| 4769 | Kerberos Service Ticket Request |
+| 4624 | Successful Logon |
+
+![Kerberos Events](https://github.com/user-attachments/assets/0c496630-0f6e-47a1-b50a-e4527485b0e0)
+
+*Log entries showing Kerberos authentication events*
+
+---
+
+#### Kerberoasting Detection Opportunities
+
+**Detection Logic**: Find all TGS request events and logon events from same user, then identify instances where TGS request exists WITHOUT subsequent logon event.
+
+> 📌 In benign service access, an additional Event 4648 (Explicit Credentials) is generated along with the logon event.
+
+---
+
+### Detecting Kerberoasting With Splunk
+
+#### Benign TGS Requests
+
+**Timeframe:** earliest=1690388417 latest=1690388630
+
+```spl
+index=main earliest=1690388417 latest=1690388630 EventCode=4648 OR (EventCode=4769 AND service_name=iis_svc) 
+| dedup RecordNumber 
+| rex field=user "(?<username>[^@]+)"
+| table _time, ComputerName, EventCode, name, username, Account_Name, Account_Domain, src_ip, service_name, Ticket_Options, Ticket_Encryption_Type, Target_Server_Name, Additional_Information
+```
+
+![Benign TGS](https://github.com/user-attachments/assets/9356d3e2-26b2-4059-bc5d-61b6cefc2139)
+
+*Benign service access showing Event 4648 and 4769*
+
+---
+
+#### Detecting Kerberoasting - SPN Querying
+
+**Timeframe:** earliest=1690448444 latest=1690454437
+
+```spl
+index=main earliest=1690448444 latest=1690454437 source="WinEventLog:SilkService-Log" 
+| spath input=Message 
+| rename XmlEventData.* as * 
+| table _time, ComputerName, ProcessName, DistinguishedName, SearchFilter 
+| search SearchFilter="*(&(samAccountType=805306368)(servicePrincipalName=*)*"
+```
+
+![SPN Querying](https://github.com/user-attachments/assets/cc3a67e0-2a11-445f-aa32-722300bdd74c)
+
+*Detecting SPN enumeration via LDAP queries*
+
+---
+
+#### Detecting Kerberoasting - TGS Requests
+
+**Timeframe:** earliest=1690450374 latest=1690450483
+
+```spl
+index=main earliest=1690450374 latest=1690450483 EventCode=4648 OR (EventCode=4769 AND service_name=iis_svc)
+| dedup RecordNumber
+| rex field=user "(?<username>[^@]+)"
+| bin span=2m _time 
+| search username!=*$ 
+| stats values(EventCode) as Events, values(service_name) as service_name, values(Additional_Information) as Additional_Information, values(Target_Server_Name) as Target_Server_Name by _time, username
+| where !match(Events,"4648")
+```
+
+![Kerberoast Detection](https://github.com/user-attachments/assets/72da0ea8-f978-4649-a50b-23cb2c68ab8d)
+
+*Kerberoasting detection - TGS without logon*
+
+#### Search Breakdown
+
+1. **Filter Events**: EventCode=4648 OR (4769 AND service_name=iis_svc)
+2. **Dedup**: Remove duplicate records
+3. **Extract Username**: Use regex to get username from user field
+4. **Time Binning**: Bin events into 2-minute intervals
+5. **Filter**: Exclude machine accounts (username!=*$)
+6. **Stats**: Group by time and username
+7. **Filter**: Exclude events with 4648 (benign access)
+
+> 📌 **Key Detection**: TGS requests (4769) WITHOUT corresponding logon (4648) indicates Kerberoasting!
+
+---
+
+#### Using Transactions for Detection
+
+**Timeframe:** earliest=1690450374 latest=1690450483
+
+```spl
+index=main earliest=1690450374 latest=1690450483 EventCode=4648 OR (EventCode=4769 AND service_name=iis_svc)
+| dedup RecordNumber
+| rex field=user "(?<username>[^@]+)"
+| search username!=*$ 
+| transaction username keepevicted=true maxspan=5s endswith=(EventCode=4648) startswith=(EventCode=4769) 
+| where closed_txn=0 AND EventCode = 4769
+| table _time, EventCode, service_name, username
+```
+
+![Transaction Detection](https://github.com/user-attachments/assets/5d8391e9-a7ef-4c50-9d99-6553add319f7)
+
+*Using transaction command to detect incomplete transactions*
+
+---
+
+### AS-REPRoasting
+
+**ASREPRoasting** targets user accounts without pre-authentication enabled. In Kerberos, pre-authentication is a security feature requiring users to prove their identity before TGT is issued.
+
+![AS-REP Roasting](https://github.com/user-attachments/assets/21e3126f-1e84-4348-a4f5-ac19a66888ad)
+
+*Rubeus AS-REP roasting*
+
+#### AS-REPRoasting Attack Steps
+
+1. **Identify Target User Accounts**: Find accounts without pre-authentication
+2. **Request AS-REQ Service Tickets**: Request TGT for each target user
+3. **Offline Brute-Force**: Crack the encrypted TGTs
+
+---
+
+#### Kerberos Pre-Authentication
+
+When pre-authentication is enabled, the AS-REQ contains an encrypted timestamp (pA-ENC-TIMESTAMP). The KDC decrypts this to issue a TGT.
+
+![Pre-Auth Enabled](https://github.com/user-attachments/assets/a14a6aea-8c8e-41fe-894f-f9780352a9ce)
+
+*Network capture showing pre-authentication enabled*
+
+When pre-authentication is **disabled**, no timestamp validation occurs, allowing TGT requests without knowing the password.
+
+![Pre-Auth Disabled](https://github.com/user-attachments/assets/053db5aa-0124-4c6c-b0bf-72a8f8a09054)
+
+*Network capture showing pre-authentication disabled*
+
+---
+
+### Detecting AS-REPRoasting With Splunk
+
+#### Detecting AS-REPRoasting - Accounts With Pre-Auth Disabled
+
+**Timeframe:** earliest=1690392745 latest=1690393283
+
+```spl
+index=main earliest=1690392745 latest=1690393283 source="WinEventLog:SilkService-Log" 
+| spath input=Message 
+| rename XmlEventData.* as * 
+| table _time, ComputerName, ProcessName, DistinguishedName, SearchFilter 
+| search SearchFilter="*(samAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=4194304)*"
+```
+
+![Pre-Auth Disabled Query](https://github.com/user-attachments/assets/554b8980-fb12-4b14-878d-42bd91abe245)
+
+*Detecting accounts with pre-auth disabled*
+
+---
+
+#### Detecting AS-REPRoasting - TGT Requests For Pre-Auth Disabled Accounts
+
+**Timeframe:** earliest=1690392745 latest=1690393283
+
+```spl
+index=main earliest=1690392745 latest=1690393283 source="WinEventLog:Security" EventCode=4768 Pre_Authentication_Type=0
+| rex field=src_ip "(\:\:ffff\:)?(?<src_ip>[0-9\.]+)"
+| table _time, src_ip, user, Pre_Authentication_Type, Ticket_Options, Ticket_Encryption_Type
+```
+
+![AS-REP Detection](https://github.com/user-attachments/assets/35595945-ae0b-4eae-9454-9fcdf7d7372a)
+
+*Detecting AS-REP roasting via Event 4768*
+
+#### Search Breakdown
+
+1. **Filter**: EventCode=4768 with Pre_Authentication_Type=0
+2. **Extract IP**: Use regex to handle IPv4-mapped IPv6 addresses
+3. **Table**: Display time, IP, user, PreAuthType, TicketOptions, EncryptionType
+
+> 📌 **Key Detection**: Event 4768 with Pre_Authentication_Type=0 indicates AS-REPRoasting attempt!
+
+---
+
+*Module 14/15 - Detecting Windows Attacks with Splunk*
+*For learning and SOC career preparation*
