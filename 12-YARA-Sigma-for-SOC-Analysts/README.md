@@ -36,12 +36,19 @@ This module covers:
 
 ## Table of Contents
 
-1. [Introduction to YARA & Sigma](#1-introduction-to-yara--sigma)
-2. [YARA and YARA Rules](#2-yara-and-yara-rules)
-3. [Developing YARA Rules](#3-developing-yara-rules)
-4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition)
-5. [Leveraging Sigma](#5-leveraging-sigma)
-6. [Skills Assessment](#6-skills-assessment)
+### Module Sections
+1. [Introduction to YARA & Sigma](#1-introduction-to-yara--sigma) - Overview, Why SOC Analysts Need YARA & Sigma
+2. [Leveraging YARA](#2-leveraging-yara) - What is YARA, Rule Structure, Components, Reserved Keywords
+3. [Developing YARA Rules](#3-developing-yara-rules) - Manual Development, yarGen, Advanced Examples
+4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition) - Disk, Process, ETW Hunting
+5. [Leveraging Sigma](#5-leveraging-sigma) - *Coming soon*
+6. [Skills Assessment](#6-skills-assessment) - *Coming soon*
+
+### Quick Reference
+- [YARA Rule Structure](#yara-rule-structure)
+- [YARA Rule Components](#yara-rule-components)
+- [Reserved Keywords](#reserved-keywords)
+- [YARA Resources](#yara-resources)
 
 ---
 
