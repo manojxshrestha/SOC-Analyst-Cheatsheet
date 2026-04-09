@@ -297,7 +297,7 @@ Web browser forensics analyzes remnants left by web browsers to understand user 
 
 > 📌 **Evidence Acquisition** - Critical phase involving collection of digital artifacts from various sources.
 
-### Overview
+### Overview {#3-1-overview}
 
 Evidence acquisition is a critical phase in digital forensics, involving the collection of digital artifacts and data from various sources to preserve potential evidence for analysis. This process requires specialized tools and techniques to ensure integrity, authenticity, and admissibility.
 
@@ -891,7 +891,7 @@ info@netlock.net
 
 > 📌 **Disk Forensics** - Examination and analysis of disk images for evidence of malicious activity.
 
-### Overview
+### Overview {#5-1-overview}
 
 Having covered memory forensics, let's shift our attention to disk forensics (disk image examination and analysis).
 
