@@ -973,19 +973,6 @@ rule susp_file_enumerator_with_encrypted_resource_101 {
     )
 }
 ```
-    filesize < 700000 and
-    pe.number_of_sections > 4 and
-    pe.number_of_signatures == 0 and
-    pe.number_of_resources > 1 and pe.number_of_resources < 15 and 
-    for any i in (0..pe.number_of_resources - 1):
-    ( (math.entropy(pe.resources[i].offset, pe.resources[i].length) > 7.8) and 
-      pe.resources[i].id == 101 and
-      pe.resources[i].length > 20000 and
-      pe.resources[i].language == 0 and
-      not ($mz in (pe.resources[i].offset..pe.resources[i].offset + pe.resources[i].length))
-    )
-}
-```
 
 **Rule Breakdown:**
 
