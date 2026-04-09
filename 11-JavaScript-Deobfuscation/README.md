@@ -43,7 +43,7 @@ This module covers the fundamentals of JavaScript Deobfuscation:
 2. [Obfuscation](#2-obfuscation)
 3. [Basic Obfuscation](#3-basic-obfuscation)
 4. [Advanced Obfuscation](#4-advanced-obfuscation)
-5. [Deobfuscation Examples](#5-deobfuscation-examples)
+5. [Deobfuscation](#5-deobfuscation)
 6. [Skills Assessment](#6-skills-assessment)
 
 ---
@@ -590,7 +590,7 @@ function generateSerial() {
 
 ---
 
-## 4. Skills Assessment
+## 6. Skills Assessment
 
 *Coming soon...*
 
