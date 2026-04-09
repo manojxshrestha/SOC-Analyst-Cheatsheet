@@ -239,7 +239,7 @@ Obfuscation tools take code as input and rewrite it in a way that is much more d
 
 *JavaScript obfuscation tool interface*
 
-> 🔴 **Reference:** https://beautifytools.com/javascript-obfuscator.php
+> 🔴 **Reference:** [beautifytools.com](https://beautifytools.com/javascript-obfuscator.php)
 
 ---
 
@@ -300,7 +300,7 @@ console.log('HTB JavaScript Deobfuscation Module');
 ```
 
 **Testing in JSConsole:**
-1. Visit https://jsconsole.com
+1. Visit [jsconsole.com](https://jsconsole.com)
 2. Paste the code
 3. Press Enter
 4. See output: `HTB JavaScript Deobfuscation Module`
@@ -322,7 +322,7 @@ console.log('HTB JavaScript Deobfuscation Module');
 - Improve load time
 - Reduce readability
 
-**Tool:** https://javascript-minifier.com/
+**Tool:** [javascript-minifier.com](https://javascript-minifier.com/)
 
 ![Minification Example](https://github.com/user-attachments/assets/563667c4-f493-4c4d-94e3-6c025082937d)
 
@@ -344,7 +344,7 @@ console.log('HTB JavaScript Deobfuscation Module');
 
 ### JavaScript Packing
 
-**Tool:** https://beautifytools.com/javascript-obfuscator.php
+**Tool:** [beautifytools.com](https://beautifytools.com/javascript-obfuscator.php)
 
 ![Packing Tool](https://github.com/user-attachments/assets/eeca25b8-2e8d-4ca7-a3b4-8ef6ccd3df32)
 
@@ -401,7 +401,7 @@ eval(function(p,a,c,k,e,d){ ... })
 
 ### Using obfuscator.io
 
-**Tool:** https://obfuscator.io
+**Tool:** [obfuscator.io](https://obfuscator.io)
 
 **Configuration:**
 1. Set **String Array Encoding** to **Base64**
@@ -487,13 +487,13 @@ var _0x1ec6=['Bg9N','sfrciePHDMfty3jPChqGrgvVyMz1C2nHDgLVBIbnB2r1Bgu='];(functio
 
 #### Method 2: Online Beautifiers
 
-**Tool 1:** https://prettier.io/playground/
+**Tool 1:** [prettier.io](https://prettier.io/playground/)
 
 ![Prettier](https://github.com/user-attachments/assets/81d882c6-1438-4311-a17e-e46606d2a08f)
 
 *Prettier code editor with obfuscated code*
 
-**Tool 2:** https://beautifier.io/
+**Tool 2:** [beautifier.io](https://beautifier.io/)
 
 ![Beautifier.io](https://github.com/user-attachments/assets/0f9110d1-1ae1-4df4-b8c2-d2d00280c003)
 
@@ -520,7 +520,7 @@ After beautifying, it's still difficult to read because it was also obfuscated (
 
 #### UnPacker Tool
 
-**Tool:** https://matthewfl.com/unPacker.html
+**Tool:** [UnPacker](https://matthewfl.com/unPacker.html)
 
 **Steps:**
 1. Copy the obfuscated code
@@ -995,14 +995,14 @@ Decode the secret key and send a POST request with the decoded key.
 
 | Resource | Description | URL |
 |----------|-------------|-----|
-| **Obfuscation Tools** | beautifytools.com | JavaScript obfuscator |
-| **Obfuscation Tools** | obfuscator.io | JavaScript obfuscator with Base64 |
-| **Beautify Tools** | prettier.io | Code formatter |
-| **Beautify Tools** | beautifier.io | Code beautifier |
-| **Deobfuscate** | UnPacker | matthewfl.com/unPacker |
-| **Test JS** | JSConsole | jsconsole.com |
-| **Encoding** | CyberChef | gchq.github.io/CyberChef |
-| **Secure Coding Module** | Advanced reverse engineering | HTB Academy |
+| **Obfuscation Tools** | JavaScript obfuscator | [beautifytools.com](https://beautifytools.com/javascript-obfuscator.php) |
+| **Obfuscation Tools** | JavaScript obfuscator with Base64 | [obfuscator.io](https://obfuscator.io) |
+| **Beautify Tools** | Code formatter | [prettier.io](https://prettier.io/playground/) |
+| **Beautify Tools** | Code beautifier | [beautifier.io](https://beautifier.io) |
+| **Deobfuscate** | UnPacker | [matthewfl.com/unPacker](https://matthewfl.com/unPacker.html) |
+| **Test JS** | JSConsole | [jsconsole.com](https://jsconsole.com) |
+| **Encoding** | CyberChef | [gchq.github.io/CyberChef](https://gchq.github.io/CyberChef) |
+| **Secure Coding Module** | Advanced reverse engineering | [HTB Academy](https://academy.hackthebox.com) |
 
 ---
 
