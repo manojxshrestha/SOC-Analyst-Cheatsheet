@@ -461,9 +461,132 @@ var _0x1ec6=['Bg9N','sfrciePHDMfty3jPChqGrgvVyMz1C2nHDgLVBIbnB2r1Bgu='];(functio
 
 ---
 
-## 3. Deobfuscation Examples
+## 5. Deobfuscation
 
-*Coming soon...*
+> 📌 Now that we understand how obfuscation works, let's learn to deobfuscate code. There are tools to beautify and deobfuscate automatically.
+
+### Beautify JavaScript Code
+
+**Problem:** Minified code is in a single line, hard to read.
+
+**Solution:** Use beautifiers to format code properly.
+
+#### Method 1: Browser DevTools
+
+1. Open Firefox Developer Tools (`CTRL + SHIFT + Z`)
+2. Navigate to the script (`secret.js`)
+3. Click the `{ }` Pretty Print button
+
+![DevTools Pretty Print](https://github.com/user-attachments/assets/f072fb1b-8288-4035-9eb0-ab01a2b00278)
+
+*Code editor showing JavaScript with Pretty Print option*
+
+#### Method 2: Online Beautifiers
+
+**Tool 1:** https://prettier.io/playground/
+
+![Prettier](https://github.com/user-attachments/assets/81d882c6-1438-4311-a17e-e46606d2a08f)
+
+*Prettier code editor with obfuscated code*
+
+**Tool 2:** https://beautifier.io/
+
+![Beautifier.io](https://github.com/user-attachments/assets/0f9110d1-1ae1-4df4-b8c2-d2d00280c003)
+
+*Beautifier.io interface*
+
+> 📌 **Note:** Beautifying only formats the code. It doesn't fully deobfuscate packed code.
+
+---
+
+### Example: Packed Code
+
+**Packed Code:**
+```javascript
+eval(function (p, a, c, k, e, d) { e = function (c) { return c.toString(36) }; if (!''.replace(/^/, String)) { while (c--) { d[c.toString(a)] = k[c] || c.toString(a) } k = [function (e) { return d[e] }]; e = function () { return '\\w+' }; c = 1 }; while (c--) { if (k[c]) { p = p.replace(new RegExp('\\b' + e(c) + '\\b', 'g'), k[c]) } } return p }('g 4(){0 5="6{7!}";0 1=8 a();0 2="/9.c";1.d("e",2,f);1.b(3)}', 17, 17, 'var|xhr|url|null|generateSerial|flag|HTB|flag|new|serial|XMLHttpRequest|send|php|open|POST|true|function'.split('|'), 0, {}))
+```
+
+After beautifying, it's still difficult to read because it was also obfuscated (packed).
+
+---
+
+### Deobfuscate JavaScript Code
+
+> 📌 For packed/obfuscated code, we need proper deobfuscation tools.
+
+#### UnPacker Tool
+
+**Tool:** https://matthewfl.com/unPacker.html
+
+**Steps:**
+1. Copy the obfuscated code
+2. Paste into UnPacker
+3. Click **UnPack** button
+
+> 🔴 **Tip:** Ensure no empty lines before the script - it may affect deobfuscation!
+
+![UnPacker](https://github.com/user-attachments/assets/0297ff3d-8c89-4df5-9214-adc7e3381031)
+
+*UnPacker tool interface*
+
+**Result:**
+```javascript
+function generateSerial() {
+  var flag = "HTB{flag}";
+  var xhr = new XMLHttpRequest;
+  var url = "/serial.php";
+  xhr.open("POST", url, true);
+  xhr.send(null);
+};
+```
+
+> 📌 Now we can clearly see what the code does!
+
+---
+
+### Manual Deobfuscation
+
+**Alternative Method:**
+1. Find the `return` value at the end of the code
+2. Replace `eval()` with `console.log()`
+3. Run in browser console to see the output
+
+**Example:**
+```javascript
+// Original: eval(function(p,a,c,k,e,d){...})
+// Modified: console.log(function(p,a,c,k,e,d){...}.toString())
+```
+
+---
+
+### Reverse Engineering
+
+> 📌 For highly obfuscated or custom-obfuscated code, automated tools may not work.
+
+**When to use manual reverse engineering:**
+- Code obfuscated with custom tools
+- Multiple layers of encoding
+- Advanced packing techniques
+
+**Required skills:**
+- JavaScript understanding
+- Debugging skills
+- Pattern recognition
+- Knowledge of encoding (Base64, hex)
+
+> 📌 For advanced JavaScript Deobfuscation, check out the **Secure Coding 101** module.
+
+---
+
+### Deobfuscation Tools Summary
+
+| Tool | Purpose | URL |
+|------|---------|-----|
+| **Prettier** | Code formatting | prettier.io |
+| **Beautifier.io** | Code formatting | beautifier.io |
+| **UnPacker** | Deobfuscate packed code | matthewfl.com/unPacker |
+| **JSConsole** | Test JavaScript | jsconsole.com |
+| **Browser DevTools** | Debug and analyze | F12 |
 
 ---
 
