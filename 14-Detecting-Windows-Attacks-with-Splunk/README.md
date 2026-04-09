@@ -1658,5 +1658,79 @@ index="rdp_bruteforce" sourcetype="bro:rdp:json"
 
 ---
 
+### Detecting Beaconing Malware {#detecting-beaconing-malware}
+
+#### Beaconing Overview
+
+**Malware beaconing** is periodic communication from infected systems to Command & Control (C2) servers. Like a lighthouse, beacons are sent at regular intervals.
+
+> 📌 Beacons are typically small data packets sent via HTTP/HTTPS, DNS, or ICMP.
+
+**Beacon Patterns:**
+
+| Pattern | Description |
+|---------|-------------|
+| Fixed | Exact intervals (e.g., every 60 seconds) |
+| Jittered | Slight variation from fixed pattern |
+| Complex | Scheduled based on malware objectives |
+
+This section focuses on detecting **Cobalt Strike** beaconing (default configuration).
+
+---
+
+#### Accessing Target System
+
+Connect via RDP:
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/cobaltstrike_beacon` |
+| Splunk Index | `cobaltstrike_beacon` |
+| Sourcetype | `bro:http:json` |
+
+---
+
+#### Detecting Beaconing With Splunk & Zeek
+
+```spl
+index="cobaltstrike_beacon" sourcetype="bro:http:json" 
+| sort 0 _time
+| streamstats current=f last(_time) as prevtime by src, dest, dest_port
+| eval timedelta = _time - prevtime
+| eventstats avg(timedelta) as avg, count as total by src, dest, dest_port
+| eval upper=avg*1.1
+| eval lower=avg*0.9
+| where timedelta > lower AND timedelta < upper
+| stats count, values(avg) as TimeInterval by src, dest, dest_port, total
+| eval prcnt = (count/total)*100
+| where prcnt > 90 AND total > 10
+```
+
+![Beacon Detection](https://github.com/user-attachments/assets/8c1eba17-dfbb-404e-8b8b-40a0d383a010)
+
+*Detecting Cobalt Strike beaconing*
+
+**Search Breakdown:**
+
+1. **Sort**: Order events by time
+2. **Streamstats**: Calculate previous event time per source/dest/port
+3. **Eval**: Compute time difference between consecutive beacons
+4. **Eventstats**: Calculate average interval and total count
+5. **Eval**: Set upper/lower bounds (10% margin around average)
+6. **Where**: Filter events within the interval bounds
+7. **Stats**: Count matching events and extract average interval
+8. **Eval**: Calculate percentage of events within bounds
+9. **Where**: Show only >90% match rate AND >10 total events
+
+> 📌 **Key Detection**: Regular intervals (>90% within 10% of avg, >10 events) indicate beaconing behavior!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
