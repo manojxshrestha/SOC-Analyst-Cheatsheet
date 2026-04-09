@@ -150,5 +150,142 @@ When we talk about the Security Operations Center (SOC), we're discussing the fr
 
 ---
 
+## 2. Windows Forensics Overview {#2-windows-forensics-overview}
+
+> 📌 **Windows Forensics** - Key artifacts and forensic procedures in Windows environments.
+
+### NTFS (New Technology File System)
+
+NTFS (New Technology File System) is a proprietary file system developed by Microsoft as part of its Windows NT operating system family. It was introduced with the release of Windows NT 3.1 in 1993 and has since become the default and most widely used file system in modern Windows operating systems.
+
+NTFS was designed to address several limitations of its predecessor, the FAT (File Allocation Table) file system. It introduced numerous features and enhancements that improved reliability, performance, security, and storage capabilities.
+
+---
+
+### Key Forensic Artifacts in NTFS
+
+| Artifact | Description |
+|----------|-------------|
+| **File Metadata** | Creation time, modification time, access time, attribute information |
+| **MFT Entries** | Master File Table stores metadata for all files and directories |
+| **File Slack** | Unused portion of a cluster that may contain data from previous files |
+| **File Signatures** | File headers useful for identifying file types even with changed extensions |
+| **USN Journal** | Update Sequence Number log recording changes to files/directories |
+| **LNK Files** | Windows shortcuts containing target file info, timestamps, metadata |
+| **Prefetch Files** | Application startup metadata showing execution history |
+| **Registry Hives** | Configuration and system information (not directly file system) |
+| **Shellbags** | Registry entries storing folder view settings |
+| **Thumbnail Cache** | Miniature previews of images/documents |
+| **Recycle Bin** | Deleted files that can be recovered |
+| **Alternate Data Streams (ADS)** | Additional data streams associated with files |
+| **Volume Shadow Copies** | Snapshots of file system at different points in time |
+| **Security Descriptors/ACLs** | Access control lists determining permissions |
+
+---
+
+### Windows Event Logs
+
+Windows Event Logs are an intrinsic part of the Windows Operating System, storing logs from different components including the system itself, applications, ETW providers, services, and others.
+
+> 📌 Windows event logging offers comprehensive logging capabilities for application errors, security events, and diagnostic information.
+
+Adversarial tactics from initial compromise using malware or other exploits, to credential accessing, privilege elevation and lateral movement using Windows operating system's internal tools are often captured via Windows event logs.
+
+**Default Log Path:** `C:\Windows\System32\winevt\logs`
+
+> 📌 The analysis of Windows Event Logs has been addressed in the modules titled "Windows Event Logs & Finding Evil" and "YARA & Sigma for SOC Analysts".
+
+---
+
+### Execution Artifacts
+
+Windows execution artifacts refer to traces and evidence left behind when programs and processes are executed. These artifacts provide valuable insights into application execution, crucial for digital forensics investigations.
+
+#### Types of Execution Artifacts
+
+| Artifact | Location | Data Stored |
+|----------|----------|-------------|
+| **Prefetch Files** | `C:\Windows\Prefetch` | File paths, execution counts, timestamps |
+| **Shimcache** | `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache` | Program execution details, file paths, timestamps |
+| **Amcache** | `C:\Windows\AppCompat\Programs\Amcache.hve` | Application details, file paths, sizes, digital signatures |
+| **UserAssist** | `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist` | Executed program details, execution counts |
+| **RunMRU Lists** | `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` | Recently executed programs and command lines |
+| **Jump Lists** | `%AppData%\Microsoft\Windows\Recent` | Recently accessed files, folders, tasks |
+| **Shortcut (LNK) Files** | Various (Desktop, Start Menu) | Target executable, file paths, timestamps |
+| **Recent Items** | `%AppData%\Microsoft\Windows\Recent` | Recently accessed files |
+| **Windows Event Logs** | `C:\Windows\System32\winevt\Logs` | Process creation, termination, events |
+
+---
+
+### Windows Persistence Artifacts
+
+Windows persistence refers to techniques used by attackers to ensure unauthorized presence on a compromised system.
+
+#### Registry Autorun Keys
+
+| Registry Path | Description |
+|---------------|-------------|
+| `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` | User-level auto-start programs |
+| `HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce` | Run once then delete |
+| `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run` | System-level auto-start programs |
+| `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce` | System-level run once |
+| `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon` | WinLogon process keys |
+| `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\Shell` | Shell configuration |
+| `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders` | User shell folders |
+| `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders` | Shell folder paths |
+
+#### Scheduled Tasks (Schtasks)
+
+- **Location:** `C:\Windows\System32\Tasks`
+- **Format:** XML files containing task creator, timing/triggers, command paths
+
+#### Services
+
+- **Registry Location:** `HKLM\System\CurrentControlSet\Services`
+- Malicious actors often tamper with or create rogue services for persistence
+
+---
+
+### Web Browser Forensics
+
+Web browser forensics analyzes remnants left by web browsers to understand user actions and potentially harmful behaviors.
+
+#### Key Browser Artifacts
+
+| Artifact | Description |
+|----------|-------------|
+| **Browsing History** | Records of websites visited (URLs, titles, timestamps) |
+| **Cookies** | Session details, preferences, authentication tokens |
+| **Cache** | Cached copies of web pages/images |
+| **Bookmarks/Favorites** | Saved links to frequently visited sites |
+| **Download History** | Downloaded files with source URLs |
+| **Autofill Data** | Auto-entered form data (names, addresses, passwords) |
+| **Search History** | Search engine queries |
+| **Typed URLs** | URLs entered directly in address bar |
+| **Passwords** | Saved or autofilled passwords |
+| **Extensions/Add-ons** | Browser extensions and configurations |
+
+---
+
+### SRUM (System Resource Usage Monitor)
+
+> 📌 SRUM is a feature introduced in Windows 8+ that tracks resource utilization and application usage patterns.
+
+- **Data Location:** `C:\Windows\System32\sru\sru.db` (SQLite format)
+- **Purpose:** Records application execution, resource consumption over time intervals
+
+#### Key Facets of SRUM Forensics
+
+| Facet | Description |
+|-------|-------------|
+| **Application Profiling** | Executable names, file paths, timestamps |
+| **Resource Consumption** | CPU time, network usage, memory consumption |
+| **Timeline Reconstruction** | Chronological application/process execution |
+| **User Context** | User identifiers for activity attribution |
+| **Malware Detection** | Identify unusual/unauthorized applications |
+| **Incident Response** | Rapid insights into recent activities |
+
+---
+
 *Module 13/15 - Introduction to Digital Forensics*
 *For learning and SOC career preparation*
