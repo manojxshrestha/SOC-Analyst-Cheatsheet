@@ -93,7 +93,126 @@ JavaScript code can be found in:
 
 ## 2. Obfuscation
 
-*Coming soon...*
+### Overview
+
+Most websites utilize JavaScript to perform their functions. While HTML determines the website's main fields and parameters, and CSS determines its design, JavaScript performs any functions necessary to run the website. This happens in the background, and we only see the pretty front-end.
+
+Even though all of this source code is available at the client-side, it is rendered by browsers, so we do not often pay attention to the HTML source code. However, to understand a page's client-side functionalities, we start by viewing the page's source code.
+
+### Viewing Source Code
+
+**Method 1: Keyboard Shortcut**
+- Press `CTRL + U` to view the source code
+
+**Method 2: URL Prefix**
+- Visit `view-source:http://example.com`
+
+**Method 3: Browser DevTools**
+- Press `F12` or `CTRL + SHIFT + I`
+- Go to **Elements** tab
+
+---
+
+### HTML Structure
+
+HTML source code can hold various information:
+- Comments (`<!-- comment -->`)
+- Hidden fields
+- Sensitive information
+- Reference to external scripts and styles
+
+**Example HTML:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secret Serial Generator</title>
+</head>
+<body>
+    <h1>Secret Serial Generator</h1>
+    <p>This page generates secret serials.</p>
+</body>
+</html>
+```
+
+> 📌 Always check HTML comments for hidden information left by developers.
+
+---
+
+### Locating CSS
+
+CSS can be defined:
+1. **Internally** - Within `<style>` tags in HTML
+2. **Externally** - In separate `.css` file referenced with `<link>`
+
+**Internal CSS:**
+```html
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    h1 {
+        font-size: 144px;
+    }
+</style>
+```
+
+**External CSS:**
+```html
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+```
+
+---
+
+### Locating JavaScript
+
+JavaScript can be defined:
+1. **Internally** - Within `<script>` tags
+2. **Externally** - In separate `.js` file referenced with `<script src="file.js">`
+
+**External JavaScript:**
+```html
+<script src="secret.js"></script>
+```
+
+---
+
+### Code Obfuscation
+
+Once we locate the JavaScript file, we may encounter obfuscated code:
+
+```javascript
+eval(function (p, a, c, k, e, d) { e = function (c) { '...SNIP... |true|function'.split('|'), 0, {})
+```
+
+> 📌 **Obfuscation** makes code difficult to understand while maintaining functionality.
+
+---
+
+### Types of Obfuscation
+
+| Type | Description |
+|------|-------------|
+| **String Encoding** | Encoding strings (Base64, hex) |
+| **Code Folding** | Collapsing functions |
+| **Variable Renaming** | Changing `userName` to `a`, `b` |
+| **Dead Code Injection** | Adding useless code |
+| **Packing** | Using packers like jsmin, uglifyjs |
+
+---
+
+### Why Obfuscation?
+
+| Use Case | Description |
+|----------|-------------|
+| **Malware** | Hide malicious functionality |
+| **Phishing** | Hide credential harvesting code |
+| **Evasion** | Bypass security tools |
+| **IP Protection** | Hide proprietary code |
+| **Size Reduction** | Minification |
 
 ---
 
