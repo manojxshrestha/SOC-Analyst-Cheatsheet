@@ -979,5 +979,275 @@ Having covered memory forensics, let's shift our attention to disk forensics (di
 
 ---
 
+## 6. Rapid Triage Examination & Analysis Tools {#6-rapid-triage-examination--analysis-tools}
+
+> 📌 **Rapid Triage** - Essential tools for quick forensic examination and analysis.
+
+### Eric Zimmerman's Tools
+
+Eric Zimmerman has curated a suite of indispensable tools for forensic analysis. These tools are available at: https://ericzimmerman.github.io/#!index.md
+
+#### Downloading Tools
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools> .\Get-ZimmermanTools.ps1
+```
+
+**Output:**
+```
+* Getting available programs...
+* Files to download: 27
+* Downloaded Get-ZimmermanTools.zip (Size: 10,396)
+* C:\htb\dfir_module\tools\net6 does not exist. Creating...
+* Downloaded AmcacheParser.zip (Size: 23,60,293) (net 6)
+* Downloaded AppCompatCacheParser.zip (Size: 22,62,497) (net 6)
+* Downloaded bstrings.zip (Size: 14,73,298) (net 6)
+* Downloaded EvtxECmd.zip (Size: 40,36,022) (net 6)
+* Downloaded EZViewer.zip (Size: 8,25,80,608) (net 6)
+* Downloaded JLECmd.zip (Size: 27,79,229) (net 6)
+* Downloaded JumpListExplorer.zip (Size: 8,66,96,361) (net 6)
+* Downloaded LECmd.zip (Size: 32,38,911) (net 6)
+* Downloaded MFTECmd.zip (Size: 22,26,605) (net 6)
+* Downloaded MFTExplorer.zip (Size: 8,27,54,162) (net 6)
+* Downloaded PECmd.zip (Size: 20,13,672) (net 6)
+* Downloaded RBCmd.zip (Size: 18,19,172) (net 6)
+* Downloaded RecentFileCacheParser.zip (Size: 17,22,133) (net 6)
+* Downloaded RECmd.zip (Size: 36,89,345) (net 6)
+* Downloaded RegistryExplorer.zip (Size: 9,66,96,169) (net 6)
+* Downloaded rla.zip (Size: 21,55,515) (net 6)
+* Downloaded SDBExplorer.zip (Size: 8,24,54,727) (net 6)
+* Downloaded SBECmd.zip (Size: 21,90,158) (net 6)
+* Downloaded ShellBagsExplorer.zip (Size: 8,80,06,168) (net 6)
+* Downloaded SQLECmd.zip (Size: 52,83,482) (net 6)
+* Downloaded SrumECmd.zip (Size: 24,00,622) (net 6)
+* Downloaded SumECmd.zip (Size: 20,23,009) (net 6)
+* Downloaded TimelineExplorer.zip (Size: 8,77,50,507) (net 6)
+* Downloaded VSCMount.zip (Size: 15,46,539) (net 6)
+* Downloaded WxTCmd.zip (Size: 36,98,112) (net 6)
+* Downloaded iisGeolocate.zip (Size: 3,66,76,319) (net 6)
+
+* Saving downloaded version information to C:\Users\johndoe\Desktop\Get-ZimmermanTools\!!!RemoteFileDetails.csv
+```
+
+---
+
+### MAC(b) Times in NTFS
+
+MAC(b) times are timestamps pivotal for forensic chronology:
+
+| Timestamp | Description |
+|-----------|-------------|
+| **Modified (M)** | Last content modification |
+| **Accessed (A)** | Last file read/access |
+| **Changed (C)** | MFT record changes |
+| **Birth (b)** | Original file creation |
+
+#### NTFS Timestamp Rules
+
+| Operation | Modified | Accessed | Birth (Created) |
+|-----------|----------|----------|-----------------|
+| File Create | Yes | Yes | Yes |
+| File Modify | Yes | No | No |
+| File Copy | No (Inherited) | Yes | Yes |
+| File Access | No | No* | No |
+
+---
+
+### MFTECmd - Master File Table Analyzer
+
+MFTECmd analyzes NTFS MFT files to extract file metadata and timestamps.
+
+#### Basic MFT Analysis
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT' --de 0x16169
+```
+
+**Output:**
+```
+MFTECmd version 1.2.2.1
+Author: Eric Zimmerman (saericzimmerman@gmail.com)
+
+File type: Mft
+Processed C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT in 3.492 seconds
+
+Dumping details for file record with key 00016169-00000004
+
+Entry-seq #: 0x16169-0x4, Offset: 0x585A400, Flags: InUse
+
+**** STANDARD INFO ****
+  Created On:         2022-01-03 16:54:25.2726453
+  Modified On:        2023-09-07 08:30:12.4258743
+  Record Modified On: 2023-09-07 08:30:12.4565632
+  Last Accessed On:   2023-09-07 08:30:12.4258743
+
+**** FILE NAME ****
+  File name: ChangedFileTime.txt
+  Created On:         2023-09-07 08:30:12.4258743
+  Modified On:        2023-09-07 08:30:12.4258743
+  Last Accessed On:   2023-09-07 08:30:12.4258743
+```
+
+#### MFT to CSV Export
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$MFT' --csv C:\Users\johndoe\Desktop\forensic_data\mft_analysis\ --csvf MFT.csv
+```
+
+---
+
+### USN Journal Analysis
+
+The USN (Update Sequence Number) Journal records file modifications, deletions, and renames.
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\MFTECmd.exe -f 'C:\Users\johndoe\Desktop\forensic_data\kape_output\D\$Extend\$J' --csv C:\Users\johndoe\Desktop\forensic_data\mft_analysis\ --csvf MFT-J.csv
+```
+
+---
+
+### EvtxECmd - Windows Event Log Parser
+
+EvtxECmd parses Windows Event Log files (EVTX) to CSV or JSON.
+
+#### Basic Usage
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe -h
+```
+
+**Examples:**
+```powershell
+EvtxECmd.exe -f "C:\Temp\Application.evtx" --csv "c:\temp\out" --csvf MyOutputFile.csv
+EvtxECmd.exe -f "C:\Temp\Application.evtx" --json "c:\temp\jsonout"
+```
+
+#### Update Mappings
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe --sync
+```
+
+#### Parse Sysmon Logs
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6\EvtxeCmd> .\EvtxECmd.exe -f "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\System32\winevt\logs\Microsoft-Windows-Sysmon%4Operational.evtx" --csv "C:\Users\johndoe\Desktop\forensic_data\event_logs\csv_timeline" --csvf kape_event_log.csv
+```
+
+---
+
+### EQL (Event Query Language)
+
+EQL allows correlation and analysis of event logs.
+
+```bash
+eql query -f C:\Users\johndoe\Desktop\forensic_data\event_logs\eql_format_json\eql-sysmon-data-kape.json "EventId=1 and (Image='*net.exe' and (wildcard(CommandLine, '* user*', '*localgroup *', '*group *')))"
+```
+
+**Example Output:**
+```
+{"CommandLine": "net  localgroup \"Remote Desktop Users\" backgroundTask /add", "Image": "C:\\Windows\\System32\\net.exe", "ParentImage": "C:\\Windows\\System32\\cmd.exe", "User": "HTBVM01\\John Doe", "UtcTime": "2023-09-07 08:30:12.178"}
+{"CommandLine": "net  users  ", "Image": "C:\\Windows\\System32\\net.exe", "ParentImage": "C:\\Windows\\System32\\cmd.exe", "User": "HTBVM01\\John Doe", "UtcTime": "2023-09-07 08:30:26.851"}
+```
+
+---
+
+### RegRipper - Registry Analysis
+
+RegRipper analyzes Windows Registry hives for forensic artifacts.
+
+#### List Available Plugins
+
+```powershell
+PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -l -c > rip_plugins.csv
+```
+
+#### Extract Computer Name
+
+```powershell
+PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -r "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\System32\config\SYSTEM" -p compname
+```
+
+#### Extract Timezone
+
+```powershell
+PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -r "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\System32\config\SYSTEM" -p timezone
+```
+
+#### Extract Network Info
+
+```powershell
+PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -r "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\System32\config\SYSTEM" -p nic2
+```
+
+#### Extract Installed Software
+
+```powershell
+PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -r "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\System32\config\SOFTWARE" -p installer
+```
+
+#### Extract Recent Documents
+
+```powershell
+PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -r "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Users\John Doe\NTUSER.DAT" -p recentdocs
+```
+
+#### Extract Auto-Run Programs
+
+```powershell
+PS C:\Users\johndoe\Desktop\RegRipper3.0-master> .\rip.exe -r "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Users\John Doe\NTUSER.DAT" -p run
+```
+
+**Output showing suspicious entries:**
+```
+DiscordUpdate - C:\Windows\Tasks\update.exe
+```
+
+---
+
+### PECmd - Prefetch Analyzer
+
+PECmd analyzes Windows Prefetch files to determine program execution history.
+
+#### View Single Prefetch File
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\PECmd.exe -f C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\prefetch\DISCORD.EXE-7191FAD6.pf
+```
+
+#### Batch Process Prefetch Files
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\PECmd.exe -d C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\prefetch --csv C:\Users\johndoe\Desktop\forensic_data\prefetch_analysis
+```
+
+---
+
+### AmcacheParser - Amcache.hve Analysis
+
+AmcacheParser extracts program execution history from Amcache.hve.
+
+```powershell
+PS C:\Users\johndoe\Desktop\Get-ZimmermanTools\net6> .\AmcacheParser.exe -f "C:\Users\johndoe\Desktop\forensic_data\kape_output\D\Windows\AppCompat\Programs\AmCache.hve" --csv C:\Users\johndoe\Desktop\forensic_data\amcache-analysis
+```
+
+---
+
+### Summary of Eric Zimmerman Tools
+
+| Tool | Purpose |
+|------|---------|
+| **MFTECmd** | MFT file analysis, USN Journal |
+| **EvtxECmd** | Windows Event Log parsing |
+| **PECmd** | Prefetch file analysis |
+| **AmcacheParser** | Amcache.hve analysis |
+| **RECmd** | Registry analysis |
+| **TimelineExplorer** | Timeline visualization |
+| **RegistryExplorer** | Registry browsing |
+| **JumpListExplorer** | Jump list analysis |
+| **ShellBagsExplorer** | Shell bag analysis |
+
+---
+
 *Module 13/15 - Introduction to Digital Forensics*
 *For learning and SOC career preparation*
