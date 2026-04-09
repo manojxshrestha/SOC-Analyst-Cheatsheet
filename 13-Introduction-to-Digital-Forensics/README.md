@@ -43,7 +43,7 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
 5. [Disk Forensics](#5-disk-forensics) - Autopsy, Disk analysis, File recovery
 6. [Rapid Triage Examination & Analysis Tools](#6-rapid-triage-examination--analysis-tools) - Eric Zimmerman tools, MFTECmd, EvtxECmd, RegRipper, PECmd
 7. [Practical Digital Forensics Scenario](#-practical-digital-forensics-scenario)
-   - [7.0 Overview](#0-overview) - Scenario description and evidence locations
+   - [7.0 Scenario Overview](#70-scenario-overview) - Scenario description and evidence locations
    - [7.1 Memory Analysis with Volatility v3](#1-memory-analysis-with-volatility-v3) - Process analysis, injected code, DLLs, network artifacts
    - [7.2 Disk Image & Rapid Triage Analysis](#2-disk-image--rapid-triage-analysis) - Autopsy, Chrome cache, Cobalt Strike, Autoruns, MFT, SRUM, Event logs
    - [7.3 Timeline Construction](#3-timeline-construction) - Building execution timeline
@@ -1527,7 +1527,7 @@ API Monitor captures and displays API calls made by applications. This is valuab
 
 ---
 
-## 0. Overview
+## 7.0 Scenario Overview
 
 > 📌 **Practical Digital Forensics** - This section covers hands-on memory dump analysis, disk forensics, and rapid triage artifact examination using industry-standard tools like Volatility, Autopsy, and Chainsaw.
 
