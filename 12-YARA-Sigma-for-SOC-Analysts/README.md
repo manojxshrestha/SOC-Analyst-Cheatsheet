@@ -42,8 +42,9 @@ This module covers:
 3. [Developing YARA Rules](#3-developing-yara-rules) - Manual Development, yarGen, Advanced Examples
 4. [Hunting Evil with YARA](#4-hunting-evil-with-yara-windows-edition) - Disk, Process, ETW Hunting (Windows)
 5. [Hunting Evil with YARA](#5-hunting-evil-with-yara-linux-edition) - Memory Forensics with YARA & Volatility
-6. [Leveraging Sigma](#6-leveraging-sigma) - *Coming soon*
-7. [Skills Assessment](#7-skills-assessment) - *Coming soon*
+6. [Hunting Evil with YARA](#6-hunting-evil-with-yara-web-edition) - Online YARA Hunting with Unpac.me
+7. [Leveraging Sigma](#7-leveraging-sigma) - *Coming soon*
+8. [Skills Assessment](#8-skills-assessment) - *Coming soon*
 
 ### Quick Reference
 - [YARA Rule Structure](#yara-rule-structure)
@@ -1575,15 +1576,88 @@ Owner: Process svchost.exe Pid 1576
 
 ---
 
-## 6. Leveraging Sigma {#6-leveraging-sigma}
+## 6. Hunting Evil with YARA (Web Edition) {#6-hunting-evil-with-yara-web-edition}
+
+> 📌 This section covers using YARA to hunt malware in online datasets via Unpac.me platform.
+
+### Unpac.Me - Online YARA Hunting
+
+Unpac.Me is a tool tailored for malware unpacking. It grants the capability to run YARA rules over their amassed database of malware submissions. For SOC analysts with limited access to commercial malware datasets, Unpac.Me is a prime asset.
+
+#### Example YARA Rule - Dharma Ransomware
+
+Let's test this YARA rule:
+
+```yara
+rule ransomware_dharma {
+
+    meta:
+        author = "Madhukar Raina"
+        version = "1.0"
+        description = "Simple rule to detect strings from Dharma ransomware"
+        reference = "https://www.virustotal.com/gui/file/bff6a1000a86f8edf3673d576786ec75b80bed0c458a8ca0bd52d12b74099071/behavior" 
+    
+    strings:
+        $string_pdb = {  433A5C6372797369735C52656C656173655C5044425C7061796C6F61642E706462 }
+        $string_ssss = { 73 73 73 73 73 62 73 73 73 }
+
+    condition: all of them
+}
+```
+
+#### How to Get Started:
+
+1. **Register** for zero-cost access and log into the platform
+2. **Navigate** to Yara Hunt and choose "New Hunt"
+
+![UnpacMe Yara Hunt Menu](https://github.com/user-attachments/assets/ad499825-1dd4-4542-8894-badf47689841)
+
+*UnpacMe interface showing 'Yara Hunt' menu with options for 'New Hunt' and 'History'.*
+
+3. **Enter** the YARA rule into the designated rule space
+
+![UnpacMe Yara Hunt Interface](https://github.com/user-attachments/assets/a1a14d55-0301-4a51-838f-89bbb44be3c9)
+
+*UnpacMe Yara Hunt interface displaying a YARA rule for detecting Dharma ransomware.*
+
+4. **Validate** and then **Scan**
+
+![Scan Options](https://github.com/user-attachments/assets/ebb13b22-850b-49f2-aa3b-01068a04420e)
+
+*Interface showing options for Scan Assist, Fast Scan, Store Offsets, File Size Limits, Validate, Scan, and Total Recall.*
+
+5. **View Results** - Scan results are displayed in real-time
+
+![Hunt Results](https://github.com/user-attachments/assets/114eba5f-79f0-4714-b144-5fa18cbbfc48)
+
+*Hunt Results showing ransomware_dharma rule with 1 unpacked malware match. Status: complete.*
+
+![Validation Results](https://github.com/user-attachments/assets/734843d5-5003-4290-b8ce-f211bfd1423b)
+
+*Rule validation passed. Scan coverage: 100%. Observed lifespan: 3 years. First seen: 21/02/2020. Last seen: 13/06/2023. File type: EXE, size: 95 KB.*
+
+> 📌 **Key Results:**
+> - **1 match** found in the malware database
+> - **Validation**: Passed
+> - **Scan Coverage**: 100%
+> - **Lifespan**: 3 years (2020-2023)
+> - **File Type**: EXE, 95 KB
+
+> 📌 **Why Use Unpac.Me?**
+> - Access to large malware dataset without commercial licensing
+> - Validate YARA rules against real-world samples
+> - Identify malware variants and families
+> - Enhances detection capabilities for SOC analysts
+
+---
+
+## 7. Leveraging Sigma {#7-leveraging-sigma}
 
 *Coming soon...*
 
 ---
 
-## 7. Skills Assessment {#7-skills-assessment}
-
-*Coming soon...*
+## 8. Skills Assessment {#8-skills-assessment}
 
 ---
 
