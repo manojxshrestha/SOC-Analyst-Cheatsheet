@@ -882,5 +882,102 @@ info@netlock.net
 
 ---
 
+## 5. Disk Forensics {#5-disk-forensics}
+
+> 📌 **Disk Forensics** - Examination and analysis of disk images for evidence of malicious activity.
+
+### Overview
+
+Having covered memory forensics, let's shift our attention to disk forensics (disk image examination and analysis).
+
+> 📌 Adhering to the sequence of data volatility is crucial. Examine each byte to detect traces left by cyber adversaries.
+
+---
+
+### Key Disk Forensic Features
+
+| Feature | Description |
+|---------|-------------|
+| **File Structure Insight** | Navigate and view disk's file hierarchy |
+| **Hex Viewer** | View files in hexadecimal for malware/exploit analysis |
+| **Web Artifacts Analysis** | Extract web browsing data |
+| **Email Carving** | Extract email data for internal threat investigation |
+| **Image Viewer** | View stored images |
+| **Metadata Analysis** | File timestamps, hashes, disk locations |
+
+---
+
+### Autopsy - Forensic Platform
+
+**Autopsy** is a user-friendly forensic platform built atop the open-source Sleuth Kit toolset. Features include:
+- Timeline assessments
+- Keyword hunts
+- Web and email artifact retrievals
+- Hash-based malicious file detection
+
+#### Autopsy Interface Overview
+
+![Autopsy Interface](https://github.com/user-attachments/assets/61d64bd5-e850-4a2a-a240-b9b4ea658549)
+
+*Autopsy showing data sources and forensic artifacts organized on side panel.*
+
+---
+
+### Autopsy Capabilities
+
+#### 1. Data Sources - Explore Files and Directories
+
+![Data Sources](https://github.com/user-attachments/assets/29c61007-f42e-4a4e-b232-cbff8dcd0f74)
+
+*File hierarchy with folders: OrphanFiles, CarvedFiles, Recycle.Bin, $Unalloc, Users, Windows, etc.*
+
+#### 2. Web Artifacts - Browser History, Cache, Downloads
+
+![Web Artifacts](https://github.com/user-attachments/assets/dfa6fecc-fa97-409d-b1f6-3cb87751c055)
+
+*Web Cache artifacts showing URLs, domains, and creation dates from keyword search.*
+
+#### 3. Attached Devices - USB Device History
+
+![USB Devices](https://github.com/user-attachments/assets/19d8bf50-97a7-42fe-842d-e3983e73b6ed)
+
+*USB Device Attached artifacts showing device make, model, ID, and timestamps.*
+
+#### 4. Recover Deleted Files
+
+![Deleted Files](https://github.com/user-attachments/assets/7abbb209-11e7-4f54-ae20-a60ef15c2950)
+
+*Deleted files listing with file names, modified times, and locations.*
+
+#### 5. Keyword Searches
+
+![Keyword Search](https://github.com/user-attachments/assets/487509b9-9145-49af-9ab9-10664c64d553)
+
+*Keyword search for 'powershell.exe' with substring match.*
+
+![Keyword Results](https://github.com/user-attachments/assets/45c954c7-243e-4a3f-8d76-7d518695fb6f)
+
+*Results showing files like Windows PowerShell.lnk, NTUSER.DAT.LOG1, $LogFile.*
+
+#### 6. Keyword Lists - Targeted Searches
+
+![Keyword Lists](https://github.com/user-attachments/assets/1dfff436-6310-4ffb-a1a0-ec40a4217a3e)
+
+*Keyword lists for Phone Numbers, IP Addresses, Email Addresses, URLs, Credit Card Numbers.*
+
+![Keyword List Results](https://github.com/user-attachments/assets/c5fcef3f-06e6-4b0d-a7f8-af4580c770b1)
+
+*Results showing files matching search criteria with IP address details.*
+
+#### 7. Timeline Analysis - Map Out Events
+
+![Timeline Analysis](https://github.com/user-attachments/assets/dd109300-236e-4e2c-a497-48c5d5058845)
+
+*Timeline Editor showing events for Notepad++, WinRAR, Process Hacker, Chrome with visual counts.*
+
+> 📌 We'll heavily utilize Autopsy in the "Practical Digital Forensics Scenario" section.
+
+---
+
 *Module 13/15 - Introduction to Digital Forensics*
 *For learning and SOC career preparation*
