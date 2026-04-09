@@ -976,5 +976,165 @@ index=main earliest=1690443407 latest=1690443544 source="XmlWinEventLog:Microsof
 
 ---
 
+### Detecting Golden Tickets/Silver Tickets {#detecting-golden-ticketssilver-tickets}
+
+#### Golden Ticket Overview
+
+A **Golden Ticket** is a forged Ticket Granting Ticket (TGT) that grants unauthorized access to a Windows Active Directory domain as a domain administrator. Attackers create a TGT with arbitrary user credentials and domain admin privileges, gaining full control over the domain.
+
+> 📌 Golden Tickets are stealthy and persistent - they have long validity periods and remain valid until expiration or revocation.
+
+![KRBTGT Hash Extraction](https://github.com/user-attachments/assets/89fec40a-5a97-4e1c-8aca-1d25ff41ec2f)
+
+*Extracting KRBTGT account hash via DCSync*
+
+#### Golden Ticket Attack Steps
+
+1. **Extract KRBTGT Hash**: Attacker extracts NTLM hash of KRBTGT account via DCSync attack, NTDS.dit, or LSASS dumps on DC
+
+2. **Forge TGT**: Using the KRBTGT hash, attacker forges a TGT for an arbitrary user with domain admin privileges
+
+![Golden Ticket Creation](https://github.com/user-attachments/assets/c71c2965-6a9f-4468-a9d3-0c06512ba803)
+
+*Mimikatz creating Golden Ticket*
+
+3. **Inject Ticket**: Attacker injects the forged TGT (same as Pass-the-Ticket)
+
+---
+
+#### Golden Ticket Detection Opportunities
+
+Detecting Golden Tickets is challenging since TGTs can be forged offline without leaving Mimikatz execution traces.
+
+| Detection Method | Description |
+|-----------------|-------------|
+| DCSync Attack | Monitor for replication requests to KRBTGT |
+| NTDS.dit Access | Monitor file access on domain controllers |
+| LSASS Memory Read | Sysmon Event ID 10 on DC |
+| Pass-the-Ticket | Same detection applies - look for tickets without proper TGT requests |
+
+> 📌 Golden Tickets are just another ticket - use Pass-the-Ticket detection logic (Event 4769 without prior 4768)
+
+---
+
+#### Detecting Golden Tickets With Splunk
+
+**Timeframe:** earliest=1690451977 latest=1690452262
+
+```spl
+index=main earliest=1690451977 latest=1690452262 source="WinEventLog:Security" user!=*$ EventCode IN (4768,4769,4770) 
+| rex field=user "(?<username>[^@]+)"
+| rex field=src_ip "(\:\:ffff\:)?(?<src_ip_4>[0-9\.]+)"
+| transaction username, src_ip_4 maxspan=10h keepevicted=true startswith=(EventCode=4768)
+| where closed_txn=0
+| search NOT user="*$@*"
+| table _time, ComputerName, username, src_ip_4, service_name, category
+```
+
+![Golden Ticket Detection](https://github.com/user-attachments/assets/bac6e91f-bf8d-4c7c-baee-75a75db3b26c)
+
+*Detecting anomalous ticket usage*
+
+---
+
+#### Silver Ticket Overview
+
+**Silver Tickets** are forged Ticket Granting Service (TGS) tickets for a specific service account (e.g., MSSQL, SharePoint). While more limited than Golden Tickets (only access to specific resource), they can still impersonate any user.
+
+> 📌 Silver Tickets are forged offline using the password hash of the target service account.
+
+![Silver Ticket Creation](https://github.com/user-attachments/assets/c403c055-5367-44e6-b0ab-911ce14a7dbd)
+
+*Mimikatz creating Silver Ticket*
+
+#### Silver Ticket Attack Steps
+
+1. **Extract Service Hash**: Attacker extracts NTLM hash of target service account using Mimikatz or other credential dumping
+
+2. **Forge TGS**: Using the service account hash, attacker creates a forged TGS ticket for the specified service
+
+![Silver Ticket Usage](https://github.com/user-attachments/assets/28b58da2-e871-4ccf-961a-b1fd9aaa7df5)
+
+*Injecting and using Silver Ticket*
+
+3. **Access Resource**: Attacker accesses the specific service with forged ticket
+
+---
+
+#### Silver Ticket Detection Opportunities
+
+Detecting forged TGS tickets is challenging - no simple indicators exist. Both Golden and Silver Tickets can use arbitrary (including non-existent) users.
+
+| Event ID | Description |
+|----------|-------------|
+| 4720 | User account was created - identify newly created users |
+| 4672 | Special Logon - detect anomalously assigned privileges |
+| 4624 | Successful logon - correlate with new users |
+
+> 📌 Compare newly created users (4720) with logged-in users to identify suspicious activity
+
+---
+
+#### Detecting Silver Tickets With Splunk
+
+##### Method 1: User Correlation - New Users Logging In
+
+First, create a list of newly created users:
+
+```spl
+index=main latest=1690448444 EventCode=4720
+| stats min(_time) as _time, values(EventCode) as EventCode by user
+| outputlookup users.csv
+```
+
+Then compare with logged-in users:
+
+```spl
+index=main latest=1690545656 EventCode=4624
+| stats min(_time) as firstTime, values(ComputerName) as ComputerName, values(EventCode) as EventCode by user
+| eval last24h = 1690451977
+| where firstTime > last24h
+| convert ctime(firstTime)
+| convert ctime(last24h)
+| lookup users.csv user as user OUTPUT EventCode as Events
+| where isnull(Events)
+```
+
+![User Correlation](https://github.com/user-attachments/assets/a63bc3dc-f847-4d84-b6f3-2a1ff30f4527)
+
+*Detecting logins from users not in the new users list*
+
+---
+
+##### Method 2: Special Privileges Assigned To New Logon
+
+```spl
+index=main latest=1690545656 EventCode=4672
+| stats min(_time) as firstTime, values(ComputerName) as ComputerName by Account_Name
+| eval last24h = 1690451977 
+| where firstTime > last24h 
+| table firstTime, ComputerName, Account_Name 
+| convert ctime(firstTime)
+```
+
+![Special Privileges](https://github.com/user-attachments/assets/8e991c70-ec90-4900-87ec-32b1c7f8d527)
+
+*Detecting special privileges assigned to recent logons*
+
+**Search Breakdown:**
+
+1. **User Correlation**: 
+   - Create list of newly created users (Event 4720)
+   - Compare with logged-in users (Event 4624)
+   - Find users logging in who were never created
+
+2. **Special Privileges**:
+   - Find Event 4672 (Special Logon) for recent logons
+   - Identify anomalously assigned privileges
+
+> 📌 **Key Detection**: Users logging in without being created (Event 4720 → 4624) or receiving special privileges (4672) shortly after first logon may indicate Silver Ticket usage!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
