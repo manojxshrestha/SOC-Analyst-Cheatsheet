@@ -42,12 +42,12 @@ Dive into Windows digital forensics with Hack The Box Academy's "Introduction to
 4. [Memory Forensics](#4-memory-forensics) - Volatility, Memory analysis, Rootkit detection
 5. [Disk Forensics](#5-disk-forensics) - Autopsy, Disk analysis, File recovery
 6. [Rapid Triage Examination & Analysis Tools](#6-rapid-triage-examination--analysis-tools) - Eric Zimmerman tools, MFTECmd, EvtxECmd, RegRipper, PECmd
-7. [Practical Digital Forensics Scenario](#7-practical-digital-forensics-scenario)
-   - [7.0 Overview](#7-0-overview) - Scenario description and evidence locations
-   - [7.1 Memory Analysis with Volatility v3](#7-1-memory-analysis-with-volatility-v3) - Process analysis, injected code, DLLs, network artifacts
-   - [7.2 Disk Image & Rapid Triage Analysis](#7-2-disk-image--rapid-triage-analysis) - Autopsy, Chrome cache, Cobalt Strike, Autoruns, MFT, SRUM, Event logs
-   - [7.3 Timeline Construction](#7-3-timeline-construction) - Building execution timeline
-   - [7.4 Summary](#7-4-summary) - Key findings and conclusions
+7. [Practical Digital Forensics Scenario](#practical-digital-forensics-scenario)
+   - [7.0 Overview](#0-overview) - Scenario description and evidence locations
+   - [7.1 Memory Analysis with Volatility v3](#1-memory-analysis-with-volatility-v3) - Process analysis, injected code, DLLs, network artifacts
+   - [7.2 Disk Image & Rapid Triage Analysis](#2-disk-image--rapid-triage-analysis) - Autopsy, Chrome cache, Cobalt Strike, Autoruns, MFT, SRUM, Event logs
+   - [7.3 Timeline Construction](#3-timeline-construction) - Building execution timeline
+   - [7.4 Summary](#4-summary) - Key findings and conclusions
 8. [Interview Questions](#8-interview-questions) - Common digital forensics interview questions
 9. [Additional Resources](#9-additional-resources) - Tools, references, further learning
 
