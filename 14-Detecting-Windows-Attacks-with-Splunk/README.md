@@ -1136,5 +1136,176 @@ index=main latest=1690545656 EventCode=4672
 
 ---
 
+### Detecting Unconstrained/Constrained Delegation {#detecting-unconstrainedconstrained-delegation}
+
+#### Unconstrained Delegation Overview
+
+**Unconstrained Delegation** allows a service to authenticate to another resource on behalf of any user. This is necessary when a web server needs to access a database on behalf of a user, for example.
+
+![Unconstrained Delegation Settings](https://github.com/user-attachments/assets/69e5fad9-8612-4532-bb31-fe4509f0414c)
+
+*Unconstrained delegation enabled on IIS server*
+
+#### Unconstrained Delegation Attack Steps
+
+1. **Identify Target**: Attacker finds systems with Unconstrained Delegation enabled
+
+![Discovery](https://github.com/user-attachments/assets/9303345a-36f9-4284-8d9f-e8638d2af45a)
+
+*PowerShell discovering Unconstrained Delegation*
+
+2. **Gain Access**: Attacker gains access to a system with Unconstrained Delegation enabled
+
+3. **Extract TGT**: Attacker extracts TGT tickets from memory using Mimikatz/Rubeus
+
+![TGT Extraction](https://github.com/user-attachments/assets/eea50ae1-9e86-49bc-b6dc-a2207849736f)
+
+*Rubeus extracting TGT*
+
+---
+
+#### Kerberos Authentication With Unconstrained Delegation
+
+When Unconstrained Delegation is enabled:
+1. User requests TGS for remote service
+2. DC embeds user's TGT into the service ticket
+3. User presents TGS + their own TGT to the service
+4. Service can use user's TGT to authenticate to other services on user's behalf
+
+![Unconstrained Delegation Process](https://github.com/user-attachments/assets/27200b16-6c43-4819-8aa6-ef81702f44ab)
+
+*Kerberos unconstrained delegation flow*
+
+---
+
+#### Unconstrained Delegation Detection Opportunities
+
+| Detection Method | Description |
+|-----------------|-------------|
+| PowerShell Logging | Event ID 4104 - commands like TrustedForDelegation |
+| LDAP Search | userAccountControl:1.2.840.113556.1.4.803:=524288 |
+| Pass-the-Ticket | TGT extraction/reuse detection |
+
+> 📌 Monitor PowerShell script block logging (4104) for LDAP queries searching for delegation settings
+
+---
+
+#### Detecting Unconstrained Delegation With Splunk
+
+**Timeframe:** earliest=1690544538 latest=1690544540
+
+```spl
+index=main earliest=1690544538 latest=1690544540 source="WinEventLog:Microsoft-Windows-PowerShell/Operational" EventCode=4104 Message="*TrustedForDelegation*" OR Message="*userAccountControl:1.2.840.113556.1.4.803:=524288*" 
+| table _time, ComputerName, EventCode, Message
+```
+
+![Unconstrained Detection](https://github.com/user-attachments/assets/b3cfb9f6-2504-45b8-b9f5-04593173038c)
+
+*Detecting PowerShell queries for Unconstrained Delegation*
+
+---
+
+#### Constrained Delegation Overview
+
+**Constrained Delegation** allows services to delegate user credentials only to **specified resources**. Any accounts with SPNs set in `msDS-AllowedToDelegateTo` can impersonate users to those specific SPNs.
+
+![Constrained Delegation Settings](https://github.com/user-attachments/assets/f3b8b4ff-06f6-4ede-8506-210468d8d448)
+
+*Constrained delegation to specific services*
+
+#### Constrained Delegation Attack Steps
+
+1. **Identify Target**: Find systems with Constrained Delegation and allowed SPNs
+
+![CD Discovery](https://github.com/user-attachments/assets/ce7583bd-4a4d-4921-8b90-3e068844c759)
+
+*Discovering Constrained Delegation*
+
+2. **Get TGT**: Extract TGT from memory or request with principal's hash
+
+![TGT Request](https://github.com/user-attachments/assets/5c8263aa-e843-4bb8-b677-84b1929faad5)
+
+*Rubeus requesting TGT*
+
+3. **S4U Impersonation**: Use S4U technique to impersonate high-privileged account
+
+![S4U Request](https://github.com/user-attachments/assets/02e7b2a6-5364-40de-b4b6-35bcbc0a97c8)
+
+*S4U2proxy impersonating WELDON_EVANS*
+
+4. **Access Service**: Inject ticket and access targeted service as impersonated user
+
+![Service Access](https://github.com/user-attachments/assets/3dcd8ba6-fa53-4f86-afd5-a9130f8983ff)
+
+*Accessing service as impersonated user*
+
+---
+
+#### S4U Extensions
+
+**S4U2self**: Allows a service to obtain a TGS for itself on behalf of any user (even without Kerberos auth)
+
+![S4U2self](https://github.com/user-attachments/assets/8b4c762e-913f-4d28-81c5-ba4ccbab70c1)
+
+*S4U2self process*
+
+**S4U2proxy**: Takes a forwardable ticket and requests TGS to any SPN in msDS-AllowedToDelegateTo
+
+With S4U2self + S4U2proxy, attackers can impersonate any user to SPNs in msDS-AllowedToDelegateTo.
+
+---
+
+#### Constrained Delegation Detection Opportunities
+
+| Detection Method | Description |
+|-----------------|-------------|
+| PowerShell Logging | Event 4104 - msDS-AllowedToDelegateTo queries |
+| Network Connections | Unusual process to Kerberos port 88 |
+| Pass-the-Ticket | TGT extraction/reuse detection |
+
+---
+
+#### Detecting Constrained Delegation With Splunk
+
+##### Method 1: PowerShell Logs
+
+**Timeframe:** earliest=1690544553 latest=1690562556
+
+```spl
+index=main earliest=1690544553 latest=1690562556 source="WinEventLog:Microsoft-Windows-PowerShell/Operational" EventCode=4104 Message="*msDS-AllowedToDelegateTo*" 
+| table _time, ComputerName, EventCode, Message
+```
+
+![Constrained PS Detection](https://github.com/user-attachments/assets/909e8cb8-7656-42c3-8cf3-a2426b42e59b)
+
+*Detecting PowerShell queries for Constrained Delegation*
+
+---
+
+##### Method 2: Sysmon Network Logs
+
+**Timeframe:** earliest=1690562367 latest=1690562556
+
+```spl
+index=main earliest=1690562367 latest=1690562556 source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" 
+| eventstats values(process) as process by process_id
+| where EventCode=3 AND dest_port=88
+| table _time, Computer, dest_ip, dest_port, Image, process
+```
+
+![Constrained Network Detection](https://github.com/user-attachments/assets/13e8a17f-8359-4a4e-a92e-290cd6749656)
+
+*Detecting Rubeus connections to Kerberos port*
+
+**Search Breakdown:**
+
+1. **EventStats**: Map process IDs to process names
+2. **Filter**: Network events (EventCode=3) to port 88
+3. **Table**: Display time, computer, destination, image, process
+
+> 📌 **Key Detection**: Network connections to Kerberos port 88 from unusual processes (like Rubeus) indicate potential delegation attacks!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
