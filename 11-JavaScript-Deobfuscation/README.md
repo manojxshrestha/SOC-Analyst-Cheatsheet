@@ -282,6 +282,183 @@ This is why obfuscation is very commonly used with JavaScript.
 
 ---
 
+## 3. Basic Obfuscation
+
+> 📌 Code obfuscation is usually automated using tools. Many online tools exist, though malicious actors often develop custom obfuscation tools.
+
+### Running JavaScript Code
+
+**Example Code:**
+```javascript
+console.log('HTB JavaScript Deobfuscation Module');
+```
+
+**Testing in JSConsole:**
+1. Visit https://jsconsole.com
+2. Paste the code
+3. Press Enter
+4. See output: `HTB JavaScript Deobfuscation Module`
+
+![JSConsole Test](https://github.com/user-attachments/assets/8177ff90-3e1f-4dd2-b1c8-3596f8ab79f5)
+
+*Console output showing 'HTB JavaScript Deobfuscation Module'*
+
+> 📌 The `console.log()` function prints output to the browser console.
+
+---
+
+### JavaScript Minification
+
+> 📌 **Minification** - Reducing code to a single line while keeping it functional.
+
+**Purpose:**
+- Reduce file size
+- Improve load time
+- Reduce readability
+
+**Tool:** https://javascript-minifier.com/
+
+![Minification Example](https://github.com/user-attachments/assets/563667c4-f493-4c4d-94e3-6c025082937d)
+
+*JavaScript minification tool showing input and minified output*
+
+**Input:**
+```javascript
+console.log('HTB JavaScript Deobfuscation Module');
+```
+
+**Output (Minified):**
+```javascript
+console.log('HTB JavaScript Deobfuscation Module');
+```
+
+> 📌 Minified JavaScript files usually have `.min.js` extension.
+
+---
+
+### JavaScript Packing
+
+**Tool:** https://beautifytools.com/javascript-obfuscator.php
+
+![Packing Tool](https://github.com/user-attachments/assets/eeca25b8-2e8d-4ca7-a3b4-8ef6ccd3df32)
+
+*JavaScript obfuscation tool with options*
+
+**Original Code:**
+```javascript
+console.log('HTB JavaScript Deobfuscation Module');
+```
+
+**Packed Output:**
+```javascript
+eval(function(p,a,c,k,e,d){e=function(c){return c};if(!''.replace(/^/,String)){while(c--){d[c]=k[c]||c}k=[function(e){return d[e]}];e=function(){return'\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\b'+e(c)+'\b','g'),k[c])}}return p}('5.4(\'3 2 1 0\');',6,6,'Module|Deobfuscation|JavaScript|HTB|log|console'.split('|'),0,{}))
+```
+
+**Verify in JSConsole:**
+
+![Packed Code Test](https://github.com/user-attachments/assets/270a528b-34b9-4929-88b5-d3e89acd7b85)
+
+*Obfuscated code running in JSConsole*
+
+> 📌 The output remains the same after packing!
+
+---
+
+### How Packing Works
+
+The packer obfuscation method:
+1. Converts all words/symbols into a dictionary
+2. Uses `(p,a,c,k,e,d)` function to rebuild code during execution
+3. Recognizable by the six function arguments
+
+**Typical Pattern:**
+```javascript
+eval(function(p,a,c,k,e,d){ ... })
+```
+
+> 🔴 **Note:** Strings may still be visible in cleartext within packed code, revealing some functionality.
+
+---
+
+### Advanced Obfuscation
+
+> 📌 For better obfuscation, consider:
+- **String encoding** (Base64, hex)
+- **Multiple layers of packing**
+- **Custom obfuscation tools**
+
+---
+
+## 4. Advanced Obfuscation
+
+> 📌 Basic obfuscation still leaves some strings visible. Advanced obfuscation completely hides the code's functionality.
+
+### Using obfuscator.io
+
+**Tool:** https://obfuscator.io
+
+**Configuration:**
+1. Set **String Array Encoding** to **Base64**
+2. Enable **Compact Code**
+3. Enable **String Array**
+
+![Obfuscator.io Settings](https://github.com/user-attachments/assets/d40edffb-592b-4820-bfc0-ae09224d65e2)
+
+*JavaScript obfuscation tool with Base64 encoding option*
+
+**Original Code:**
+```javascript
+console.log('HTB JavaScript Deobfuscation Module');
+```
+
+**Advanced Obfuscated Output:**
+```javascript
+var _0x1ec6=['Bg9N','sfrciePHDMfty3jPChqGrgvVyMz1C2nHDgLVBIbnB2r1Bgu='];(function(_0x13249d,_0x1ec6e5){var _0x14f83b=function(_0x3f720f){while(--_0x3f720f){_0x13249d['push'](_0x13249d['shift']());}};_0x14f83b(++_0x1ec6e5);}(_0x1ec6,0xb4));var _0x14f8=function(_0x13249d,_0x1ec6e5){_0x13249d=_0x13249d-0x0;var _0x14f83b=_0x1ec6[_0x13249d];if(_0x14f8['eOTqeL']===undefined){...};console[_0x14f8('0x0')](_0x14f8('0x1'));
+```
+
+![Obfuscator Input](https://github.com/user-attachments/assets/a4048165-c0da-4b13-b7b0-d9987af6ed35)
+
+*JavaScript code input area with 'Obfuscate' button*
+
+> 📌 This code is completely obfuscated with no cleartext remnants!
+
+---
+
+### JSFuck Encoding
+
+**Example JSFuck code:**
+```javascript
+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]][(...SNIP...)]()) 
+```
+
+> 🔴 This code still outputs `HTB JavaScript Deobfuscation Module` when executed!
+
+**Example Output:**
+
+![JSFuck Output](https://github.com/user-attachments/assets/f1bf37ad-6fc1-4236-bee6-554dc29686bc)
+
+*Obfuscated code running in JSConsole*
+
+---
+
+### Other Obfuscation Tools
+
+| Tool | Description | URL |
+|------|-------------|-----|
+| **JJEncode** | JJEncode obfuscation | Various online tools |
+| **AAEncode** | Asian art encoding | Various online tools |
+| **JSFuck** | Using only 6 characters | jsfuck.com |
+
+> 🔴 **Warning:** These tools make code execution very slow. Use only for bypassing web filters.
+
+---
+
+### Performance Impact
+
+> 📌 **Note:** Obfuscated code takes longer to execute due to the decoding process during runtime.
+
+---
+
 ## 3. Deobfuscation Examples
 
 *Coming soon...*
