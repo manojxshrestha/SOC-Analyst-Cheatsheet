@@ -17,8 +17,6 @@ This module covers:
 - Using sigmac utility
 - Hunting threats in event logs and SIEM solutions
 
-> 🔴 **Difficulty:** Easy | **Tier:** 2 | **Estimated Time:** 3 days | **Cubes:** 20
-
 ### Prerequisites
 
 - Understanding Log Sources & Investigating with Splunk
