@@ -1,8 +1,8 @@
 <h1 align="center">SOC Analyst Cheatsheet</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/SOC-Analyst-100%25-green" alt="SOC Analyst">
-  <img src="https://img.shields.io/badge-HTBAcademy-blue" alt="HTB Academy">
+  <a href="https://img.shields.io/badge/SOC-Analyst-100%25-green"><img src="https://img.shields.io/badge/SOC-Analyst-100%25-green" alt="SOC Analyst"></a>
+  <a href="https://img.shields.io/badge/HTB-Academy-blue"><img src="https://img.shields.io/badge/HTB-Academy-blue" alt="HTB Academy"></a>
 </p>
 
 > Comprehensive security operations cheatsheet for SOC analysts.
