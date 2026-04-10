@@ -2039,5 +2039,69 @@ size>0
 
 ---
 
+### Detecting Zerologon {#detecting-zerologon}
+
+#### Zerologon Overview
+
+**Zerologon (CVE-2020-1472)** is a critical flaw in Microsoft's Netlogon Remote Protocol (MS-NRPC). Attackers can impersonate any computer, including domain controllers, and execute remote procedure calls.
+
+> 📌 The vulnerability uses a cryptographic weakness - IV is set to all zeros instead of random.
+
+**Vulnerability Details:**
+- Session key derived from machine account password
+- IV for AES-CFB8 is fixed to all zeros (flawed implementation)
+- Attacker authenticates using all-zeros session key
+- Uses `NetrServerPasswordSet2` to change machine password to blank
+- Grants full control over domain controller and entire AD
+
+#### Zerologon Traffic
+
+![Zerologon Process](https://github.com/user-attachments/assets/459ba43d-6597-4e48-a793-f2207146331c)
+
+*Netlogon protocol steps for Zerologon*
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/zerologon` |
+| Splunk Index | `zerologon` |
+| Sourcetype | `bro:dce_rpc:json` |
+
+---
+
+#### Detecting Zerologon With Splunk & Zeek
+
+```spl
+index="zerologon" endpoint="netlogon" sourcetype="bro:dce_rpc:json"
+| bin _time span=1m
+| where operation == "NetrServerReqChallenge" OR operation == "NetrServerAuthenticate3" OR operation == "NetrServerPasswordSet2"
+| stats count values(operation) as operation_values dc(operation) as unique_operations by _time, id.orig_h, id.resp_h
+| where unique_operations >= 2 AND count>100
+```
+
+![Zerologon Detection](https://github.com/user-attachments/assets/55188302-5afd-42f0-b912-aaa537280b23)
+
+*Detecting Zerologon exploitation*
+
+**Search Breakdown:**
+
+1. **Filter**: Netlogon endpoint, specific operations
+2. **Bin**: 1-minute intervals
+3. **Stats**: Count and unique operations
+4. **Filter**: >=2 unique operations + >100 attempts
+
+> 📌 **Key Detection**: Multiple Netlogon operations (ReqChallenge + Authenticate3 + PasswordSet2) with high attempt count indicates Zerologon!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
