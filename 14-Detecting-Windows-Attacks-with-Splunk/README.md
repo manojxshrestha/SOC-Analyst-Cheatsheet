@@ -4,7 +4,7 @@
 
 ---
 
-## 0. Overview
+## 0. Overview {#0-overview}
 
 > 📌 **Detecting Windows Attacks with Splunk** - Advanced Windows and Active Directory attack detection using Splunk.
 
@@ -65,7 +65,7 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
 
 ---
 
-## 1. Leveraging Windows Event Logs
+## 1. Leveraging Windows Event Logs {#1-leveraging-windows-event-logs}
 
 ### Detecting Common User/Domain Recon {#detecting-common-userdomain-recon}
 
@@ -735,7 +735,7 @@ From the Windows Event Log perspective, the following logs are generated:
 
 *Security events showing interactive logon*
 
-![Event 4624 LogonType 9](https://github.com/attachments/assets/09c3d91b-4ec6-4f8c-8dd6-a56264b4caeb)
+![Event 4624 LogonType 9](https://github.com/user-attachments/assets/09c3d91b-4ec6-4f8c-8dd6-a56264b4caeb)
 
 *Security events showing NewCredentials logon*
 
@@ -2326,7 +2326,7 @@ Reference: https://github.com/corelight/detect-ransomware-filenames
 
 ---
 
-## Interview Questions
+## Interview Questions {#4-interview-questions}
 
 ### Windows Event Log Detection
 
@@ -2381,7 +2381,7 @@ Reference: https://github.com/corelight/detect-ransomware-filenames
 
 ---
 
-## Additional Resources
+## Additional Resources {#5-additional-resources}
 
 ### Official Documentation
 - [Splunk Enterprise Security](https://www.splunk.com/en_us/products/enterprise-security.html)
