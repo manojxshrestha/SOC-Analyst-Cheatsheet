@@ -151,16 +151,230 @@ The reporting process is the cohesive framework that binds all elements of secur
 
 ---
 
+## 2. Communications
+
+### Stakeholder Communication
+
+Effective communication is critical during incident response.
+
+| Stakeholder | Information Needed |
+|-------------|---------------------|
+| **Technical Team** | Technical details, IOCs, containment actions |
+| **Management** | Business impact, resource needs, timeline |
+| **Legal/Compliance** | Regulatory requirements, notification obligations |
+| **Customers** | Impact to their data/services, remediation steps |
+| **Public Relations** | Pre-approved statements, fact-checking |
+
+> 📌 Different stakeholders need different information - technical teams need IOCs, management needs business impact, legal needs compliance requirements.
+
+### Communication Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| **Non-technical Language** | Use clear, non-technical language when communicating with non-technical stakeholders |
+| **Regular Updates** | Provide regular updates even when there's no new information |
+| **Documentation** | Document all communications |
+| **Pre-established Channels** | Establish communication channels in advance |
+| **Escalation Procedures** | Have escalation procedures defined |
+
+> 🔴 **Effective communication during incidents is essential for coordinated response and minimizing damage.**
+
+---
+
+## 3. Elements of a Proper Incident Report
+
+### Overview
+
+The Executive Summary serves as the gateway to our report, designed to cater to a broad audience, including non-technical stakeholders. This section should furnish the reader with a succinct overview, key findings, immediate actions executed, and the impact on stakeholders. Since many stakeholders may only peruse the Executive Summary, it's imperative to nail this section.
+
+> 📌 **The Executive Summary is often the only section read by non-technical stakeholders, making it crucial for conveying key information effectively.**
+
+### 3.1 Executive Summary
+
+The Executive Summary provides a concise overview for all stakeholders.
+
+| Section | Description |
+|---------|-------------|
+| **Incident ID** | Unique identifier for the incident |
+| **Incident Overview** | Concise summary of events (initial detection), incident type (ransomware, data breach, etc.), estimated date/time, duration, affected systems/data, status (ongoing/resolved/escalated) |
+| **Key Findings** | Salient findings, root cause, CVE exploited, data compromised/exfiltrated |
+| **Immediate Actions Taken** | Response measures, system isolation, root cause identification, third-party services engaged |
+| **Stakeholder Impact** | Customer downtime, financial ramifications, employee data compromised, proprietary information at risk |
+
+### 3.2 Technical Analysis
+
+This section is where we dive deeply into the technical aspects, dissecting the events that transpired during the incident. It's likely to be the most voluminous part of the incident report.
+
+#### Affected Systems & Data
+
+- All systems potentially/confirmed compromised
+- Volume/quantity of exfiltrated data (if ascertainable)
+
+#### Evidence Sources & Analysis
+
+- Evidence scrutinized, results, analytical methodology
+- Include screenshots for documentation
+- Hash files to ensure evidence integrity (crucial for criminal cases)
+
+> 🔴 **Maintaining evidence integrity is crucial, especially in criminal cases. A best practice is to hash files to ensure their integrity.**
+
+#### Indicators of Compromise (IoCs)
+
+- Abnormal outbound traffic
+- Unfamiliar processes and scheduled tasks
+- Can attribute attack to specific threat groups
+- Used for hunting across environment/partner organizations
+
+> 📌 **IoCs are instrumental for hunting potential compromises across our broader environment or even among partner organizations.**
+
+#### Root Cause Analysis
+
+- Detailed root cause
+- Vulnerabilities exploited
+- Failure points
+
+#### Technical Timeline
+
+The timeline should include:
+
+| Phase | Description |
+|-------|-------------|
+| **Reconnaissance** | Initial information gathering |
+| **Initial Compromise** | First access gained |
+| **C2 Communications** | Command and control communication |
+| **Enumeration** | Internal discovery and mapping |
+| **Lateral Movement** | Moving across the network |
+| **Data Access & Exfiltration** | Data access and theft |
+| **Malware Deployment** | Including Process Injection and Persistence |
+| **Containment** | Time when containment was achieved |
+| **Eradication** | Time when threat was removed |
+| **Recovery** | Time when systems were restored |
+
+#### Nature of the Attack
+
+- Type of attack
+- TTPs (Tactics, Techniques, Procedures) employed by attacker
+
+#### Impact Analysis
+
+- Adverse effects on data, operations, reputation
+- Systems/processes/data compromised
+- Business implications: financial loss, regulatory penalties, reputational damage
+
+### 3.3 Response and Recovery Analysis
+
+Outline the specific actions taken to contain the security incident, eradicate the threat, and restore normal operations.
+
+#### Immediate Response Actions
+
+**Revocation of Access**
+- Identification of compromised accounts/systems (tools, methodologies used)
+- Timeframe: exact time when unauthorized access detected and revoked (to the minute)
+- Method of revocation: disable accounts, change permissions, alter firewall rules
+- Impact: prevention of data exfiltration or further system compromise
+
+> 📌 **Timeframe should be down to the minute if possible for accurate documentation.**
+
+**Containment Strategy**
+
+| Type | Description |
+|------|-------------|
+| **Short-term Containment** | Immediate actions to isolate affected systems from network to prevent lateral movement |
+| **Long-term Containment** | Strategic measures like network segmentation or zero-trust architecture |
+| **Effectiveness** | Evaluation of how effective containment strategies were |
+
+#### Eradication Measures
+
+**Malware Removal**
+- Identification procedures (EDR, forensic analysis)
+- Removal techniques (tools, manual methods)
+- Verification (checksum, heuristic analysis)
+
+**System Patching**
+- Vulnerability identification (CVE identifiers)
+- Patch management (testing, deployment, verification)
+- Fallback procedures
+
+#### Recovery Steps
+
+**Data Restoration**
+- Backup validation procedures
+- Restoration process (including decryption)
+- Data integrity checks
+
+**System Validation**
+- Security measures before going live (firewall reconfiguration, IDS updates)
+- Operational checks (production readiness)
+
+### 3.4 Post-Incident Actions
+
+#### Monitoring
+- Enhanced monitoring plans for ongoing detection
+- Tools and technologies for holistic view
+
+#### Lessons Learned
+- Gap analysis (what failed and why)
+- Recommendations for improvement (prioritized by timeline)
+- Future strategy: policy, architecture, personnel training changes
+
+> 📌 **Post-incident reflection is essential for enhancing preparedness for future incidents.**
+
+### 3.5 Diagrams
+
+Given that the narrative can become exceedingly complex, visual aids can be invaluable:
+
+| Diagram | Purpose |
+|---------|---------|
+| **Incident Flowchart** | Attack progression from entry to propagation |
+| **Affected Systems Map** | Network topology with compromised nodes (color-coded severity) |
+| **Attack Vector Diagram** | Attacker's navigation through defenses visually |
+
+![Attack Vectors Diagram](https://github.com/user-attachments/assets/c4b51b90-1918-4214-9a64-f2b0391f508b)
+
+*Diagram showing attack vectors like phishing, vulnerability exploits, insider threat, and open ports leading to network weaknesses in endpoints and servers.*
+
+### 3.6 Appendices
+
+This section serves as a repository for supplementary material:
+
+| Item | Description |
+|------|-------------|
+| **Log Files** | Raw log data |
+| **Network Diagrams** | Pre-incident and post-incident |
+| **Forensic Evidence** | Disk images, memory dumps |
+| **Code snippets** | Malicious code samples |
+| **Incident Response Checklist** | Response procedures |
+| **Communication Records** | All communications during incident |
+| **Legal/Regulatory Documents** | Compliance forms, NDAs |
+| **Glossary and Acronyms** | Technical terms reference |
+
+### 3.7 Best Practices
+
+- **Root Cause Analysis**: Always aim to find the root cause to prevent future occurrences
+- **Community Sharing**: Share non-sensitive details with defender community
+- **Regular Updates**: Keep all stakeholders updated throughout
+- **External Review**: Consider third-party specialists to validate findings
+
+> 📌 **A meticulously crafted incident report is non-negotiable following a security breach or attack.**
+
+### 3.8 Conclusion
+
+A meticulously crafted incident report is non-negotiable following a security breach or attack. These reports offer exhaustive analysis of what went awry, what measures were effective, the reasons behind them, and future preventive strategies.
+
+---
+
 ### Summary
 
-Security incident reporting is a critical function in modern cybersecurity operations. It serves as the vital link between detecting threats and effectively responding to them. Key concepts covered:
+Key elements of a proper incident report:
 
-- **Incident Identification**: Multiple sources including security tools, human observation, and third-party notifications
-- **Categorization**: Various incident types (malware, phishing, DDoS, etc.) with severity levels (P1-P4)
-- **7-Step Process**: From initial detection through feedback loop for continuous improvement
-- **Documentation**: Essential for regulatory compliance, lessons learned, and organizational resilience
+- **Executive Summary**: Gateway section for all stakeholders with incident ID, overview, key findings, actions taken, and stakeholder impact
+- **Technical Analysis**: Most voluminous section covering affected systems, evidence, IoCs, root cause, timeline, attack nature, and impact
+- **Response & Recovery**: Detailed actions for revocation, containment, eradication, and recovery
+- **Post-Incident**: Monitoring plans and lessons learned
+- **Visual Aids**: Flowcharts, system maps, attack vector diagrams
+- **Appendices**: Log files, forensic evidence, legal documents
 
-> 🔴 **A meticulously designed and streamlined incident reporting mechanism is pivotal for any organization's preparedness to counter emerging threats effectively.**
+> 🔴 **These reports offer exhaustive analysis of what went wrong, what was effective, why, and future preventive strategies.**
 
 ---
 
