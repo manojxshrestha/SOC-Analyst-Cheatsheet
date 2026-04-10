@@ -59,6 +59,8 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
     - [Detecting Exfiltration (HTTP)](#detecting-exfiltration-http)
     - [Detecting Exfiltration (DNS)](#detecting-exfiltration-dns)
     - [Detecting Ransomware](#detecting-ransomware)
+    - [Interview Questions](#interview-questions)
+    - [Additional Resources](#additional-resources)
 
 ---
 
@@ -2397,10 +2399,6 @@ Reference: https://github.com/corelight/detect-ransomware-filenames
 - **BloodHound** - AD reconnaissance
 - **SharpHound** - Data collection for BloodHound
 - **Splunk** - SIEM and log analysis
-
-### Downloadable Resources
-- **Detection-of-Active-Directory-Attacks.tar.gz** - Custom Splunk app for AD attack detection
-- **users.csv** - Lookup file for Silver Ticket detection
 
 ---
 
