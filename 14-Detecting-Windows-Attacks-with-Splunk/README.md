@@ -2227,5 +2227,101 @@ index=dns_exf sourcetype="bro:dns:json"
 
 ---
 
+### Detecting Ransomware {#detecting-ransomware}
+
+#### Ransomware Detection Overview
+
+Ransomware uses two main techniques:
+
+1. **File Overwrite**: Encrypt files and overwrite original via SMB
+2. **File Renaming**: Encrypt files and rename with unique extension (indicates strain)
+
+> 📌 Both methods leave traces in SMB traffic that can be detected.
+
+#### Ransomware Methods
+
+**Method 1: File Overwrite**
+
+![File Overwrite](https://github.com/user-attachments/assets/706e3fb0-01d7-4937-b409-5c6bdc8e6043)
+
+*Process: Read → Encrypt → Overwrite*
+
+**Method 2: File Renaming**
+
+![File Renaming](https://github.com/user-attachments/assets/b46307ef-f582-4e1f-9b47-18a058bcb304)
+
+*Process: Read → Encrypt → Rename with extension*
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/ransomware_open_rename_sodinokibi` |
+| Index | `ransomware_open_rename_sodinokibi` |
+| Sourcetype | `bro:smb_files:json` |
+
+---
+
+#### Detecting Ransomware - Excessive Overwriting
+
+```spl
+index="ransomware_open_rename_sodinokibi" sourcetype="bro:smb_files:json" 
+| where action IN ("SMB::FILE_OPEN", "SMB::FILE_RENAME")
+| bin _time span=5m
+| stats count by _time, source, action
+| where count>30 
+| stats sum(count) as count values(action) dc(action) as uniq_actions by _time, source
+| where uniq_actions==2 AND count>100
+```
+
+![Ransomware Overwrite Detection](https://github.com/user-attachments/assets/c16ce383-2065-4f8f-8ab4-7b270f773d6c)
+
+*Detecting excessive file overwrites*
+
+---
+
+#### Detecting Ransomware - Excessive Renaming
+
+```spl
+index="ransomware_new_file_extension_ctbl_ocker" sourcetype="bro:smb_files:json" action="SMB::FILE_RENAME" 
+| bin _time span=5m
+| rex field="name" "\.(?<new_file_name_extension>[^\.]*$)"
+| rex field="prev_name" "\.(?<old_file_name_extension>[^\.]*$)"
+| stats count by _time, id.orig_h, id.resp_p, source, new_file_name_extension
+| where new_file_name_extension!=old_file_name_extension
+| stats count by _time, id.orig_h, id.resp_p, source, new_file_name_extension
+| where count>20
+| sort -count
+```
+
+![Ransomware Rename Detection](https://github.com/user-attachments/assets/91242d0a-3534-4b36-a0f3-4d7e19aeed73)
+
+*Detecting excessive file renaming*
+
+**Search Breakdown:**
+
+1. **Filter**: SMB file rename actions
+2. **Bin**: 5-minute intervals
+3. **Regex**: Extract old and new file extensions
+4. **Filter**: Extensions changed
+5. **Stats**: Count by new extension
+6. **Filter**: >20 renames with same extension
+
+> 📌 **Key Detection**: >100 file open/rename operations OR >20 files renamed with same extension in 5 minutes indicates ransomware!
+
+#### Known Ransomware Extensions
+
+Reference: https://github.com/corelight/detect-ransomware-filenames
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
