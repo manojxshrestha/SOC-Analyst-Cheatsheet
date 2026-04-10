@@ -2328,56 +2328,93 @@ Reference: https://github.com/corelight/detect-ransomware-filenames
 
 ## 4. Interview Questions
 
-### Windows Event Log Detection
+### Q1: What Windows Event IDs would you monitor to detect Kerberoasting attacks?
 
-1. **What Windows Event IDs would you monitor to detect Kerberoasting attacks?**
-   - **Answer**: Event ID 4769 (Kerberos Service Ticket Request) - Look for TGS requests without corresponding logon (Event 4648)
+**Answer:** Event ID 4769 (Kerberos Service Ticket Request) - Look for TGS requests without corresponding logon (Event 4648)
 
-2. **How do you differentiate between legitimate service access and Kerberoasting?**
-   - **Answer**: Legitimate access generates Event 4648 (Explicit Credentials), Kerberoasting does not
+---
 
-3. **What is the difference between Pass-the-Hash and Pass-the-Ticket?**
-   - **Answer**: PtH uses NTLM hashes, PtT uses Kerberos tickets extracted from memory
+### Q2: How do you differentiate between legitimate service access and Kerberoasting?
 
-4. **Which Logon Type indicates Pass-the-Hash (NewCredentials)?**
-   - **Answer**: LogonType 9 (NewCredentials) - Used when runas /netonly is executed
+**Answer:** Legitimate access generates Event 4648 (Explicit Credentials), Kerberoasting does not
 
-5. **How can you detect Golden Ticket attacks?**
-   - **Answer**: Look for TGS requests (4769) without prior TGT requests (4768) - tickets created offline
+---
 
-### Zeek/Network Detection
+### Q3: What is the difference between Pass-the-Hash and Pass-the-Ticket?
 
-6. **What Zeek logs would you use to detect Cobalt Strike beacons?**
-   - **Answer**: bro:http:json - Monitor for regular intervals in HTTP traffic
+**Answer:** PtH uses NTLM hashes, PtT uses Kerberos tickets extracted from memory
 
-7. **How do you detect RDP brute force attacks?**
-   - **Answer**: Count RDP connection attempts per source IP (>30 in 5 minutes indicates attack)
+---
 
-8. **What DNS patterns indicate data exfiltration?**
-   - **Answer**: High volume of long DNS queries (>40 chars) to external domains (>60/day)
+### Q4: Which Logon Type indicates Pass-the-Hash (NewCredentials)?
 
-9. **How does ransomware appear in SMB logs?**
-   - **Answer**: Excessive FILE_OPEN + FILE_RENAME operations or same extension renaming
+**Answer:** LogonType 9 (NewCredentials) - Used when runas /netonly is executed
 
-10. **What network behavior indicates Kerberos brute force?**
-    - **Answer**: Multiple AS-REQ failures (KDC_ERR_C_PRINCIPAL_UNKNOWN) to same DC
+---
 
-### General Security
+### Q5: How can you detect Golden Ticket attacks?
 
-11. **What is the first step when investigating a potential AD attack?**
-    - **Answer**: Identify the time window and affected systems, gather relevant logs
+**Answer:** Look for TGS requests (4769) without prior TGT requests (4768) - tickets created offline
 
-12. **How would you investigate a Golden Ticket alert?**
-    - **Answer**: Check for TGS-only traffic without prior AS-REQ/AS-REP, verify ticket validity period
+---
 
-13. **What Splunk searches would you use for incident response?**
-    - **Answer**: transaction command for event correlation, stats for aggregation
+### Q6: What Zeek logs would you use to detect Cobalt Strike beacons?
 
-14. **How do you baseline normal Kerberos traffic?**
-    - **Answer**: Monitor typical TGT/TGS request patterns per user/system
+**Answer:** bro:http:json - Monitor for regular intervals in HTTP traffic
 
-15. **What is the MITRE ATT&CK technique for Kerberoasting?**
-    - **Answer**: T1558.003 - Service Target Ticket (Kerberoasting)
+---
+
+### Q7: How do you detect RDP brute force attacks?
+
+**Answer:** Count RDP connection attempts per source IP (>30 in 5 minutes indicates attack)
+
+---
+
+### Q8: What DNS patterns indicate data exfiltration?
+
+**Answer:** High volume of long DNS queries (>40 chars) to external domains (>60/day)
+
+---
+
+### Q9: How does ransomware appear in SMB logs?
+
+**Answer:** Excessive FILE_OPEN + FILE_RENAME operations or same extension renaming
+
+---
+
+### Q10: What network behavior indicates Kerberos brute force?
+
+**Answer:** Multiple AS-REQ failures (KDC_ERR_C_PRINCIPAL_UNKNOWN) to same DC
+
+---
+
+### Q11: What is the first step when investigating a potential AD attack?
+
+**Answer:** Identify the time window and affected systems, gather relevant logs
+
+---
+
+### Q12: How would you investigate a Golden Ticket alert?
+
+**Answer:** Check for TGS-only traffic without prior AS-REQ/AS-REP, verify ticket validity period
+
+---
+
+### Q13: What Splunk searches would you use for incident response?
+
+**Answer:** transaction command for event correlation, stats for aggregation
+
+---
+
+### Q14: How do you baseline normal Kerberos traffic?
+
+**Answer:** Monitor typical TGT/TGS request patterns per user/system
+
+---
+
+### Q15: What is the MITRE ATT&CK technique for Kerberoasting?
+
+**Answer:** T1558.003 - Service Target Ticket (Kerberoasting)
 
 ---
 
