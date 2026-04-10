@@ -2326,7 +2326,7 @@ Reference: https://github.com/corelight/detect-ransomware-filenames
 
 ---
 
-## Interview Questions {#4-interview-questions}
+## 4. Interview Questions {#4-interview-questions}
 
 ### Windows Event Log Detection
 
@@ -2381,7 +2381,7 @@ Reference: https://github.com/corelight/detect-ransomware-filenames
 
 ---
 
-## Additional Resources {#5-additional-resources}
+## 5. Additional Resources {#5-additional-resources}
 
 ### Official Documentation
 - [Splunk Enterprise Security](https://www.splunk.com/en_us/products/enterprise-security.html)
