@@ -1,12 +1,37 @@
-<h1 align="center">SOC Analyst Cheatsheet</h1>
+<h1 align="center">
+  <img src="https://img.shields.io/badge/SOC_Analyst_Cheatsheet-FF0000?style=for-the-badge&logo=shield&logoColor=white" alt="SOC Analyst Cheatsheet">
+</h1>
 
 <p align="center">
-  <a href="https://img.shields.io/badge/SOC-Analyst-100%25-green"><img src="https://img.shields.io/badge/SOC-Analyst-100%25-green" alt="SOC Analyst"></a>
-  <a href="https://img.shields.io/badge/HTB-Academy-blue"><img src="https://img.shields.io/badge/HTB-Academy-blue" alt="HTB Academy"></a>
+  <a href="https://github.com/manojxshrestha/SOC-Analyst-Cheatsheet">
+    <img src="https://img.shields.io/github/stars/manojxshrestha/SOC-Analyst-Cheatsheet?style=for-the-badge&logo=github&color=brightgreen" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/manojxshrestha/SOC-Analyst-Cheatsheet/forks">
+    <img src="https://img.shields.io/github/forks/manojxshrestha/SOC-Analyst-Cheatsheet?style=for-the-badge&logo=github&color=brightgreen" alt="GitHub forks">
+  </a>
+  <a href="https://github.com/manojxshrestha/SOC-Analyst-Cheatsheet/issues">
+    <img src="https://img.shields.io/github/issues/manojxshrestha/SOC-Analyst-Cheatsheet?style=for-the-badge&logo=github&color=yellow" alt="Issues">
+  </a>
 </p>
 
-> Comprehensive security operations cheatsheet for SOC analysts.
-> Essential commands, queries, techniques, and notes based on HTB Academy SOC Analyst learning path.
+<p align="center">
+  <img src="https://img.shields.io/badge/Made_for-SOC_Analysts-blueviolet?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="Made for SOC Analysts">
+  <img src="https://img.shields.io/badge/Blue_Team-Ready-00b4d8?style=for-the-badge&logo=cybersecurity&logoColor=white" alt="Blue Team">
+  <img src="https://img.shields.io/badge/HTB_Academy-FF9900?style=for-the-badge&logo=hackthebox&logoColor=white" alt="HTB Academy">
+  <img src="https://img.shields.io/badge/Cheatsheet-100%25-00ff9f?style=for-the-badge&logo=readme&logoColor=black" alt="100% Cheatsheet">
+</p>
+
+<p align="center">
+  <strong>A comprehensive, quick-reference cheatsheet for Security Operations Center (SOC) Analysts, Incident Responders, and Blue Teamers.</strong><br>
+  Covering SIEM, Log Analysis, Threat Hunting, Incident Response, Forensics, Network Security, and more.
+</p>
+
+---
+
+<!-- Add a nice divider or hero image if you want (optional) -->
+<div align="center">
+  <img src="https://img.shields.io/badge/🚀_Ready_to_Level_Up_Your_SOC_Skills-000000?style=for-the-badge" alt="Ready to Level Up">
+</div>
 
 ---
 
