@@ -1973,5 +1973,71 @@ index="golden_ticket_attack" sourcetype="bro:kerberos:json"
 
 ---
 
+### Detecting Cobalt Strike's PSExec {#detecting-cobalt-strikes-psexec}
+
+#### PSExec Overview
+
+Cobalt Strike's **PSExec** is a lightweight remote execution tool that executes payloads on remote systems via SMB (port 445).
+
+> 📌 Requires local administrator privileges - often used after initial access and privilege escalation.
+
+**Attack Steps:**
+
+1. **Service Creation**: Create new service with random name
+2. **File Transfer**: Transfer payload to ADMIN$ share via SMB
+3. **Service Execution**: Start service to execute payload
+4. **Service Removal**: Stop and delete service to minimize traces
+5. **Communication**: Establish beacon back to C2 server
+
+#### PSExec Traffic
+
+![PSExec Traffic](https://github.com/user-attachments/assets/b791a703-93c1-431c-864a-00794da31229)
+
+*Network capture showing SMB2 service creation*
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/cobalt_strike_psexec` |
+| Splunk Index | `cobalt_strike_psexec` |
+| Sourcetype | `bro:smb_files:json` |
+
+---
+
+#### Detecting PSExec With Splunk & Zeek
+
+```spl
+index="cobalt_strike_psexec"
+sourcetype="bro:smb_files:json"
+action="SMB::FILE_OPEN" 
+name IN ("*.exe", "*.dll", "*.bat")
+path IN ("*\\c$", "*\\ADMIN$")
+size>0
+```
+
+![PSExec Detection](https://github.com/user-attachments/assets/8dc6e572-6990-4bd6-a15f-447101501b1b)
+
+*Detecting PSExec file transfers*
+
+**Search Breakdown:**
+
+1. **Filter**: SMB file open actions
+2. **Filter**: Executable files (.exe, .dll, .bat)
+3. **Filter**: To ADMIN$ or C$ shares
+4. **Filter**: Files with size > 0
+
+> 📌 **Key Detection**: Executable files written to ADMIN$/C$ shares via SMB indicate PSExec activity!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
