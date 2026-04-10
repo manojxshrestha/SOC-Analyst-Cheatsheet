@@ -60,8 +60,8 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
    - 3.9 [Detecting Exfiltration (HTTP)](#detecting-exfiltration-http)
    - 3.10 [Detecting Exfiltration (DNS)](#detecting-exfiltration-dns)
    - 3.11 [Detecting Ransomware](#detecting-ransomware)
-4. [Interview Questions](#interview-questions)
-5. [Additional Resources](#additional-resources)
+4. [Interview Questions](#4-interview-questions)
+5. [Additional Resources](#5-additional-resources)
 
 ---
 
