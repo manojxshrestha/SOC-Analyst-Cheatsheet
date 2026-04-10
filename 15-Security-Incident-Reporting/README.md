@@ -122,7 +122,19 @@ Upon identification, categorizing incidents facilitates prioritization and resou
 
 ### 1.3 The Incident Reporting Process
 
-A meticulously structured incident reporting process ensures comprehensive documentation and effective response.
+The reporting process is the cohesive framework that binds all elements of security incident reporting. An effective reporting mechanism delivers clarity, direction, and actionable insights.
+
+#### The 7-Step Process
+
+| Step | Description |
+|------|-------------|
+| **1. Initial Detection & Acknowledgement** | Detection vectors range from human observation to automated alerts. In some cases, the threat actor triggers detection (e.g., ransomware). |
+| **2. Preliminary Analysis** | Ascertain scope and potential ramifications. Categorize based on classification and severity metrics. |
+| **3. Incident Logging** | Every facet, action, and observation must be meticulously logged using an established system (e.g., JIRA, TheHive Project). Even pen and paper can suffice in a pinch. |
+| **4. Notification of Relevant Parties** | **Internal**: IT, legal, PR, executive teams (org-wide if severe). **External**: customers, partners, regulatory bodies, or public if necessary. |
+| **5. Detailed Investigation & Reporting** | Duration varies from days to years. Comprehensive technical analysis with all findings compiled. |
+| **6. Final Report Creation** | Culmination of the analyst's role - furnishes regulators, insurers, and leadership with detailed incident account, origins, and remedial actions. |
+| **7. Feedback Loop!** | Post-incident reflection essential for enhancing preparedness. Revisit and analyze to identify areas for improvement. |
 
 #### Key Components of Incident Reporting
 
@@ -142,6 +154,8 @@ A meticulously structured incident reporting process ensures comprehensive docum
 - Response actions taken
 - Evidence preserved
 - Communication logs
+
+> 📌 The reporting process is a strategic asset that enhances an organization's resilience against security threats.
 
 ---
 
