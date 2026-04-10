@@ -35,39 +35,39 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
 
 ## Table of Contents
 
-0. Overview
-1. Leveraging Windows Event Logs
-   - 1.1 Detecting Common User/Domain Recon
-   - 1.2 Detecting Password Spraying
-   - 1.3 Detecting Responder-like Attacks
-   - 1.4 Detecting Kerberoasting/AS-REPRoasting
-   - 1.5 Detecting Pass-the-Hash
-   - 1.6 Detecting Pass-the-Ticket
-   - 1.7 Detecting Overpass-the-Hash
-   - 1.8 Detecting Golden Tickets/Silver Tickets
-   - 1.9 Detecting Unconstrained/Constrained Delegation
-   - 1.10 Detecting DCSync/DCShadow
-2. Creating Custom Splunk Applications
-3. Leveraging Zeek Logs
-   - 3.1 Detecting RDP Brute Force Attacks
-   - 3.2 Detecting Beaconing Malware
-   - 3.3 Detecting Nmap Port Scanning
-   - 3.4 Detecting Kerberos Brute Force Attacks
-   - 3.5 Detecting Kerberoasting (Zeek)
-   - 3.6 Detecting Golden Tickets (Zeek)
-   - 3.7 Detecting Cobalt Strike's PSExec
-   - 3.8 Detecting Zerologon
-   - 3.9 Detecting Exfiltration (HTTP)
-   - 3.10 Detecting Exfiltration (DNS)
-   - 3.11 Detecting Ransomware
-4. Interview Questions
-5. Additional Resources
+0. [Overview](#0-overview)
+1. [Leveraging Windows Event Logs](#1-leveraging-windows-event-logs)
+   - 1.1 [Detecting Common User/Domain Recon](#1-detecting-common-user-domain-recon)
+   - 1.2 [Detecting Password Spraying](#1-detecting-password-spraying)
+   - 1.3 [Detecting Responder-like Attacks](#1-detecting-responder-like-attacks)
+   - 1.4 [Detecting Kerberoasting/AS-REPRoasting](#1-detecting-kerberoasting-as-reproasting)
+   - 1.5 [Detecting Pass-the-Hash](#1-detecting-pass-the-hash)
+   - 1.6 [Detecting Pass-the-Ticket](#1-detecting-pass-the-ticket)
+   - 1.7 [Detecting Overpass-the-Hash](#1-detecting-overpass-the-hash)
+   - 1.8 [Detecting Golden Tickets/Silver Tickets](#1-detecting-golden-tickets-silver-tickets)
+   - 1.9 [Detecting Unconstrained/Constrained Delegation](#1-detecting-unconstrained-constrained-delegation)
+   - 1.10 [Detecting DCSync/DCShadow](#1-detecting-dcsync-dcshadow)
+2. [Creating Custom Splunk Applications](#2-creating-custom-splunk-applications)
+3. [Leveraging Zeek Logs](#3-leveraging-zeek-logs)
+   - 3.1 [Detecting RDP Brute Force Attacks](#3-detecting-rdp-brute-force-attacks)
+   - 3.2 [Detecting Beaconing Malware](#3-detecting-beaconing-malware)
+   - 3.3 [Detecting Nmap Port Scanning](#3-detecting-nmap-port-scanning)
+   - 3.4 [Detecting Kerberos Brute Force Attacks](#3-detecting-kerberos-brute-force-attacks)
+   - 3.5 [Detecting Kerberoasting (Zeek)](#3-detecting-kerberoasting-zeek)
+   - 3.6 [Detecting Golden Tickets (Zeek)](#3-detecting-golden-tickets-zeek)
+   - 3.7 [Detecting Cobalt Strike's PSExec](#3-detecting-cobalt-strikes-psexec)
+   - 3.8 [Detecting Zerologon](#3-detecting-zerologon)
+   - 3.9 [Detecting Exfiltration (HTTP)](#3-detecting-exfiltration-http)
+   - 3.10 [Detecting Exfiltration (DNS)](#3-detecting-exfiltration-dns)
+   - 3.11 [Detecting Ransomware](#3-detecting-ransomware)
+4. [Interview Questions](#4-interview-questions)
+5. [Additional Resources](#5-additional-resources)
 
 ---
 
-## 1. Leveraging Windows Event Logs
+## 1. Leveraging Windows Event Logs {#1-leveraging-windows-event-logs}
 
-### Detecting Common User/Domain Recon
+### Detecting Common User/Domain Recon {#1-detecting-common-user-domain-recon}
 
 > 📌 **Domain Reconnaissance** - A pivotal stage in the cyberattack lifecycle where adversaries gather information about the target environment.
 
@@ -263,7 +263,7 @@ index=main earliest=1690195896 latest=1690285475 source="WinEventLog:SilkService
 
 ---
 
-### Detecting Password Spraying
+### Detecting Password Spraying {#1-detecting-password-spraying}
 
 #### Password Spraying Overview
 
@@ -336,7 +336,7 @@ index=main earliest=1690280680 latest=1690289489 source="WinEventLog:Security" E
 
 ---
 
-### Detecting Responder-like Attacks
+### Detecting Responder-like Attacks {#1-detecting-responder-like-attacks}
 
 #### LLMNR/NBT-NS/mDNS Poisoning Overview
 
@@ -444,7 +444,7 @@ index=main earliest=1690290814 latest=1690291207 EventCode IN (4648)
 
 ---
 
-### Detecting Kerberoasting/AS-REPRoasting
+### Detecting Kerberoasting/AS-REPRoasting {#1-detecting-kerberoasting-as-reproasting}
 
 #### Kerberoasting Overview
 
@@ -668,7 +668,7 @@ index=main earliest=1690392745 latest=1690393283 source="WinEventLog:Security" E
 
 ---
 
-### Detecting Pass-the-Hash
+### Detecting Pass-the-Hash {#1-detecting-pass-the-hash}
 
 #### Pass-the-Hash Overview
 
@@ -791,7 +791,7 @@ index=main earliest=1690450689 latest=1690451116 (source="XmlWinEventLog:Microso
 
 ---
 
-### Detecting Pass-the-Ticket
+### Detecting Pass-the-Ticket {#1-detecting-pass-the-ticket}
 
 #### Pass-the-Ticket Overview
 
@@ -911,7 +911,7 @@ index=main earliest=1690392405 latest=1690451745 source="WinEventLog:Security" u
 
 ---
 
-### Detecting Overpass-the-Hash
+### Detecting Overpass-the-Hash {#1-detecting-overpass-the-hash}
 
 #### Overpass-the-Hash Overview
 
@@ -979,7 +979,7 @@ index=main earliest=1690443407 latest=1690443544 source="XmlWinEventLog:Microsof
 
 ---
 
-### Detecting Golden Tickets/Silver Tickets
+### Detecting Golden Tickets/Silver Tickets {#1-detecting-golden-tickets-silver-tickets}
 
 #### Golden Ticket Overview
 
@@ -1139,7 +1139,7 @@ index=main latest=1690545656 EventCode=4672
 
 ---
 
-### Detecting Unconstrained/Constrained Delegation
+### Detecting Unconstrained/Constrained Delegation {#1-detecting-unconstrained-constrained-delegation}
 
 #### Unconstrained Delegation Overview
 
@@ -1310,7 +1310,7 @@ index=main earliest=1690562367 latest=1690562556 source="XmlWinEventLog:Microsof
 
 ---
 
-### Detecting DCSync/DCShadow
+### Detecting DCSync/DCShadow {#1-detecting-dcsync-dcshadow}
 
 #### DCSync Overview
 
@@ -1432,7 +1432,7 @@ index=main earliest=1690623888 latest=1690623890 EventCode=4742
 
 ---
 
-## 2. Creating Custom Splunk Applications
+## 2. Creating Custom Splunk Applications {#2-creating-custom-splunk-applications}
 
 ### Overview
 
@@ -1597,9 +1597,9 @@ To update an existing app:
 
 ---
 
-## 3. Leveraging Zeek Logs
+## 3. Leveraging Zeek Logs {#3-leveraging-zeek-logs}
 
-### Detecting RDP Brute Force Attacks
+### Detecting RDP Brute Force Attacks {#3-detecting-rdp-brute-force-attacks}
 
 #### RDP Brute Force Overview
 
@@ -1661,7 +1661,7 @@ index="rdp_bruteforce" sourcetype="bro:rdp:json"
 
 ---
 
-### Detecting Beaconing Malware
+### Detecting Beaconing Malware {#3-detecting-beaconing-malware}
 
 #### Beaconing Overview
 
@@ -1735,7 +1735,7 @@ index="cobaltstrike_beacon" sourcetype="bro:http:json"
 
 ---
 
-### Detecting Nmap Port Scanning
+### Detecting Nmap Port Scanning {#3-detecting-nmap-port-scanning}
 
 #### Port Scanning Overview
 
@@ -1791,7 +1791,7 @@ index="cobaltstrike_beacon" sourcetype="bro:conn:json" orig_bytes=0 dest_ip IN (
 
 ---
 
-### Detecting Kerberos Brute Force Attacks
+### Detecting Kerberos Brute Force Attacks {#3-detecting-kerberos-brute-force-attacks}
 
 #### Kerberos Brute Force Overview
 
@@ -1856,7 +1856,7 @@ success="false" request_type=AS
 
 ---
 
-### Detecting Kerberoasting (Zeek)
+### Detecting Kerberoasting (Zeek) {#3-detecting-kerberoasting-zeek}
 
 #### Kerberoasting via Network Analysis
 
@@ -1911,7 +1911,7 @@ forwardable="true" renewable="true"
 
 ---
 
-### Detecting Golden Tickets (Zeek)
+### Detecting Golden Tickets (Zeek) {#3-detecting-golden-tickets-zeek}
 
 #### Golden Ticket Detection via Network Analysis
 
@@ -1976,7 +1976,7 @@ index="golden_ticket_attack" sourcetype="bro:kerberos:json"
 
 ---
 
-### Detecting Cobalt Strike's PSExec
+### Detecting Cobalt Strike's PSExec {#3-detecting-cobalt-strikes-psexec}
 
 #### PSExec Overview
 
@@ -2042,7 +2042,7 @@ size>0
 
 ---
 
-### Detecting Zerologon
+### Detecting Zerologon {#3-detecting-zerologon}
 
 #### Zerologon Overview
 
@@ -2106,7 +2106,7 @@ index="zerologon" endpoint="netlogon" sourcetype="bro:dce_rpc:json"
 
 ---
 
-### Detecting Exfiltration (HTTP)
+### Detecting Exfiltration (HTTP) {#3-detecting-exfiltration-http}
 
 #### HTTP Exfiltration Overview
 
@@ -2163,7 +2163,7 @@ index="cobaltstrike_exfiltration_http" sourcetype="bro:http:json" method=POST
 
 ---
 
-### Detecting Exfiltration (DNS)
+### Detecting Exfiltration (DNS) {#3-detecting-exfiltration-dns}
 
 #### DNS Exfiltration Overview
 
@@ -2230,7 +2230,7 @@ index=dns_exf sourcetype="bro:dns:json"
 
 ---
 
-### Detecting Ransomware
+### Detecting Ransomware {#3-detecting-ransomware}
 
 #### Ransomware Detection Overview
 
