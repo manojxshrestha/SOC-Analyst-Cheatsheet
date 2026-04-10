@@ -801,7 +801,7 @@ This real-world incident report demonstrates practical application of:
 - **Response & Recovery**: Full containment, eradication, and recovery process with timestamps
 - **Post-Incident**: Monitoring enhancements and lessons learned with actionable recommendations
 
-All images preserved as provided. This report serves as a template for documenting actual security incidents.
+This report serves as a template for documenting actual security incidents.
 
 ---
 
