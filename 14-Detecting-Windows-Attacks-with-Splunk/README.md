@@ -35,38 +35,33 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
 
 ## Table of Contents
 
-## 1. Leveraging Windows Event Logs
-
-- Detecting Common User/Domain Recon
-- Detecting Password Spraying
-- Detecting Responder-like Attacks
-- Detecting Kerberoasting/AS-REPRoasting
-- Detecting Pass-the-Hash
-- Detecting Pass-the-Ticket
-- Detecting Overpass-the-Hash
-- Detecting Golden Tickets/Silver Tickets
-- Detecting Unconstrained/Constrained Delegation
-- Detecting DCSync/DCShadow
-
-## 2. Creating Custom Splunk Applications
-
-## 3. Leveraging Zeek Logs
-
-- Detecting RDP Brute Force Attacks
-- Detecting Beaconing Malware
-- Detecting Nmap Port Scanning
-- Detecting Kerberos Brute Force Attacks
-- Detecting Kerberoasting (Zeek)
-- Detecting Golden Tickets (Zeek)
-- Detecting Cobalt Strike's PSExec
-- Detecting Zerologon
-- Detecting Exfiltration (HTTP)
-- Detecting Exfiltration (DNS)
-- Detecting Ransomware
-
-## 4. Interview Questions
-
-## 5. Additional Resources
+0. [Overview](#0-overview)
+1. [Leveraging Windows Event Logs](#1-leveraging-windows-event-logs)
+   - Detecting Common User/Domain Recon
+   - Detecting Password Spraying
+   - Detecting Responder-like Attacks
+   - Detecting Kerberoasting/AS-REPRoasting
+   - Detecting Pass-the-Hash
+   - Detecting Pass-the-Ticket
+   - Detecting Overpass-the-Hash
+   - Detecting Golden Tickets/Silver Tickets
+   - Detecting Unconstrained/Constrained Delegation
+   - Detecting DCSync/DCShadow
+2. [Creating Custom Splunk Applications](#2-creating-custom-splunk-applications)
+3. [Leveraging Zeek Logs](#3-leveraging-zeek-logs)
+   - Detecting RDP Brute Force Attacks
+   - Detecting Beaconing Malware
+   - Detecting Nmap Port Scanning
+   - Detecting Kerberos Brute Force Attacks
+   - Detecting Kerberoasting (Zeek)
+   - Detecting Golden Tickets (Zeek)
+   - Detecting Cobalt Strike's PSExec
+   - Detecting Zerologon
+   - Detecting Exfiltration (HTTP)
+   - Detecting Exfiltration (DNS)
+   - Detecting Ransomware
+4. [Interview Questions](#4-interview-questions)
+5. [Additional Resources](#5-additional-resources)
 
 ---
 
