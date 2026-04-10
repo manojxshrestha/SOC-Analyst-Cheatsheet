@@ -37,24 +37,24 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
 
 0. [Overview](#0-overview)
 1. [Leveraging Windows Event Logs](#1-leveraging-windows-event-logs)
-   - [Detecting Common User/Domain Recon](#detecting-common-userdomain-recon)
+   - [Detecting Common User/Domain Recon](#detecting-common-user-domain-recon)
    - [Detecting Password Spraying](#detecting-password-spraying)
    - [Detecting Responder-like Attacks](#detecting-responder-like-attacks)
-   - [Detecting Kerberoasting/AS-REPRoasting](#detecting-kerberoastingas-reproasting)
+   - [Detecting Kerberoasting/AS-REPRoasting](#detecting-kerberoasting-as-reproasting)
    - [Detecting Pass-the-Hash](#detecting-pass-the-hash)
    - [Detecting Pass-the-Ticket](#detecting-pass-the-ticket)
    - [Detecting Overpass-the-Hash](#detecting-overpass-the-hash)
-   - [Detecting Golden Tickets/Silver Tickets](#detecting-golden-ticketssilver-tickets)
-   - [Detecting Unconstrained/Constrained Delegation](#detecting-unconstrainedconstrained-delegation)
-   - [Detecting DCSync/DCShadow](#detecting-dcsyncdcshadow)
+   - [Detecting Golden Tickets/Silver Tickets](#detecting-golden-tickets-silver-tickets)
+   - [Detecting Unconstrained/Constrained Delegation](#detecting-unconstrained-constrained-delegation)
+   - [Detecting DCSync/DCShadow](#detecting-dcsync-dcshadow)
 2. [Creating Custom Splunk Applications](#2-creating-custom-splunk-applications)
 3. [Leveraging Zeek Logs](#3-leveraging-zeek-logs)
    - [Detecting RDP Brute Force Attacks](#detecting-rdp-brute-force-attacks)
    - [Detecting Beaconing Malware](#detecting-beaconing-malware)
    - [Detecting Nmap Port Scanning](#detecting-nmap-port-scanning)
    - [Detecting Kerberos Brute Force Attacks](#detecting-kerberos-brute-force-attacks)
-   - [Detecting Kerberoasting (Zeek)](#detecting-kerberoasting-1)
-   - [Detecting Golden Tickets (Zeek)](#detecting-golden-tickets-1)
+   - [Detecting Kerberoasting (Zeek)](#detecting-kerberoasting-zeek)
+   - [Detecting Golden Tickets (Zeek)](#detecting-golden-tickets-zeek)
    - [Detecting Cobalt Strike's PSExec](#detecting-cobalt-strikes-psexec)
    - [Detecting Zerologon](#detecting-zerologon)
    - [Detecting Exfiltration (HTTP)](#detecting-exfiltration-http)
@@ -67,7 +67,7 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
 
 ## 1. Leveraging Windows Event Logs {#1-leveraging-windows-event-logs}
 
-### Detecting Common User/Domain Recon {#detecting-common-userdomain-recon}
+### Detecting Common User/Domain Recon {#detecting-common-user-domain-recon}
 
 > 📌 **Domain Reconnaissance** - A pivotal stage in the cyberattack lifecycle where adversaries gather information about the target environment.
 
@@ -444,7 +444,7 @@ index=main earliest=1690290814 latest=1690291207 EventCode IN (4648)
 
 ---
 
-### Detecting Kerberoasting/AS-REProasting {#detecting-kerberoastingas-reproasting}
+### Detecting Kerberoasting/AS-REPRoasting {#detecting-kerberoasting-as-reproasting}
 
 #### Kerberoasting Overview
 
@@ -979,7 +979,7 @@ index=main earliest=1690443407 latest=1690443544 source="XmlWinEventLog:Microsof
 
 ---
 
-### Detecting Golden Tickets/Silver Tickets {#detecting-golden-ticketssilver-tickets}
+### Detecting Golden Tickets/Silver Tickets {#detecting-golden-tickets-silver-tickets}
 
 #### Golden Ticket Overview
 
@@ -1139,7 +1139,7 @@ index=main latest=1690545656 EventCode=4672
 
 ---
 
-### Detecting Unconstrained/Constrained Delegation {#detecting-unconstrainedconstrained-delegation}
+### Detecting Unconstrained/Constrained Delegation {#detecting-unconstrained-constrained-delegation}
 
 #### Unconstrained Delegation Overview
 
@@ -1310,7 +1310,7 @@ index=main earliest=1690562367 latest=1690562556 source="XmlWinEventLog:Microsof
 
 ---
 
-### Detecting DCSync/DCShadow {#detecting-dcsyncdcshadow}
+### Detecting DCSync/DCShadow {#detecting-dcsync-dcshadow}
 
 #### DCSync Overview
 
@@ -1856,7 +1856,7 @@ success="false" request_type=AS
 
 ---
 
-### Detecting Kerberoasting (Zeek) {#detecting-kerberoasting-1}
+### Detecting Kerberoasting (Zeek) {#detecting-kerberoasting-zeek}
 
 #### Kerberoasting via Network Analysis
 
@@ -1911,7 +1911,7 @@ forwardable="true" renewable="true"
 
 ---
 
-### Detecting Golden Tickets (Zeek) {#detecting-golden-tickets-1}
+### Detecting Golden Tickets (Zeek) {#detecting-golden-tickets-zeek}
 
 #### Golden Ticket Detection via Network Analysis
 
