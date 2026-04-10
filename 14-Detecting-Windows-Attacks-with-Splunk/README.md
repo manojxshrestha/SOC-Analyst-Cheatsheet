@@ -2103,5 +2103,62 @@ index="zerologon" endpoint="netlogon" sourcetype="bro:dce_rpc:json"
 
 ---
 
+### Detecting Exfiltration (HTTP) {#detecting-exfiltration-http}
+
+#### HTTP Exfiltration Overview
+
+**Data exfiltration via HTTP** involves transmitting stolen data from a compromised system to an attacker's C2 server using HTTP POST requests.
+
+> 📌 Attackers disguise data as legitimate web traffic (POST requests, form submissions).
+
+**Exfiltration Process:**
+1. Attacker sends data in HTTP POST body to C2 server
+2. Uses innocuous URLs and headers to disguise traffic
+3. C2 server extracts and decodes the data
+
+**Detection Strategy:**
+- Monitor volume of outgoing traffic to specific IPs/ports
+- Identify unusually large or frequent data transfers
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/cobaltstrike_exfiltration_http` |
+| Splunk Index | `cobaltstrike_exfiltration_http` |
+| Sourcetype | `bro:http:json` |
+
+---
+
+#### Detecting HTTP Exfiltration With Splunk & Zeek
+
+```spl
+index="cobaltstrike_exfiltration_http" sourcetype="bro:http:json" method=POST
+| stats sum(request_body_len) as TotalBytes by src, dest, dest_port
+| eval TotalBytes = TotalBytes/1024/1024
+```
+
+![HTTP Exfiltration Detection](https://github.com/user-attachments/assets/c9035315-e014-4bd3-9a12-c723cbd420fd)
+
+*Detecting HTTP exfiltration volume*
+
+**Search Breakdown:**
+
+1. **Filter**: HTTP POST requests
+2. **Stats**: Sum of request body length by source/dest/port
+3. **Eval**: Convert bytes to MB
+
+> 📌 **Key Detection**: Unusually large POST request body volumes to external IPs indicate data exfiltration!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
