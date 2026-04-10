@@ -2160,5 +2160,72 @@ index="cobaltstrike_exfiltration_http" sourcetype="bro:http:json" method=POST
 
 ---
 
+### Detecting Exfiltration (DNS) {#detecting-exfiltration-dns}
+
+#### DNS Exfiltration Overview
+
+**DNS-based exfiltration** is reliable and stealthy because DNS traffic is often allowed by default in network firewalls.
+
+> 📌 Attackers embed data in DNS queries/responses, bypassing security controls.
+
+**How DNS Exfiltration Works:**
+
+1. **Initial Compromise**: Attacker gains access via malware/phishing/exploits
+2. **Data Preparation**: Encode/encrypt data, split into small chunks
+3. **Exfiltration**: Send data in DNS query subdomains to attacker-controlled domain
+4. **Data Retrieval**: Attacker extracts and reassembles data
+
+#### DNS Exfiltration Traffic
+
+![DNS Exfiltration](https://github.com/user-attachments/assets/8b819c73-3ad4-4faf-ad0d-fa948e5a0e71)
+
+*DNS queries containing exfiltrated data*
+
+---
+
+#### Accessing Target System
+
+```bash
+xfreerdp /u:htb-student /p:'HTB_@cademy_stdnt!' /v:[Target IP] /dynamic-resolution
+```
+
+**Related Resources:**
+
+| Item | Value |
+|------|-------|
+| Directory | `/home/htb-student/module_files/dns_exf` |
+| Splunk Index | `dns_exf` |
+| Sourcetype | `bro:dce_rpc:json` |
+
+---
+
+#### Detecting DNS Exfiltration With Splunk & Zeek
+
+```spl
+index=dns_exf sourcetype="bro:dns:json"
+| eval len_query=len(query)
+| search len_query>=40 AND query!="*.ip6.arpa*" AND query!="*amazonaws.com*" AND query!="*._googlecast.*" AND query!="_ldap.*"
+| bin _time span=24h
+| stats count(query) as req_by_day by _time, id.orig_h, id.resp_h
+| where req_by_day>60
+| table _time, id.orig_h, id.resp_h, req_by_day
+```
+
+![DNS Exfiltration Detection](https://github.com/user-attachments/assets/77bdb9ad-4db6-4180-a0d5-7e37213c7aba)
+
+*Detecting DNS exfiltration*
+
+**Search Breakdown:**
+
+1. **Eval**: Calculate query length
+2. **Filter**: Long queries (>40 chars), exclude legitimate queries
+3. **Bin**: 24-hour intervals
+4. **Stats**: Count queries per day
+5. **Filter**: >60 requests per day
+
+> 📌 **Key Detection**: >60 long DNS queries per day to external DNS servers indicates DNS exfiltration!
+
+---
+
 *Module 14/15 - Detecting Windows Attacks with Splunk*
 *For learning and SOC career preparation*
