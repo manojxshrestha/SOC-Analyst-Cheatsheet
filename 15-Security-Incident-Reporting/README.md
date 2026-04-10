@@ -535,6 +535,10 @@ Additionally, cmd.exe and powershell.exe were spawned from wmiprvse.exe:
 
 *Logs showing processes for opening PDF followed by cmd.exe*
 
+![WMI Process Details](https://github.com/user-attachments/assets/bc731236-bedc-442e-a61f-c85adb0e82bc)
+
+*Event data logs showing process details for wmiprvse.exe, including command line, process IDs, and source IP 192.168.220.66*
+
 The unauthorized entity then executed specific PowerShell commands:
 
 ![PowerShell Commands](https://github.com/user-attachments/assets/1a104700-6540-4867-8d86-5f2fcfb97d02)
