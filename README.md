@@ -160,4 +160,3 @@ This repository follows the HTB Academy SOC Analyst career path. For best result
 
 *Built with research + HTB Academy materials*
 *For learning and SOC career preparation*
-*10/10 Modules Complete* 🎉
