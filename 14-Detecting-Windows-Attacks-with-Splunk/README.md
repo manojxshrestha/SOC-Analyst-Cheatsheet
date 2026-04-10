@@ -37,29 +37,29 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
 
 0. [Overview](#0-overview)
 1. [Leveraging Windows Event Logs](#1-leveraging-windows-event-logs)
-   - Detecting Common User/Domain Recon
-   - Detecting Password Spraying
-   - Detecting Responder-like Attacks
-   - Detecting Kerberoasting/AS-REPRoasting
-   - Detecting Pass-the-Hash
-   - Detecting Pass-the-Ticket
-   - Detecting Overpass-the-Hash
-   - Detecting Golden Tickets/Silver Tickets
-   - Detecting Unconstrained/Constrained Delegation
-   - Detecting DCSync/DCShadow
+   - [Detecting Common User/Domain Recon](#detecting-common-userdomain-recon)
+   - [Detecting Password Spraying](#detecting-password-spraying)
+   - [Detecting Responder-like Attacks](#detecting-responder-like-attacks)
+   - [Detecting Kerberoasting/AS-REPRoasting](#detecting-kerberoastingas-reproasting)
+   - [Detecting Pass-the-Hash](#detecting-pass-the-hash)
+   - [Detecting Pass-the-Ticket](#detecting-pass-the-ticket)
+   - [Detecting Overpass-the-Hash](#detecting-overpass-the-hash)
+   - [Detecting Golden Tickets/Silver Tickets](#detecting-golden-ticketssilver-tickets)
+   - [Detecting Unconstrained/Constrained Delegation](#detecting-unconstrainedconstrained-delegation)
+   - [Detecting DCSync/DCShadow](#detecting-dcsyncdcshadow)
 2. [Creating Custom Splunk Applications](#2-creating-custom-splunk-applications)
 3. [Leveraging Zeek Logs](#3-leveraging-zeek-logs)
-   - Detecting RDP Brute Force Attacks
-   - Detecting Beaconing Malware
-   - Detecting Nmap Port Scanning
-   - Detecting Kerberos Brute Force Attacks
-   - Detecting Kerberoasting (Zeek)
-   - Detecting Golden Tickets (Zeek)
-   - Detecting Cobalt Strike's PSExec
-   - Detecting Zerologon
-   - Detecting Exfiltration (HTTP)
-   - Detecting Exfiltration (DNS)
-   - Detecting Ransomware
+   - [Detecting RDP Brute Force Attacks](#detecting-rdp-brute-force-attacks)
+   - [Detecting Beaconing Malware](#detecting-beaconing-malware)
+   - [Detecting Nmap Port Scanning](#detecting-nmap-port-scanning)
+   - [Detecting Kerberos Brute Force Attacks](#detecting-kerberos-brute-force-attacks)
+   - [Detecting Kerberoasting (Zeek)](#detecting-kerberoasting-1)
+   - [Detecting Golden Tickets (Zeek)](#detecting-golden-tickets-1)
+   - [Detecting Cobalt Strike's PSExec](#detecting-cobalt-strikes-psexec)
+   - [Detecting Zerologon](#detecting-zerologon)
+   - [Detecting Exfiltration (HTTP)](#detecting-exfiltration-http)
+   - [Detecting Exfiltration (DNS)](#detecting-exfiltration-dns)
+   - [Detecting Ransomware](#detecting-ransomware)
 4. [Interview Questions](#4-interview-questions)
 5. [Additional Resources](#5-additional-resources)
 
