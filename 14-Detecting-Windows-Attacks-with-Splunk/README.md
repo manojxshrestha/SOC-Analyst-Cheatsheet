@@ -39,7 +39,7 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
    - [Detecting Common User/Domain Recon](#detecting-common-userdomain-recon)
    - [Detecting Password Spraying](#detecting-password-spraying)
    - [Detecting Responder-like Attacks](#detecting-responder-like-attacks)
-   - [Detecting Kerberoasting/AS-REProasting](#detecting-kerberoastingas-reproasting)
+   - [Detecting Kerberoasting/AS-REPRoasting](#detecting-kerberoastingas-reproasting)
    - [Detecting Pass-the-Hash](#detecting-pass-the-hash)
    - [Detecting Pass-the-Ticket](#detecting-pass-the-ticket)
    - [Detecting Overpass-the-Hash](#detecting-overpass-the-hash)
@@ -48,17 +48,17 @@ This module focuses on pinpointing attacks on Windows and Active Directory using
    - [Detecting DCSync/DCShadow](#detecting-dcsyncdcshadow)
 2. [Creating Custom Splunk Applications](#2-creating-custom-splunk-applications)
 3. [Leveraging Zeek Logs](#3-leveraging-zeek-logs)
-   - [Detecting RDP Brute Force Attacks](#detecting-rdp-brute-force-attacks)
-   - [Detecting Beaconing Malware](#detecting-beaconing-malware)
-   - [Detecting Nmap Port Scanning](#detecting-nmap-port-scanning)
-   - [Detecting Kerberos Brute Force Attacks](#detecting-kerberos-brute-force-attacks)
-   - [Detecting Kerberoasting](#detecting-kerberoasting)
-   - [Detecting Golden Tickets](#detecting-golden-tickets)
-   - [Detecting Cobalt Strike's PSExec](#detecting-cobalt-strikes-psexec)
-   - [Detecting Zerologon](#detecting-zerologon)
-   - [Detecting Exfiltration (HTTP)](#detecting-exfiltration-http)
-   - [Detecting Exfiltration (DNS)](#detecting-exfiltration-dns)
-   - [Detecting Ransomware](#detecting-ransomware)
+    - [Detecting RDP Brute Force Attacks](#detecting-rdp-brute-force-attacks)
+    - [Detecting Beaconing Malware](#detecting-beaconing-malware)
+    - [Detecting Nmap Port Scanning](#detecting-nmap-port-scanning)
+    - [Detecting Kerberos Brute Force Attacks](#detecting-kerberos-brute-force-attacks)
+    - [Detecting Kerberoasting (Zeek)](#detecting-kerberoasting-1)
+    - [Detecting Golden Tickets (Zeek)](#detecting-golden-tickets-1)
+    - [Detecting Cobalt Strike's PSExec](#detecting-cobalt-strikes-psexec)
+    - [Detecting Zerologon](#detecting-zerologon)
+    - [Detecting Exfiltration (HTTP)](#detecting-exfiltration-http)
+    - [Detecting Exfiltration (DNS)](#detecting-exfiltration-dns)
+    - [Detecting Ransomware](#detecting-ransomware)
 
 ---
 
@@ -2320,6 +2320,87 @@ index="ransomware_new_file_extension_ctbl_ocker" sourcetype="bro:smb_files:json"
 #### Known Ransomware Extensions
 
 Reference: https://github.com/corelight/detect-ransomware-filenames
+
+---
+
+## Interview Questions
+
+### Windows Event Log Detection
+
+1. **What Windows Event IDs would you monitor to detect Kerberoasting attacks?**
+   - **Answer**: Event ID 4769 (Kerberos Service Ticket Request) - Look for TGS requests without corresponding logon (Event 4648)
+
+2. **How do you differentiate between legitimate service access and Kerberoasting?**
+   - **Answer**: Legitimate access generates Event 4648 (Explicit Credentials), Kerberoasting does not
+
+3. **What is the difference between Pass-the-Hash and Pass-the-Ticket?**
+   - **Answer**: PtH uses NTLM hashes, PtT uses Kerberos tickets extracted from memory
+
+4. **Which Logon Type indicates Pass-the-Hash (NewCredentials)?**
+   - **Answer**: LogonType 9 (NewCredentials) - Used when runas /netonly is executed
+
+5. **How can you detect Golden Ticket attacks?**
+   - **Answer**: Look for TGS requests (4769) without prior TGT requests (4768) - tickets created offline
+
+### Zeek/Network Detection
+
+6. **What Zeek logs would you use to detect Cobalt Strike beacons?**
+   - **Answer**: bro:http:json - Monitor for regular intervals in HTTP traffic
+
+7. **How do you detect RDP brute force attacks?**
+   - **Answer**: Count RDP connection attempts per source IP (>30 in 5 minutes indicates attack)
+
+8. **What DNS patterns indicate data exfiltration?**
+   - **Answer**: High volume of long DNS queries (>40 chars) to external domains (>60/day)
+
+9. **How does ransomware appear in SMB logs?**
+   - **Answer**: Excessive FILE_OPEN + FILE_RENAME operations or same extension renaming
+
+10. **What network behavior indicates Kerberos brute force?**
+    - **Answer**: Multiple AS-REQ failures (KDC_ERR_C_PRINCIPAL_UNKNOWN) to same DC
+
+### General Security
+
+11. **What is the first step when investigating a potential AD attack?**
+    - **Answer**: Identify the time window and affected systems, gather relevant logs
+
+12. **How would you investigate a Golden Ticket alert?**
+    - **Answer**: Check for TGS-only traffic without prior AS-REQ/AS-REP, verify ticket validity period
+
+13. **What Splunk searches would you use for incident response?**
+    - **Answer**: transaction command for event correlation, stats for aggregation
+
+14. **How do you baseline normal Kerberos traffic?**
+    - **Answer**: Monitor typical TGT/TGS request patterns per user/system
+
+15. **What is the MITRE ATT&CK technique for Kerberoasting?**
+    - **Answer**: T1558.003 - Service Target Ticket (Kerberoasting)
+
+---
+
+## Additional Resources
+
+### Official Documentation
+- [Splunk Enterprise Security](https://www.splunk.com/en_us/products/enterprise-security.html)
+- [Zeek Documentation](https://docs.zeek.org/)
+- [Microsoft Kerberos Documentation](https://learn.microsoft.com/en-us/windows-server/security/kerberos/)
+
+### Reference Links
+- [Detect Ransomware Filenames](https://github.com/corelight/detect-ransomware-filenames)
+- [iRed.team - Kerberoasting](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
+- [The DFIR Report - Cobalt Strike](https://thedfirreport.com/2021/08/29/cobalt-strike-a-defenders-guide/)
+- [Trend Micro - Zerologon](https://www.trendmicro.com/en_us/what-is/zerologon.html)
+
+### Tools
+- **Mimikatz** - Credential extraction
+- **Rubeus** - Kerberos ticket manipulation
+- **BloodHound** - AD reconnaissance
+- **SharpHound** - Data collection for BloodHound
+- **Splunk** - SIEM and log analysis
+
+### Downloadable Resources
+- **Detection-of-Active-Directory-Attacks.tar.gz** - Custom Splunk app for AD attack detection
+- **users.csv** - Lookup file for Silver Ticket detection
 
 ---
 
