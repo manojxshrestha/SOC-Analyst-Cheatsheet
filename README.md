@@ -1,32 +1,60 @@
-# 🚀 SOC Analyst Cheatsheet
+<h1 align="center">SOC Analyst Cheatsheet</h1>
 
-A comprehensive, practical cheatsheet repository for SOC analysts based on the HTB Academy SOC Analyst learning path. This repository contains detailed guides, commands, queries, and workflows for real-world security operations.
+<p align="center">
+  <img src="https://img.shields.io/badge/SOC-Analyst-100%25-green" alt="SOC Analyst">
+  <img src="https://img.shields.io/badge-HTBAcademy-blue" alt="HTB Academy">
+</p>
 
----
-
-## 📚 Module Overview
-
-| # | Module | Description | Key Topics |
-|---|--------|-------------|------------|
-| **1** | [Incident Handling Process](./1-Incident-Handling-Process/) ✅ | NIST-based incident response lifecycle | Cyber Kill Chain, MITRE ATT&CK, Pyramid of Pain, NIST IR Lifecycle, IR Playbooks, Case Studies, Diamond Model, RACI Matrix |
-| **2** | [Security Monitoring & SIEM Fundamentals](./2-Security-Monitoring-SIEM-Fundamentals/) ✅ | SIEM concepts and log management | Elastic Stack, KQL queries, SOC tiers, MITRE ATT&CK mapping, Use Case Development |
-| **3** | [Windows Event Logs & Finding Evil](./3-Windows-Event-Logs-Finding-Evil/) ✅ | Windows security event analysis | Event IDs (4624, 4625, 4688, etc.), Sysmon, detecting malicious activity |
-| **4** | [Threat Hunting with Elastic](./4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/) ✅ | Proactive threat detection | Hypothesis-based hunting, Elastic/KQL queries, MITRE ATT&CK mapping |
-| **5** | [Investigating with Splunk](./5-Understanding-Log-Sources-Investigating-with-Splunk/) ✅ | Splunk for SOC analysts | SPL queries, authentication monitoring, network logs, search optimization |
-| **6** | [Windows Attacks & Defense](./6-Windows-Attacks-Defense/) ✅ | Common Windows attack techniques | Kerberoasting, AS-REP Roasting, GPP, DCSync, Golden Ticket, Kerberos Delegation, Print Spooler, Coercing, ACLs, PKI ESC1/ESC8 |
-| **7** | [Network Traffic Analysis](./7-Intro-to-Network-Traffic-Analysis/) ✅ | Network fundamentals | Wireshark, tcpdump, BPF filters, TCP/IP, packet analysis |
-| **8** | [Intermediate Network Traffic Analysis](./8-Intermediate-Network-Traffic-Analysis/) ✅ | Advanced network analysis | DNS analysis, HTTP/HTTPS traffic, malware traffic patterns, PCAP analysis |
-| **9** | [Working with IDS/IPS](./9-Working-with-IDS-IPS/) ✅ | Intrusion detection systems | Snort/Suricata rules, alert analysis, signature development |
-| **10** | [Introduction to Malware Analysis](./10-Introduction-to-Malware-Analysis/) ✅ | Malware triage basics | Static analysis, strings, hashing, PE analysis, sandboxing |
-| **11** | [JavaScript Deobfuscation](./11-JavaScript-Deobfuscation/) ✅ | Malicious script analysis | Deobfuscation techniques, analyzing obfuscated JavaScript |
-| **12** | [YARA & Sigma for SOC Analysts](./12-YARA-Sigma-for-SOC-Analysts/) ✅ | Detection rule writing | YARA rules, Sigma rules, sigmac, Chainsaw, Splunk queries, threat intelligence |
-| **13** | [Digital Forensics](./13-Introduction-to-Digital-Forensics/) ✅ | Core forensics concepts | FTK Imager, KAPE, Volatility, memory forensics, disk forensics, timeline analysis, MFT, Registry |
-| **14** | [Detecting Windows Attacks with Splunk](./14-Detecting-Windows-Attacks-with-Splunk/) ✅ | Advanced Windows detection | Splunk queries for Windows attacks, MITRE ATT&CK coverage |
-| **15** | [Security Incident Reporting](./15-Security-Incident-Reporting/) ✅ | Incident documentation | Report writing, stakeholder communication, real-world case studies, lessons learned |
+> Comprehensive security operations cheatsheet for SOC analysts.
+> Essential commands, queries, techniques, and notes based on HTB Academy SOC Analyst learning path.
 
 ---
 
-## 🎯 Skills You'll Gain
+## Quick Navigation
+
+| # | Module | Folder |
+|---|--------|--------|
+| 01 | Incident Handling Process | [1-Incident-Handling-Process](./1-Incident-Handling-Process/) |
+| 02 | Security Monitoring & SIEM Fundamentals | [2-Security-Monitoring-SIEM-Fundamentals](./2-Security-Monitoring-SIEM-Fundamentals/) |
+| 03 | Windows Event Logs & Finding Evil | [3-Windows-Event-Logs-Finding-Evil](./3-Windows-Event-Logs-Finding-Evil/) |
+| 04 | Threat Hunting with Elastic | [4-Introduction-to-Threat-Hunting-Hunting-With-Elastic](./4-Introduction-to-Threat-Hunting-Hunting-With-Elastic/) |
+| 05 | Investigating with Splunk | [5-Understanding-Log-Sources-Investigating-with-Splunk](./5-Understanding-Log-Sources-Investigating-with-Splunk/) |
+| 06 | Windows Attacks & Defense | [6-Windows-Attacks-Defense](./6-Windows-Attacks-Defense/) |
+| 07 | Network Traffic Analysis | [7-Intro-to-Network-Traffic-Analysis](./7-Intro-to-Network-Traffic-Analysis/) |
+| 08 | Intermediate Network Traffic Analysis | [8-Intermediate-Network-Traffic-Analysis](./8-Intermediate-Network-Traffic-Analysis/) |
+| 09 | Working with IDS/IPS | [9-Working-with-IDS-IPS](./9-Working-with-IDS-IPS/) |
+| 10 | Introduction to Malware Analysis | [10-Introduction-to-Malware-Analysis](./10-Introduction-to-Malware-Analysis/) |
+| 11 | JavaScript Deobfuscation | [11-JavaScript-Deobfuscation](./11-JavaScript-Deobfuscation/) |
+| 12 | YARA & Sigma for SOC Analysts | [12-YARA-Sigma-for-SOC-Analysts](./12-YARA-Sigma-for-SOC-Analysts/) |
+| 13 | Digital Forensics | [13-Introduction-to-Digital-Forensics](./13-Introduction-to-Digital-Forensics/) |
+| 14 | Detecting Windows Attacks with Splunk | [14-Detecting-Windows-Attacks-with-Splunk](./14-Detecting-Windows-Attacks-with-Splunk/) |
+| 15 | Security Incident Reporting | [15-Security-Incident-Reporting](./15-Security-Incident-Reporting/) |
+
+---
+
+## Cheatsheet Modules
+
+| # | Module | Key Topics |
+|---|--------|------------|
+| 01 | Incident Handling Process | NIST IR Lifecycle, Cyber Kill Chain, MITRE ATT&CK, Pyramid of Pain, Diamond Model, IR Playbooks |
+| 02 | Security Monitoring & SIEM Fundamentals | Elastic Stack, KQL queries, SOC tiers, SIEM concepts, Use Case Development |
+| 03 | Windows Event Logs & Finding Evil | Event IDs (4624, 4625, 4688), Sysmon, detecting malicious activity, endpoint forensics |
+| 04 | Threat Hunting with Elastic | Hypothesis-based hunting, KQL queries, MITRE ATT&CK mapping, proactive detection |
+| 05 | Investigating with Splunk | SPL queries, authentication monitoring, network logs, search optimization |
+| 06 | Windows Attacks & Defense | Kerberoasting, AS-REP Roasting, GPP, DCSync, Golden Ticket, Kerberos Delegation, Print Spooler, ACLs, PKI |
+| 07 | Network Traffic Analysis | Wireshark, tcpdump, BPF filters, TCP/IP, packet analysis, network fundamentals |
+| 08 | Intermediate Network Traffic Analysis | DNS analysis, HTTP/HTTPS traffic, malware patterns, PCAP analysis |
+| 09 | Working with IDS/IPS | Snort/Suricata rules, alert analysis, signature development |
+| 10 | Introduction to Malware Analysis | Static analysis, strings, hashing, PE analysis, sandboxing, malware triage |
+| 11 | JavaScript Deobfuscation | Deobfuscation techniques, analyzing obfuscated JavaScript, malicious scripts |
+| 12 | YARA & Sigma for SOC Analysts | YARA rules, Sigma rules, sigmac, Chainsaw, Splunk queries, threat intelligence |
+| 13 | Digital Forensics | FTK Imager, KAPE, Volatility, memory forensics, disk forensics, timeline analysis, MFT, Registry |
+| 14 | Detecting Windows Attacks with Splunk | Splunk queries for Windows attacks, MITRE ATT&CK coverage, advanced detection |
+| 15 | Security Incident Reporting | Report writing, stakeholder communication, real-world case studies, lessons learned |
+
+---
+
+## Skills Gained
 
 ### Tier 1 SOC Skills
 - Alert triage and prioritization
@@ -42,7 +70,7 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 - Active Directory attack detection
 - Certificate Services abuse detection
 
-### Tier 3 SOC / Threat Hunting Skills
+### Tier 3 SOC / Threat Hunting
 - Proactive threat hunting
 - Malware analysis
 - Digital forensics
@@ -51,112 +79,23 @@ A comprehensive, practical cheatsheet repository for SOC analysts based on the H
 
 ---
 
-## 🛠️ Tools Covered
+## Tools Covered
 
-### SIEM & Logging
-- **Splunk** - Enterprise SIEM, SPL queries
-- **Elastic Security** - Kibana, KQL queries
-- **Wazuh** - Open source SIEM
+**SIEM & Logging:** Splunk, Elastic Security, Wazuh
 
-### Network Analysis
-- **Wireshark** - Packet analysis
-- **tcpdump** - Command-line packet capture
-- **NetworkMiner** - PCAP artifact extraction
-- **Snort/Suricata** - IDS/IPS
+**Network Analysis:** Wireshark, tcpdump, NetworkMiner, Snort/Suricata
 
-### Endpoint Security
-- **Windows Event Logs** - Security, System, Application
-- **Sysmon** - Advanced endpoint telemetry
-- **EDR** - Endpoint Detection & Response
+**Endpoint Security:** Windows Event Logs, Sysmon, EDR
 
-### Forensics & Malware
-- **FTK Imager** - Forensic imaging
-- **Autopsy** - Disk analysis
-- **Volatility** - Memory forensics
-- **YARA** - Malware detection rules
-- **KAPE** - Forensic artifact collection
-- **Velociraptor** - Endpoint forensics
+**Forensics & Malware:** FTK Imager, Autopsy, Volatility, YARA, KAPE, Velociraptor
 
-### AD Attacks & Certificates
-- **Mimikatz** - Credential dumping
-- **BloodHound** - AD attack path analysis
-- **Rubeus** - Kerberos attacks
-- **Certify** - Certificate template vulnerabilities
-- **Certipy** - PKI attacks
-- **Impacket** - Python AD exploitation
+**AD Attacks:** Mimikatz, BloodHound, Rubeus, Certify, Certipy, Impacket
 
-### Case Management
-- **TheHive** - Incident case management
-- **Cortex** - Threat intelligence enrichment
+**Case Management:** TheHive, Cortex
 
 ---
 
-## 📋 Each Module Includes
-
-- **Concept Summary** - Theory and fundamentals
-- **Key Artifacts** - Logs, fields, data sources
-- **Detection Use Cases** - Real attack scenarios
-- **Investigation Workflow** - Step-by-step process
-- **Commands & Queries** - Splunk, Elastic, Windows, Linux
-- **IOCs** - Common indicators of compromise
-- **Analyst Tips** - Real-world shortcuts and insights
-
----
-
-## 🚀 How to Use
-
-1. **Navigate** to the relevant module folder for your investigation
-2. **Search** the markdown for specific Event IDs, queries, or techniques
-3. **Use** the commands and queries directly in your SIEM or analysis tools
-4. **Reference** the playbooks for step-by-step incident response workflows
-
----
-
-## 📁 Repository Structure
-
-```
-SOC-Analyst-Cheatsheet/
-├── README.md
-├── 1-Incident-Handling-Process/                  ✅ Complete
-├── 2-Security-Monitoring-SIEM-Fundamentals/      ✅ Complete
-├── 3-Windows-Event-Logs-Finding-Evil/           ✅ Complete
-├── 4-Introduction-to-Threat-Hunting-With-Elastic/  ✅ Complete
-├── 5-Understanding-Log-Sources-Investigating-with-Splunk/ ✅ Complete
-├── 6-Windows-Attacks-Defense/                   ✅ Complete
-├── 7-Intro-to-Network-Traffic-Analysis/         ✅ Complete
-├── 8-Intermediate-Network-Traffic-Analysis/     ✅ Complete
-├── 9-Working-with-IDS-IPS/                      ✅ Complete
-├── 10-Introduction-to-Malware-Analysis/         ✅ Complete
-├── 11-JavaScript-Deobfuscation/                 ✅ Complete
-├── 12-YARA-Sigma-for-SOC-Analysts/              ✅ Complete
-├── 13-Introduction-to-Digital-Forensics/        ✅ Complete
-├── 14-Detecting-Windows-Attacks-with-Splunk/    ✅ Complete
-└── 15-Security-Incident-Reporting/              ✅ Complete
-```
-
----
-
-## 📖 Learning Path
-
-This repository follows the HTB Academy SOC Analyst career path. For best results:
-
-1. **Start with Module 1** - Understand incident handling fundamentals
-2. **Build SIEM skills** - Modules 2-5
-3. **Learn endpoint analysis** - Modules 3, 6
-4. **Master network analysis** - Modules 7-9
-5. **Add malware & forensics** - Modules 10-13
-6. **Complete with reporting** - Module 15
-
----
-
-## 🔗 Additional Resources
-
-- [MITRE ATT&CK](https://attack.mitre.org)
-- [NIST SP 800-61](https://csrc.nist.gov/publications/detail/sp/800-61/rev-2/final)
-- [The DFIR Report](https://thedfirreport.com/)
-- [SANS IR](https://www.sans.org/security-resources/incident-management/)
-
----
-
-*Built with research + HTB Academy materials*
-*For learning and SOC career preparation*
+<p align="center">
+  <strong>by <a href="https://github.com/manojxshrestha">manojxshrestha</a></strong><br>
+  <sub>Based on HTB Academy SOC Analyst learning path. For learning and SOC career preparation.</sub>
+</p>
