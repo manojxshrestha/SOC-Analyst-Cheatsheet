@@ -1,4 +1,4 @@
-# Security Incident Reporting
+# 🚨 Security Incident Reporting
 
 ## SOC Analyst Cheatsheet - Module 15/15
 
@@ -18,6 +18,22 @@ Embark on a comprehensive journey into security incident reporting with Hack The
 
 ### Key Takeaways
 
+```mermaid
+graph TB
+    A["Incident<br/>Reporting"] --> B["Identification<br/>& Categorization"]
+    B --> C["7-Step<br/>Process"]
+    C --> D["Communications<br/>Strategy"]
+    D --> E["Incident<br/>Report Elements"]
+    E --> F["Real-World<br/>Example"]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+```
+
 - Explore the art of identifying and classifying security incidents
 - Understand the systematic process of incident documentation
 - Perfect communication strategies during incidents
@@ -29,15 +45,30 @@ Embark on a comprehensive journey into security incident reporting with Hack The
 - Incident Handling Process
 - Security Monitoring & SIEM Fundamentals
 
-### Module Classification
+---
 
-- **Difficulty:** Easy
-- **Assumes:** Basic knowledge of how Windows operate and common attack principles
-
-### Creators
-
-- sebh24
-- dbougioukas
+## Table of Contents
+0. [Overview](#0-overview)
+1. [Introduction](#1-introduction)
+   - [1.1 Introduction to Security Incident Reporting](#11-introduction-to-security-incident-reporting)
+   - [1.2 Incident Identification and Categorisation](#12-incident-identification-and-categorisation)
+   - [1.3 The Incident Reporting Process](#13-the-incident-reporting-process)
+2. [Communications](#2-communications)
+3. [Elements of a Proper Incident Report](#3-elements-of-a-proper-incident-report)
+   - [3.1 Executive Summary](#31-executive-summary)
+   - [3.2 Technical Analysis](#32-technical-analysis)
+   - [3.3 Response and Recovery Analysis](#33-response-and-recovery-analysis)
+   - [3.4 Post-Incident Actions](#34-post-incident-actions)
+   - [3.5 Diagrams](#35-diagrams)
+   - [3.6 Appendices](#36-appendices)
+   - [3.7 Best Practices](#37-best-practices)
+   - [3.8 Conclusion](#38-conclusion)
+4. [Real-world Incident Report](#4-real-world-incident-report)
+   - [4.1 Executive Summary](#41-executive-summary)
+   - [4.2 Technical Analysis](#42-technical-analysis)
+   - [4.3 Response and Recovery Analysis](#43-response-and-recovery-analysis)
+   - [4.4 Post-Incident Actions](#44-post-incident-actions)
+   - [4.5 Annex A: Technical Timeline](#45-annex-a-technical-timeline-summary)
 
 ---
 
@@ -99,6 +130,24 @@ Upon identification, categorizing incidents facilitates prioritization and resou
 
 **Incident Severity Levels:**
 
+```mermaid
+graph TD
+    P1[P1 - Critical] --> Immediate[Immediate Response]
+    P2[P2 - High] --> OneHour[Response within 1 Hour]
+    P3[P3 - Medium] --> FourHours[Response within 4 Hours]
+    P4[P4 - Low] --> TwentyFour[Response within 24 Hours]
+
+    style P1 fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style P2 fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style P3 fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style P4 fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+
+    style Immediate fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style OneHour fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style FourHours fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style TwentyFour fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+```
+
 | Severity | Level | Description |
 |----------|-------|-------------|
 | **Critical** | P1 | Imminent threats jeopardizing core business or sensitive data - immediate intervention required |
@@ -115,6 +164,24 @@ Upon identification, categorizing incidents facilitates prioritization and resou
 The reporting process is the cohesive framework that binds all elements of security incident reporting. An effective reporting mechanism delivers clarity, direction, and actionable insights.
 
 #### The 7-Step Process
+
+```mermaid
+graph LR
+    A["1. Detection"] --> B["2. Analysis"]
+    B --> C["3. Logging"]
+    C --> D["4. Notification"]
+    D --> E["5. Investigation"]
+    E --> F["6. Final Report"]
+    F --> G["7. Feedback"]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+```
 
 | Step | Description |
 |------|-------------|
@@ -149,6 +216,24 @@ The reporting process is the cohesive framework that binds all elements of secur
 
 > 📌 The reporting process is a strategic asset that enhances an organization's resilience against security threats.
 
+```mermaid
+graph TD
+    A[Detection] --> B[Triage]
+    B --> C[Investigation]
+    C --> D[Containment]
+    D --> E[Eradication]
+    E --> F[Recovery]
+    F --> G[Lessons Learned]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+```
+
 ---
 
 ## 2. Communications
@@ -158,6 +243,25 @@ The reporting process is the cohesive framework that binds all elements of secur
 In the midst of any crisis, effective communication is not just beneficial but crucial. The stakes are even higher during a security incident, where transparency, coordinated response efforts, and trust-building with stakeholders are paramount.
 
 > 📌 **Effective communication during incidents is essential for coordinated response and minimizing damage.**
+
+```mermaid
+graph TD
+    Internal[Internal Communications] --> A[IT Team]
+    Internal --> B[Legal Team]
+    Internal --> C[Executive]
+    External[External Communications] --> D[Customers]
+    External --> E[Regulatory Bodies]
+    External --> F[Public/Partners]
+
+    style Internal fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style External fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style A fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+```
 
 ### Importance of Effective Communications
 
@@ -257,6 +361,22 @@ The Executive Summary provides a concise overview for all stakeholders.
 | **Immediate Actions Taken** | Response measures, system isolation, root cause identification, third-party services engaged |
 | **Stakeholder Impact** | Customer downtime, financial ramifications, employee data compromised, proprietary information at risk |
 
+```mermaid
+graph TD
+    A[Executive Summary] --> B[Incident ID]
+    A --> C[Overview]
+    A --> D[Key Findings]
+    A --> E[Actions Taken]
+    A --> F[Stakeholder Impact]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+```
+
 ### 3.2 Technical Analysis
 
 This section is where we dive deeply into the technical aspects, dissecting the events that transpired during the incident. It's likely to be the most voluminous part of the incident report.
@@ -306,6 +426,28 @@ The timeline should include:
 | **Eradication** | Time when threat was removed |
 | **Recovery** | Time when systems were restored |
 
+```mermaid
+graph LR
+    Recon[Recon] --> Initial[Initial Compromise]
+    Initial --> C2[C2 Comms]
+    C2 --> Enum[Enumeration]
+    Enum --> Lateral[Lateral Movement]
+    Lateral --> Exfil[Data Exfiltration]
+    Exfil --> Contain[Containment]
+    Contain --> Eradicate[Eradication]
+    Eradicate --> Recover[Recovery]
+
+    style Recon fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Initial fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C2 fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Enum fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style Lateral fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style Exfil fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style Contain fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style Eradicate fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style Recover fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+```
+
 #### Nature of the Attack
 
 - Type of attack
@@ -338,6 +480,26 @@ Outline the specific actions taken to contain the security incident, eradicate t
 | **Short-term Containment** | Immediate actions to isolate affected systems from network to prevent lateral movement |
 | **Long-term Containment** | Strategic measures like network segmentation or zero-trust architecture |
 | **Effectiveness** | Evaluation of how effective containment strategies were |
+
+```mermaid
+graph TD
+    A[Incident Detected] --> B[Short-term Containment]
+    B --> C[Isolate Systems]
+    C --> D[Block C2]
+    D --> E[Long-term Containment]
+    E --> F[Network Segmentation]
+    F --> G[Zero Trust]
+    G --> H[System Validation]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+```
 
 #### Eradication Measures
 
@@ -441,6 +603,24 @@ Key elements of a proper incident report:
 This section presents a comprehensive real-world incident report that applies all the concepts covered in the previous sections. The report demonstrates how to document a security incident from detection through resolution.
 
 > 📌 **A real-world incident report demonstrates the practical application of all incident reporting concepts.**
+
+```mermaid
+graph TD
+    A[Real-World Incident] --> B[Executive Summary]
+    B --> C[Technical Analysis]
+    C --> D[Evidence & IoCs]
+    D --> E[Timeline]
+    E --> F[Response & Recovery]
+    F --> G[Lessons Learned]
+
+    style A fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#e6ccff,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#e0f2f1,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffe5cc,stroke:#333,stroke-width:2px,color:#000
+```
 
 ---
 
@@ -648,6 +828,25 @@ Search for network connections between HR01 and unauthorized entity revealed con
 | **April 22, 05:21:20** | Recovery: WKST01 restored from verified backup |
 | **April 22, 05:58:50** | Recovery: HR01 restored from verified backup |
 | **April 22, 06:33:44** | Patching: Emergency patch deployed for buffer overflow vulnerability |
+
+```mermaid
+gantt
+    title Incident Response Timeline
+    dateFormat HH:mm
+    section Attack
+    Initial Compromise       :00:27, 00:30
+    Data Access             :00:35, 00:40
+    Lateral Movement         :00:50, 00:55
+    Data Exfiltration       :01:30, 01:35
+    section Response
+    Detection               :01:05, 01:10
+    Containment             :02:30, 03:10
+    Collection             :03:10, 03:15
+    Block C2                :03:43, 03:45
+    Eradication            :04:11, 04:15
+    Patching               :04:30, 04:35
+    Recovery               :05:21, 06:00
+```
 
 ---
 
